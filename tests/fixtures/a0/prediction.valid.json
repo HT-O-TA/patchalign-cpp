@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1.0",
+  "run_id": "fixture-run-v1",
+  "sample_id": "fixture:add-sign-v1",
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "revision": null,
+    "config_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "adapter_sha256": null
+  },
+  "prompt_version": "function-unidiff-v0.1",
+  "prompt_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "seed": 20260830,
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": null,
+    "top_p": null
+  },
+  "raw_text": "--- a/src/add.cpp\n+++ b/src/add.cpp\n@@ -1 +1 @@\n-int add(int a, int b) { return a - b; }\n+int add(int a, int b) { return a + b; }\n",
+  "extracted_patch": "--- a/src/add.cpp\n+++ b/src/add.cpp\n@@ -1 +1 @@\n-int add(int a, int b) { return a - b; }\n+int add(int a, int b) { return a + b; }\n",
+  "status": "ok",
+  "error": null,
+  "input_tokens": 96,
+  "output_tokens": 54,
+  "latency_seconds": 1.25,
+  "max_gpu_memory_bytes": 9253692928
+}
+

@@ -1,0 +1,459 @@
+# PatchAlign-Cpp 执行记录
+
+> 用途：持续记录第二项目已经真实完成、正在进行和仍被阻塞的事项。  
+> 记录原则：只写可由命令、文件、作业或用户确认支持的事实；不把计划写成完成。  
+> 首次建立：2026-08-30 18:28 CST（祝融 2026-08-30 10:28 UTC）
+
+目录结构的独立台账见：`/home/lenovo/A/patchalign-cpp/docs/records/第二项目_PatchAlign-Cpp_目录结构.md`。发生较大目录更新时，应同步更新该台账及本文中的相关执行记录。
+
+## 1. 已冻结的用户决策
+
+| 事项 | 决策 |
+|---|---|
+| 本地仓库路径 | `/home/lenovo/A/patchalign-cpp` |
+| 第一阶段范围 | 函数级 C++ 修复为主，Schema 兼容给定文件上下文 |
+| GitHub 认证 | 仓库专属、无口令 Ed25519 Deploy Key |
+| GitHub fetch / push | HTTPS fetch；SSH alias `github-patchalign-cpp` push |
+| 祝融项目环境 | 显式 prefix `/mingli01/project/ht/.conda_envs/patchalign-cpp` |
+| 主模型实际路径 | `/mingli01/models/Qwen2.5-Coder-7B` |
+| 环境与 smoke | 允许自主创建和验证，但不得修改其他环境或既有内容 |
+
+## 2. 本地与 GitHub
+
+### 2.1 已完成
+
+- 初次检查时 `/home/lenovo/A/patchalign-cpp` 不存在；2026-08-30 已创建本地 Git 仓库并使用 `main` 分支。
+- 原 `/home/lenovo/A/new` 下三份 PatchAlign-Cpp 文档已移动到本仓库的 `docs/handoff` 和 `docs/records`。
+- 已建立 A0 Draft 文档、ADR、模型配置和三个机器可校验 JSON Schema。
+- 已配置 `origin`：HTTPS fetch、`github-patchalign-cpp` SSH push。
+- 已形成明确标注为 A0 Draft 的首次本地 Git 提交；尚未推送。
+- GitHub 空仓库 `HT-O-TA/patchalign-cpp` 已存在。
+- 已生成仓库专属 Ed25519 Deploy Key：
+  - 私钥：`/home/lenovo/.ssh/id_ed25519_patchalign_cpp`
+  - 公钥：`/home/lenovo/.ssh/id_ed25519_patchalign_cpp.pub`
+  - 私钥权限：`600`
+  - 指纹：`SHA256:JpsyLCyueK5SWlmheQop57y1E2Qp3qjaAwaFSGTC4JE`
+- 用户已将公钥添加到 GitHub Deploy Keys，并启用所需权限。
+- 已在 `/home/lenovo/.ssh/config` 配置独立 Host alias：`github-patchalign-cpp`。
+- 2026-08-30 已执行身份验证，GitHub 返回：
+
+  ```text
+  Hi HT-O-TA/patchalign-cpp! You've successfully authenticated, but GitHub does not provide shell access.
+  ```
+
+  `ssh -T` 在成功认证后返回退出码 1 是 GitHub 不提供 shell 的正常行为；身份验证本身成功。
+
+### 2.2 尚未完成
+
+- 尚未做首次 push 写权限验证。
+
+A0 当前为 Draft，尚未通过验收门禁。
+
+## 3. 祝融目录与基础设施
+
+### 3.1 已确认
+
+- SSH alias `a800` 可登录祝融管理节点。
+- `/mingli01/project/ht` 存在，检查时为空。
+- `/mingli01/project/ht/patchalign-cpp` 已创建，当前保存 G0 脚本、Slurm 文件和 artifact；尚未初始化为 Git 仓库。
+- 系统模块可用：
+  - `conda/3`
+  - `cuda/13.0`
+- 集群关联上限：`gres/gpu=20`。
+- `professors` QOS 上限包括：`cpu=256, gres/gpu=80, mem=1T`。
+- `/mingli01` 检查时总容量约 30 TB、剩余约 4.1 TB、使用率约 86%。
+- 登录节点具有 GCC/G++ 11.4、Make、Git、patch、timeout 和 prlimit。
+- CMake 与 Ninja 已安装到项目专属环境，不修改系统工具。
+- 常见 rootless 隔离工具 Bubblewrap、Podman、Apptainer 和 Singularity 未在登录节点发现。
+- Slurm 暴露 `srun --container`，但 OCI 隔离能力尚未通过计算节点安全测试。
+
+### 3.2 祝融本地作业模板参考
+
+经用户授权，2026-08-30 对 `/mingli01/project` 中可读的少量 Slurm 模板做了只读抽样，仅检查 Shell、`#SBATCH`、模块和 Conda 初始化行，没有修改文件或读取无关业务内容。
+
+代表性模板包括：
+
+```text
+/mingli01/project/hyh/.claude/skills/zhurong-job-submission/template.sbatch
+/mingli01/project/hyh/zhurong/template.sbatch
+/mingli01/project/hyh/install_deps.sbatch
+/mingli01/project/hyh/infer_alpamayo.sbatch
+```
+
+共同模式：
+
+```bash
+#!/bin/bash
+#SBATCH --partition=gre
+#SBATCH --nodes=1
+#SBATCH --gres=gpu:1
+
+module load conda/3
+module load cuda/13.0
+source /persist_data/apps/miniconda3/etc/profile.d/conda.sh
+conda activate <named-environment>
+```
+
+PatchAlign-Cpp 的环境是自定义显式 prefix，而非普通逻辑名称。实测该集群可能出现 `CONDA_PREFIX` 正确但 `python` 仍指向系统 Miniconda 的异常，因此本项目作业规范增加强制验证：
+
+```bash
+ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
+export PATH="${ENV_PREFIX}/bin:${PATH}"
+hash -r
+test "$(command -v python)" = "${ENV_PREFIX}/bin/python"
+test "$(python -c 'import sys; print(sys.prefix)')" = "${ENV_PREFIX}"
+```
+
+后续 Slurm 脚本必须：
+
+1. 使用真实 `#!/bin/bash` 文件，不用包含 Bash 语法的裸 `sbatch --wrap`；
+2. 提交前执行 `bash -n`；
+3. Python 入口提交前执行 `python -m py_compile` 或项目测试；
+4. 运行时断言专属 Python 路径和 `sys.prefix`；
+5. 设置 `PYTHONNOUSERSITE=1`；
+6. 不执行 `conda init`，不修改共享 Shell 初始化；
+7. 不在计算作业内安装依赖。
+
+## 4. PatchAlign-Cpp 专属 Conda 环境
+
+### 4.1 环境标识
+
+该环境使用显式 prefix 创建：
+
+```text
+/mingli01/project/ht/.conda_envs/patchalign-cpp
+```
+
+因为它不在 Conda 默认 `envs_dirs` 中，`conda env list` 的名称栏为空，只显示完整路径。因此：
+
+- 项目简称可以写作 `patchalign-cpp`；
+- 它没有可依赖的 Conda 逻辑名称；
+- 文档和 Slurm 脚本必须按完整 prefix 激活：
+
+  ```bash
+  conda activate /mingli01/project/ht/.conda_envs/patchalign-cpp
+  ```
+
+### 4.2 已安装并验证的核心版本
+
+| 软件 | 版本 |
+|---|---|
+| Python | 3.10.20 |
+| PyTorch | 2.11.0+cu130 |
+| PyTorch CUDA runtime | 13.0 |
+| Transformers | 4.57.6 |
+| Datasets | 3.6.0 |
+| Accelerate | 1.13.0 |
+| PEFT | 0.18.1 |
+| TRL | 0.28.0 |
+| bitsandbytes | 0.49.2 |
+| CMake | 3.31.6 |
+| Ninja | 1.11.1.4 |
+| pytest | 8.4.2 |
+| Pydantic | 2.12.5 |
+
+- `pip check`：通过，无损坏依赖。
+- 环境占用：约 8.2 GB。
+- 未安装 DeepSpeed。
+- 未修改 `base`、`dirl_grpo`、`llamafactory_env` 或其他已有环境。
+- 登录节点没有 GPU，故登录节点上的 `torch.cuda.is_available()` 为 `False`；这不代表计算节点失败。
+
+### 4.3 环境污染防护
+
+实测发现祝融用户级目录 `~/.local/lib/python3.10/site-packages` 默认可能进入新环境的 Python 搜索路径。所有项目命令和 Slurm 作业必须设置：
+
+```bash
+export PYTHONNOUSERSITE=1
+```
+
+否则可能误用历史环境之外的用户级包，使复现结论失真。
+
+### 4.4 复现证据
+
+环境内已保存：
+
+```text
+/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/conda-explicit.txt
+/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/pip-freeze.txt
+```
+
+首次生成时的 SHA256：
+
+```text
+691ce1aa4ecab68bf309ddd1006ff6824fd325a511a10490f67de179451c8d0a  conda-explicit.txt
+d50b7ea34e48542f50348fa560c0b70d3d24b12f220b82dd6365fc0d1e59e655  pip-freeze.txt
+```
+
+## 5. 模型权重
+
+### 5.1 已完成的检查
+
+- 已确认现有外部基线 `/mingli01/models/Qwen3-8B` 存在。
+- 已确认其 `config.json` 为 `model_type: qwen3`、`torch_dtype: bfloat16`。
+- 未修改任何已有模型。
+- 已从祝融尝试访问 Hugging Face 官方地址。
+
+### 5.2 集群直接下载结果
+
+祝融连接 `huggingface.co:443` 超时，Hugging Face dry-run 也无法取得模型文件清单，因此集群直接下载失败。
+
+首次尝试时，用户原计划路径：
+
+```text
+/mingli01/models/Qwen2.5-Coder-7B Base
+```
+
+该带空格目录没有被创建，也没有残缺模型文件。
+
+### 5.3 模型已到位后的核验
+
+2026-08-30 后续检查确认，模型实际放在：
+
+```text
+/mingli01/models/Qwen2.5-Coder-7B
+```
+
+CPU 侧静态核验结果：
+
+- 目录大小约 15 GB；
+- `architectures`：`Qwen2ForCausalLM`；
+- `model_type`：`qwen2`；
+- `torch_dtype`：`bfloat16`；
+- hidden size：3584；
+- 层数：28；
+- attention heads：28；
+- key/value heads：4；
+- vocabulary size：152064；
+- 权重索引声明总大小：15,231,233,024 字节；
+- 权重索引包含 339 个 tensor；
+- 4 个 safetensors 分片全部存在；
+- README 标题为 `Qwen2.5-Coder-7B`，不是 Instruct 模型卡；
+- 许可证文件和模型卡声明 Apache-2.0。
+
+下载目录没有保留 Hugging Face snapshot revision 元数据，因此精确 upstream commit 当前未知。后续仍需：
+
+- 文件完整性；
+- 模型 ID 和精确 revision；
+- tokenizer/config；
+- 全目录或文件级哈希；
+- 真实 tokenizer/config 加载；
+- 计算节点 BF16 与 NF4 加载。
+
+## 6. GPU 环境 smoke
+
+### 6.1 已提交
+
+| 项目 | 值 |
+|---|---|
+| Slurm Job ID | `90574` |
+| Job name | `patchalign-env-smoke` |
+| GPU | 1 |
+| CPU | 2 |
+| 主机内存 | 4 GB |
+| 时间上限 | 20 分钟 |
+
+smoke 计划验证：
+
+1. A800 与 CUDA 可见性；
+2. BF16 矩阵计算；
+3. bitsandbytes NF4 前向与反向；
+4. 小型模型 LoRA 注入和 optimizer step；
+5. adapter 保存与重载；
+6. 峰值 GPU 显存。
+
+脚本位置：
+
+```text
+/mingli01/project/ht/patchalign-cpp/artifacts/smoke/history/90574/env_smoke.py
+```
+
+脚本 SHA256：
+
+```text
+56d8c85cecc4c1f64526da3201558d0ca4f86ec91afc48c122ef76583c0a721e
+```
+
+### 6.2 实际结果
+
+Job `90574` 后来获得过 1 张 GPU，但在进入 Python 和 CUDA 测试前 1 秒失败：
+
+```text
+90574 | FAILED | elapsed 00:00:01 | ExitCode 2:0
+```
+
+失败原因：`sbatch --wrap` 使用 `/bin/sh` 解释包装脚本，而包装命令使用了 Bash 专属的 `source` 和 `set -o pipefail`。日志为：
+
+```text
+source: not found
+set: Illegal option -o pipefail
+```
+
+这是提交封装错误，不是 Python、CUDA、bitsandbytes、LoRA 或 GPU 失败。作业已经结束，不再排队或占用资源，因此没有可终止的 Job。后续正式 smoke 必须使用具有 `#!/bin/bash` 的 sbatch 文件或显式 `/bin/bash -lc`。
+
+GPU smoke 在作业实际完成并检查日志前，不得写成“通过”。
+
+### 6.3 真实模型综合 G0 smoke
+
+2026-08-30 已使用明确的 Bash sbatch 文件提交新作业：
+
+| 项目 | 值 |
+|---|---|
+| Slurm Job ID | `90699` |
+| Job name | `patchalign-g0-smoke` |
+| 模型 | `/mingli01/models/Qwen2.5-Coder-7B` |
+| GPU | 1 |
+| CPU | 8 |
+| 主机内存 | 32 GB |
+| 时间上限 | 1 小时 |
+| 初始状态 | `PENDING (AssocGrpGRES)` |
+
+脚本：
+
+```text
+/mingli01/project/ht/patchalign-cpp/scripts/smoke/patchalign_g0_smoke.py
+/mingli01/project/ht/patchalign-cpp/slurm/g0_smoke.sbatch
+```
+
+最初失败和成功作业实际使用的原始 sbatch 已归档：
+
+```text
+/mingli01/project/ht/patchalign-cpp/artifacts/smoke/history/90699/patchalign_g0_smoke.sbatch
+/mingli01/project/ht/patchalign-cpp/artifacts/smoke/history/90719/patchalign_g0_smoke_v2.sbatch
+```
+
+SHA256：
+
+```text
+480c828891063f1238ce2be580b6e393bad900d56051fadc868bd176ed21d72e  patchalign_g0_smoke.py
+d0d5e73f3921f44950d48fc100309cd9c1a88076eec0722d1cabe61190940c9c  patchalign_g0_smoke.sbatch
+```
+
+该作业按独立进程依次验证：
+
+1. A800、CUDA 和 BF16 运算；
+2. tokenizer/config 离线加载；
+3. BF16 Base 加载、LoRA 单步、adapter 保存/重载；
+4. NF4 Base 加载、QLoRA 单步、adapter 保存/重载；
+5. 版本、loss、梯度、显存、生成文本和 artifact 哈希。
+
+作业结束且原始日志、JSON artifact、Slurm 资源记录均通过检查前，不得标记 G0 完成。
+
+### 6.4 G0 修正与最终结果
+
+Job `90699` 后来启动，但在 2 秒内失败：非交互 Slurm Shell 中 `conda activate` 报 `Run 'conda init' before 'conda activate'`，尚未进入 Python。进一步检查发现，即使显式加载 `conda.sh`，集群 Shell 仍可能设置正确的 `CONDA_PREFIX`、但保留错误的系统 Python PATH。为避免修改全局 Shell 配置，最终脚本改为把专属 prefix 的 `bin` 显式放在 PATH 首位，并强制检查：
+
+```text
+command -v python == /mingli01/project/ht/.conda_envs/patchalign-cpp/bin/python
+sys.prefix == /mingli01/project/ht/.conda_envs/patchalign-cpp
+```
+
+修正版 Job：
+
+| 项目 | 结果 |
+|---|---|
+| Slurm Job ID | `90719` |
+| Job name | `patchalign-g0-smoke-v2` |
+| State / ExitCode | `COMPLETED / 0:0` |
+| 节点 | `gpu10` |
+| GPU | NVIDIA A800-SXM4-80GB，compute capability 8.0 |
+| Driver / CUDA | 580.65.06 / 13.0 |
+| 总耗时 | 3 分 48 秒 |
+| 主机 MaxRSS | 17,764,536 KiB，约 16.9 GiB |
+
+BF16 LoRA 结果：
+
+- 模型 footprint：15,231,233,280 bytes；
+- trainable parameters：20,185,088；
+- trainable fraction：约 0.2643%；
+- 单步 loss：0.4554518163；
+- adapter gradient norm：0.6343216168；
+- 峰值 allocated GPU memory：16,501,191,680 bytes，约 15.37 GiB；
+- 峰值 reserved GPU memory：16,703,815,680 bytes，约 15.56 GiB；
+- adapter 保存、重载、forward 和短生成通过。
+
+NF4 QLoRA 结果：
+
+- 发现 196 个 bitsandbytes `Linear4bit` 模块；
+- 量化模型 footprint：5,443,300,608 bytes；
+- trainable parameters：20,185,088；
+- 单步 loss：0.4569952786；
+- adapter gradient norm：0.7460884016；
+- 峰值 allocated GPU memory：9,253,692,928 bytes，约 8.62 GiB；
+- 峰值 reserved GPU memory：10,645,143,552 bytes，约 9.91 GiB；
+- adapter 保存、重载、forward 和短生成通过。
+
+结果与 adapter：
+
+```text
+/mingli01/project/ht/patchalign-cpp/artifacts/smoke/g0/90719
+```
+
+结果 JSON SHA256：
+
+```text
+67ed4a7e580d121bdbbb12f108eb2b19d8fc2a23dfd4d815ebb66ef720f7b06f  bf16-result.json
+c264097d18417cb9b2575cbc670d4dd28197bae66bdd3775c1fc5cbfcb3d79a5  nf4-result.json
+```
+
+adapter SHA256：
+
+```text
+ba334293a988d9ebf08fd44214742bab7edb171f328e4f5219ca67c5fc890e0e  bf16-adapter/adapter_model.safetensors
+2e6b0495f4c32c9aaf8ea87396bf4dd7f3db96ff8925bcbdf20d399c8c78257b  nf4-adapter/adapter_model.safetensors
+```
+
+日志中的 `torch_dtype` 弃用提示和 bitsandbytes FutureWarning 不影响本次结果，后续代码应把 `torch_dtype` 更新为 `dtype`。短生成只验证数值与加载链路，不用于判断补丁质量。
+
+结论：G0 真实模型综合 smoke 已通过。该结论仅证明当前环境、模型、BF16 LoRA、NF4 QLoRA 和 adapter 生命周期兼容，不代表正式 SFT 或修复质量结果。
+
+### 6.5 smoke 目录结构迁移
+
+根据用户决定，2026-08-30 将项目代码和 Conda 环境调整为并列结构：
+
+```text
+/mingli01/project/ht/
+├── patchalign-cpp/
+│   ├── scripts/smoke/
+│   ├── slurm/
+│   └── artifacts/smoke/
+└── .conda_envs/
+    └── patchalign-cpp/
+```
+
+迁移结果：
+
+- 成功 G0 Python 脚本进入 `scripts/smoke`；
+- 新的可复用 sbatch 进入 `slurm/g0_smoke.sbatch`，所有路径已改为新项目根目录；
+- Job 90719 的 JSON、adapter 和日志进入 `artifacts/smoke`；
+- Job 90574、90699、90719 的旧脚本和失败证据保留在 `artifacts/smoke/history`；
+- Conda prefix 下原临时 `smoke` 目录已清空并移除；
+- 模型目录和 Conda 包未移动、未修改；
+- 迁移后关键 Python 脚本、结果 JSON 和 adapter 权重 SHA256 与迁移前一致。
+
+新的可复用 sbatch SHA256：
+
+```text
+a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke.sbatch
+```
+
+## 7. 当前边界
+
+当前只完成准备与环境验证，没有推进以下工作：
+
+- 没有创建项目 Git 仓库；
+- 没有创建 A0 文档和代码骨架；
+- 没有下载数据；
+- 没有运行模型推理；
+- 没有训练；
+- 没有修改 MeetingMind；
+- 没有取消或修改账户中的既有作业。
+
+## 8. 下一次应更新的事件
+
+发生以下任一事件时更新本文：
+
+1. 补充 Qwen2.5-Coder-7B 权重哈希及可获得的来源 revision；
+2. 本地仓库正式创建；
+3. Git fetch/push 分离配置和首次 push 完成；
+4. A0 开始或验收；
+5. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理。

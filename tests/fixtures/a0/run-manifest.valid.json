@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1.0",
+  "run_id": "fixture-run-v1",
+  "stage": "g0",
+  "started_at": "2026-08-30T13:03:51Z",
+  "finished_at": "2026-08-30T13:07:39Z",
+  "git_commit": "0000000000000000000000000000000000000000",
+  "dirty_worktree": true,
+  "config_sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "model_id": "Qwen/Qwen2.5-Coder-7B",
+  "model_revision": null,
+  "model_config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605",
+  "adapter_sha256": "sha256:ba334293a988d9ebf08fd44214742bab7edb171f328e4f5219ca67c5fc890e0e",
+  "dataset_manifest_sha256": null,
+  "environment_sha256": "sha256:d50b7ea34e48542f50348fa560c0b70d3d24b12f220b82dd6365fc0d1e59e655",
+  "seed": 20260830,
+  "slurm_job_id": "90719",
+  "prediction_artifact_sha256": null,
+  "execution_artifact_sha256": null,
+  "notes": "Synthetic compatibility smoke; not a quality evaluation."
+}
+

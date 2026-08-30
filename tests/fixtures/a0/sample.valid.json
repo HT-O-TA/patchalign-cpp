@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1.0",
+  "sample_id": "fixture:add-sign-v1",
+  "source_dataset": "synthetic_fixture",
+  "source_revision": "fixture-v1",
+  "repo_id": "fixture/add-sign",
+  "repo_family": "fixture/add-sign",
+  "base_commit": "0000000",
+  "fix_commit": "1111111",
+  "language": "cpp",
+  "task_level": "function",
+  "problem_statement": "add must return the sum of its two arguments",
+  "failure_evidence": "add(2, 3) returned -1 instead of 5",
+  "context": {
+    "target_file": "src/add.cpp",
+    "target_symbol": "add",
+    "start_line": 1,
+    "end_line": 1,
+    "buggy_code": "int add(int a, int b) { return a - b; }"
+  },
+  "allowed_paths": ["src/add.cpp"],
+  "gold_patch": "--- a/src/add.cpp\n+++ b/src/add.cpp\n@@ -1 +1 @@\n-int add(int a, int b) { return a - b; }\n+int add(int a, int b) { return a + b; }\n",
+  "build_command": ["cmake", "--build", "build"],
+  "public_test_command": ["ctest", "--test-dir", "build", "-R", "public_add"],
+  "hidden_test_command": ["ctest", "--test-dir", "build", "-R", "hidden_add"],
+  "regression_test_command": ["ctest", "--test-dir", "build"],
+  "timeout_seconds": 60,
+  "license": "CC0-1.0",
+  "split": "validation",
+  "provenance_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}
+

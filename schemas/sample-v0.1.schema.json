@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/patchalign/sample-v0.1.schema.json",
+  "title": "PatchAlign canonical sample v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sample_id",
+    "source_dataset",
+    "source_revision",
+    "repo_id",
+    "repo_family",
+    "base_commit",
+    "language",
+    "task_level",
+    "problem_statement",
+    "failure_evidence",
+    "context",
+    "allowed_paths",
+    "gold_patch",
+    "build_command",
+    "public_test_command",
+    "hidden_test_command",
+    "regression_test_command",
+    "timeout_seconds",
+    "license",
+    "split",
+    "provenance_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "sample_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$"},
+    "source_dataset": {"type": "string", "minLength": 1},
+    "source_revision": {"type": ["string", "null"], "minLength": 1},
+    "repo_id": {"type": "string", "minLength": 1},
+    "repo_family": {"type": "string", "minLength": 1},
+    "base_commit": {"type": "string", "minLength": 7},
+    "fix_commit": {"type": ["string", "null"], "minLength": 7},
+    "language": {"enum": ["c", "cpp"]},
+    "task_level": {"enum": ["function", "file_window"]},
+    "problem_statement": {"type": "string", "minLength": 1},
+    "failure_evidence": {"type": "string", "minLength": 1},
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_file", "target_symbol", "start_line", "end_line", "buggy_code"],
+      "properties": {
+        "target_file": {"$ref": "#/$defs/repoPath"},
+        "target_symbol": {"type": ["string", "null"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "buggy_code": {"type": "string", "minLength": 1}
+      }
+    },
+    "allowed_paths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/repoPath"}
+    },
+    "gold_patch": {"type": ["string", "null"]},
+    "build_command": {"$ref": "#/$defs/command"},
+    "public_test_command": {"$ref": "#/$defs/command"},
+    "hidden_test_command": {"oneOf": [{"$ref": "#/$defs/command"}, {"type": "null"}]},
+    "regression_test_command": {"oneOf": [{"$ref": "#/$defs/command"}, {"type": "null"}]},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+    "license": {"type": "string", "minLength": 1},
+    "split": {"enum": ["train", "validation", "internal_test", "external_test"]},
+    "provenance_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
+
