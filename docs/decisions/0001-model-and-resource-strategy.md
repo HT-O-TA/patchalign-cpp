@@ -1,6 +1,6 @@
 # ADR-0001：模型与资源策略
 
-状态：Accepted for A0  
+状态：Accepted for A0
 日期：2026-08-30
 
 ## 背景
@@ -43,4 +43,3 @@ Job `90719` 已完成真实模型 G0：BF16 LoRA 和 NF4 QLoRA 单步、adapter 
 - G4/G5 pilot 显示 Base 能力不足且数据/评测不是主要瓶颈；
 - Qwen3-8B-Base 合法到位并能在同协议下比较；
 - 7B/8B 主线已经完成，资源允许增加扩展实验。
-

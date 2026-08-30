@@ -1,6 +1,6 @@
 # A0 样本与运行 Schema
 
-状态：Draft  
+状态：Draft
 版本：`0.1.0`
 
 ## 1. 设计原则
@@ -103,4 +103,3 @@ summary script commit/hash
 必须先确定 `repo_family` 和外部 benchmark 黑名单，再分配 split，之后才生成函数或上下文样本。禁止先随机切分样本再补仓库隔离。
 
 RunBugRun 按题目/程序标识隔离，不得把它描述成 repository-family 隔离。
-
