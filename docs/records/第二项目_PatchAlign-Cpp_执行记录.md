@@ -436,7 +436,24 @@ ba334293a988d9ebf08fd44214742bab7edb171f328e4f5219ca67c5fc890e0e  bf16-adapter/a
 a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke.sbatch
 ```
 
-## 7. 当前边界
+## 7. 本地仓库与 A0 Draft 建立
+
+2026-08-30 完成：
+
+- 在 `/home/lenovo/A/patchalign-cpp` 初始化 Git `main` 分支；
+- 配置 `origin`：HTTPS fetch、Deploy Key SSH push；
+- 将原 `/home/lenovo/A/new` 下三份项目文档迁入仓库；
+- 建立 README、pyproject、最小 Python package；
+- 建立任务契约、Schema 说明、评测协议、实验协议和真实性声明；
+- 建立两个 ADR、模型配置和三个 JSON Schema；
+- 建立三个正例 fixture 和关键负例 pytest；
+- 完成本地 JSON/TOML 解析、Python 编译、Markdown 相对链接、Git ignore、敏感模式和大文件检查；
+- 初始提交：`aaecacf chore: bootstrap A0 draft contracts`；
+- 空白规范化提交：`2de6363 style: normalize repository whitespace`。
+
+本机与现有祝融环境当前没有安装 `jsonschema`，因此 pytest 尚未实际运行。A0 继续保持 Draft；不得把“测试代码已建立”写成“Schema 验收已通过”。
+
+## 8. 当前边界
 
 当前只完成准备与环境验证，没有推进以下工作：
 
@@ -448,7 +465,7 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 没有修改 MeetingMind；
 - 没有取消或修改账户中的既有作业。
 
-## 8. 下一次应更新的事件
+## 9. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 

@@ -217,4 +217,5 @@ patchalign-cpp/
 - 将 `/home/lenovo/A/new` 中三份 PatchAlign-Cpp 文档迁入 `docs/handoff` 和 `docs/records`；
 - 新增 README、pyproject、A0 文档、ADR、模型配置和 JSON Schema；
 - A0 明确标记为 Draft，尚未通过 fixture、评分闭环、许可证等验收门禁；
+- 建立本地提交 `aaecacf`，并以 `2de6363` 规范化仓库空白；
 - 本轮未推送 GitHub、未下载数据、未运行训练。
