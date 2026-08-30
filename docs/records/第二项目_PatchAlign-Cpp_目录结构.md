@@ -3,20 +3,28 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：准备/G0 已完成，正式 A0 尚未开始。
+> 当前状态：准备/G0 已完成，A0 Draft 已建立；本机与集群采用 Git 同步、运行产物集群本地化。
 
 ## 1. 祝融当前结构
 
 ```text
 /mingli01/project/ht/
-├── patchalign-cpp/                         # 项目运行目录；当前尚未初始化为 Git 仓库
-│   ├── .gitignore                          # 忽略 artifact、日志、缓存和密钥文件
+├── patchalign-cpp/                         # Git 计算工作副本，与本机锁定到同一 commit
+│   ├── .git/                               # Git 元数据；origin 指向 GitHub
+│   ├── .gitignore                          # 忽略 artifact、日志、缓存、权重和密钥文件
+│   ├── README.md
+│   ├── configs/
+│   ├── docs/
+│   ├── schemas/
+│   ├── src/
+│   ├── tests/
 │   ├── scripts/
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
 │   │   └── g0_smoke.sbatch                 # 适配祝融和当前显式 prefix 的 G0 作业脚本
-│   └── artifacts/                          # 大型或运行期产物；默认不得提交 Git
+│   ├── pyproject.toml
+│   └── artifacts/                          # 集群本地化产物；被 Git 忽略
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -48,9 +56,13 @@
 │   ├── docs/
 │   │   ├── a0/
 │   │   ├── decisions/
+│   │   ├── development/
+│   │   ├── evidence/
 │   │   ├── handoff/
 │   │   └── records/
 │   ├── schemas/
+│   ├── scripts/smoke/
+│   ├── slurm/
 │   ├── src/patchalign/
 │   └── tests/
 └── new/                                   # PatchAlign-Cpp 文档已迁出，当前为空
@@ -62,16 +74,16 @@ GitHub 目标仓库：
 HT-O-TA/patchalign-cpp
 ```
 
-当前为可访问的空仓库；Deploy Key 身份已验证，首次项目 push 尚未进行。
+作为代码和文档的同步中枢；本机通过仓库专属 Deploy Key 推送，集群通过 HTTPS 获取。
 
 ## 3. 目录备注
 
 ### 3.1 `/mingli01/project/ht/patchalign-cpp`
 
-- 祝融上的项目运行目录；
-- 后续用于同步本地仓库代码、配置和 Slurm 脚本；
-- 当前只保存 G0 相关脚本和证据，还不是完整项目；
-- 当前没有 `.git`，不得误写成已经完成 Git 初始化或推送；
+- 祝融上的 Git 计算工作副本；
+- 从 GitHub 同步代码、配置、文档和 Slurm 脚本；
+- 与本机工作区使用同一个 commit 作为一致性判据；
+- 不在两端同时编辑同一个文件，正式作业前要求工作区干净；
 - 原始数据、模型权重和大型训练产物不得进入 Git。
 
 ### 3.2 `scripts/smoke`
@@ -121,7 +133,15 @@ HT-O-TA/patchalign-cpp
 - 已建立 README、A0 Draft 文档、ADR、Schema、模型配置和最小 Python 包骨架；
 - 原 `/home/lenovo/A/new` 中三份项目文档已迁入本仓库；
 - A0 尚未验收，不能写成已完成；
-- 祝融运行目录不是本地 Git 仓库的替代品。
+- 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
+
+### 3.8 Git 同步与产物本地化
+
+- 跟踪内容：代码、配置、Schema、测试、Slurm 脚本和小型证据摘要；
+- 集群本地化内容：`artifacts/`、数据、日志、checkpoint、adapter、模型和 Conda prefix；
+- 不使用跨 SSH 软链接、SSHFS 或双向删除式 rsync；
+- run manifest 必须记录完整 Git commit；
+- 操作规范见 `docs/development/git-sync.md`。
 
 ## 4. 预计的正式项目结构
 
@@ -219,3 +239,12 @@ patchalign-cpp/
 - A0 明确标记为 Draft，尚未通过 fixture、评分闭环、许可证等验收门禁；
 - 建立本地提交 `aaecacf`，并以 `2de6363` 规范化仓库空白；
 - 本轮未推送 GitHub、未下载数据、未运行训练。
+
+### 2026-08-30：建立 Git 同步与集群产物本地化边界
+
+- 将祝融已通过 Job `90719` 的 `scripts/smoke/patchalign_g0_smoke.py` 与 `slurm/g0_smoke.sbatch` 原样纳入本机 Git；
+- 新增 `docs/evidence/g0-smoke-90719.md`，只提交关键指标、路径和 SHA256，不复制两个约 77 MiB 的 adapter 或原始日志；
+- 新增 `docs/development/git-sync.md`，规定本机开发、GitHub 中转、祝融计算工作副本的单向同步流程；
+- 祝融的 `artifacts/` 与并列的 `.conda_envs/patchalign-cpp` 保持原位，没有移动或删除；
+- 祝融项目目录初始化为 Git 工作副本，并与本机锁定到同一 commit；
+- GitHub 完成首次 push，后续用完整 commit 校验两端一致性。

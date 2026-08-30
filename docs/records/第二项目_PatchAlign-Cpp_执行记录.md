@@ -17,6 +17,7 @@
 | 祝融项目环境 | 显式 prefix `/mingli01/project/ht/.conda_envs/patchalign-cpp` |
 | 主模型实际路径 | `/mingli01/models/Qwen2.5-Coder-7B` |
 | 环境与 smoke | 允许自主创建和验证，但不得修改其他环境或既有内容 |
+| 本机—集群同步 | GitHub 作为同步中枢；代码和文档同步，运行产物保留在集群 |
 
 ## 2. 本地与 GitHub
 
@@ -26,7 +27,7 @@
 - 原 `/home/lenovo/A/new` 下三份 PatchAlign-Cpp 文档已移动到本仓库的 `docs/handoff` 和 `docs/records`。
 - 已建立 A0 Draft 文档、ADR、模型配置和三个机器可校验 JSON Schema。
 - 已配置 `origin`：HTTPS fetch、`github-patchalign-cpp` SSH push。
-- 已形成明确标注为 A0 Draft 的首次本地 Git 提交；尚未推送。
+- 已形成明确标注为 A0 Draft 的本地 Git 历史。
 - GitHub 空仓库 `HT-O-TA/patchalign-cpp` 已存在。
 - 已生成仓库专属 Ed25519 Deploy Key：
   - 私钥：`/home/lenovo/.ssh/id_ed25519_patchalign_cpp`
@@ -43,9 +44,13 @@
 
   `ssh -T` 在成功认证后返回退出码 1 是 GitHub 不提供 shell 的正常行为；身份验证本身成功。
 
-### 2.2 尚未完成
+### 2.2 同步方式
 
-- 尚未做首次 push 写权限验证。
+- 本机是主要开发与提交工作区；
+- GitHub 是代码和文档同步中枢；
+- 祝融是同一仓库的计算工作副本；
+- 产物、环境、模型、数据和权重不进入 Git；
+- 具体流程见 `docs/development/git-sync.md`。
 
 A0 当前为 Draft，尚未通过验收门禁。
 
@@ -55,7 +60,7 @@ A0 当前为 Draft，尚未通过验收门禁。
 
 - SSH alias `a800` 可登录祝融管理节点。
 - `/mingli01/project/ht` 存在，检查时为空。
-- `/mingli01/project/ht/patchalign-cpp` 已创建，当前保存 G0 脚本、Slurm 文件和 artifact；尚未初始化为 Git 仓库。
+- `/mingli01/project/ht/patchalign-cpp` 已创建并作为 Git 计算工作副本；原有 G0 artifact 保留在被忽略的 `artifacts/`。
 - 系统模块可用：
   - `conda/3`
   - `cuda/13.0`
@@ -450,27 +455,32 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 完成本地 JSON/TOML 解析、Python 编译、Markdown 相对链接、Git ignore、敏感模式和大文件检查；
 - 初始提交：`aaecacf chore: bootstrap A0 draft contracts`；
 - 空白规范化提交：`2de6363 style: normalize repository whitespace`。
+- A0 引导证据提交：`c5a1f4c docs: record local A0 bootstrap evidence`。
 
 本机与现有祝融环境当前没有安装 `jsonschema`，因此 pytest 尚未实际运行。A0 继续保持 Draft；不得把“测试代码已建立”写成“Schema 验收已通过”。
 
-## 8. 当前边界
+## 8. Git 同步与当前边界
 
-当前只完成准备与环境验证，没有推进以下工作：
+已完成：
 
-- 没有创建项目 Git 仓库；
-- 没有创建 A0 文档和代码骨架；
+- 本机仓库、GitHub 和祝融计算工作副本使用 Git 同步；
+- 祝融 G0 Python 与 sbatch 纳入版本控制；
+- G0 小型证据摘要纳入文档；
+- 原始 JSON、adapter、日志、模型和 Conda 环境继续保留在集群，不进入 Git。
+
+仍未推进：
+
 - 没有下载数据；
-- 没有运行模型推理；
-- 没有训练；
+- 没有运行正式基线或质量评测；
+- 没有正式训练；
 - 没有修改 MeetingMind；
-- 没有取消或修改账户中的既有作业。
+- 没有提交新的 GPU 作业。
 
 ## 9. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 
 1. 补充 Qwen2.5-Coder-7B 权重哈希及可获得的来源 revision；
-2. 本地仓库正式创建；
-3. Git fetch/push 分离配置和首次 push 完成；
-4. A0 开始或验收；
-5. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理。
+2. A0 验收；
+3. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理；
+4. 新增重要目录、模型、环境、作业或 artifact 迁移。

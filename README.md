@@ -25,6 +25,8 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [Codex 交接说明](docs/handoff/第二项目_PatchAlign-Cpp_Codex交接说明.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
+- [本机—集群 Git 同步规范](docs/development/git-sync.md)
+- [G0 Job 90719 证据摘要](docs/evidence/g0-smoke-90719.md)
 
 ## 环境与模型
 
