@@ -22,6 +22,7 @@
 - 在固定 `base_commit` 的独立干净工作树中执行 `git apply --recount --check`；
 - `--recount` 只重新推断 hunk header 的旧/新行数计数；起始位置偏差能否应用仍由 Git 根据补丁携带的删除行和上下文判断；
 - 不启用 `--ignore-whitespace`、`--3way`、`--reject`、`--unsafe-paths` 或 `--unidiff-zero`；
+- prompt 默认要求每个 hunk 携带修改前后各 3 行上下文，文件边界不足时使用全部可用上下文；这是生成约定，Git 仍严格匹配补丁实际携带的全部上下文；
 - check 通过后，实际应用必须使用同一 `--recount` 参数；
 - `apply_success` 只进入 Patch apply rate；只有 build、public、hidden 和 regression 全部通过才是最终 `success`。
 

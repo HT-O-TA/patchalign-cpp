@@ -488,7 +488,7 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 完整预测必须通过来源许可、敏感信息和漏洞披露检查；
 - 原始日志和内部路径不公开，但失败结果不能从统计分母中删除。
 
-该决策关闭 A0 的“项目代码许可证”和“产物公开范围”两个未决项，但不代表 A0 已完成。Schema 自动测试、确定性评分 fixture、输出协议用户验收、评测集阈值与沙箱等门禁仍待完成。
+该决策关闭 A0 的“项目代码许可证”和“产物公开范围”两个未决项，但不代表 A0 已完成。当时 Schema 自动测试、确定性评分 fixture、输出协议用户验收、评测集阈值与沙箱等门禁仍待完成；其中前三项随后分别在第 11、12 节关闭。
 
 ## 10. 模型 revision 与第一版数据组成冻结
 
@@ -536,9 +536,43 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 5. 刷新环境复现清单 `repro/pip-freeze.txt`，SHA256 为 `bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4`；
 6. 全程未使用 GPU、未提交 Slurm 作业、未修改模型或数据目录。
 
-结论：Schema 自动校验与正反例测试门禁已关闭，A0 仍为 Draft。确定性评分 fixture、严格 unified diff 输出协议用户验收、提升/退化阈值和沙箱验证仍待完成。
+结论：Schema 自动校验与正反例测试门禁已关闭，A0 仍为 Draft。本节记录时仍待完成的确定性评分 fixture 和输出协议验收已随后在第 12 节关闭；提升/退化阈值和沙箱验证仍待完成。
 
-## 12. 下一次应更新的事件
+## 12. 严格输出协议与确定性评分闭环
+
+2026-09-01 用户接受 ADR-0002 的严格 unified diff 输出协议，并接受标准应用模式：
+
+- 唯一纯 unified diff，不允许围栏、解释或多个候选；
+- 多文件、路径逃逸、绝对路径和二进制 patch 严格拒绝；
+- 应用前后分别使用 `git apply --recount --check` 和 `git apply --recount`；
+- `--recount` 只放宽 hunk header 行数计数，不忽略删除行、上下文或空白差异；
+- parse、policy 和 apply 失败保持独立分类，apply 通过不等于最终 Pass。
+
+实现提交 `c000f775071f7632f81edc5103455dfe93d271c2` 新增：
+
+- `src/patchalign/evaluation/patches.py`：严格 parser 和单文件路径策略；
+- `src/patchalign/evaluation/scorer.py`：临时 clone、固定顺序评分、超时进程组清理、规范化哈希和固定分母汇总；
+- `tests/fixtures/scoring`：固定 base commit 的微型 C++ 仓库、v0.2 sample、prediction 和各阶段失败 patch；
+- parser、策略和端到端确定性 pytest。
+
+集群项目环境设置 `PYTHONNOUSERSITE=1`，使用 Python 3.10.20、Git 2.34.1 和 g++ 11.4.0 验收：
+
+```text
+全量首轮：53 passed in 5.51s
+全量复跑：53 passed in 5.23s
+评分专项：12 passed in 4.92s
+```
+
+固定证据：
+
+```text
+fixture base commit: d68a0718b4a066cb319e89efc21e5c2af9d1d093
+success score SHA256: sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44ed96b3a6a98dc0
+```
+
+结论：A0 的输出协议验收、极小确定性评分 fixture 和重复评分门禁已关闭。该受控 fixture 不等于 A2 沙箱或真实数据评分闭环；A0 继续保持 Draft。本次未使用 GPU、未提交 Slurm 作业、未修改模型或数据。
+
+## 13. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 

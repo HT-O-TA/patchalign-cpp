@@ -17,7 +17,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [真实性、污染与泄漏声明](authenticity_and_leakage.md) | 定义证据强度和禁止表述 | Draft |
 | [许可证与产物发布策略](publication_policy.md) | 定义仓库许可、第三方边界和 artifact 发布门禁 | Accepted for A0 |
 | [ADR-0001](../decisions/0001-model-and-resource-strategy.md) | 模型、LoRA/QLoRA 和资源策略 | Accepted for A0 |
-| [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出协议 | Proposed |
+| [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出与 `--recount` 应用协议 | Accepted for A0 |
 | [ADR-0003](../decisions/0003-dataset-composition-v1.md) | 第一版数据配额、语言、任务层级、修改类型和测试覆盖 | Accepted for A0 |
 
 机器可校验 Schema：
@@ -41,6 +41,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 - BF16 LoRA 与 NF4 QLoRA 先公平 pilot，再冻结正式方案；
 - gold patch 不得出现在生成 prompt；
 - 第一主指标为 hidden-test Pass@1，同时报告解析、应用、编译和回归；
+- 模型只输出唯一纯 unified diff；应用阶段用 `git apply --recount --check` 放宽 hunk 行数计数，不放宽内容、路径或修改范围；
 - 不在 A2 执行闭环完成前训练。
 - 仓库原创内容采用 Apache-2.0，版权标识为 `PatchAlign-Cpp contributors`；
 - 正式 adapter 可在逐项审计后发布，中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
@@ -57,10 +58,11 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 
 A0 只有在以下事项全部满足后才能标记完成：
 
-- [ ] 用户审阅并接受任务契约和输出协议；
+- [x] 用户审阅并接受输出协议；
+- [ ] 用户审阅并接受完整任务契约；
 - [x] 所有当前 JSON Schema 通过自动校验和正反例测试；
-- [ ] 有一个不依赖大模型的极小 fixture 可从预测文件重复评分；
-- [ ] 同一预测重复评分得到相同阶段结果和指标；
+- [x] 有一个不依赖大模型的极小 fixture 可从预测文件重复评分；
+- [x] 同一预测重复评分得到相同阶段结果、指标和规范化哈希；
 - [ ] 指标分母、跳过规则和失败优先级无歧义；
 - [ ] 模型角色、生成参数、seed 和 artifact 规则冻结；
 - [ ] 真实性与污染声明模板通过审阅；

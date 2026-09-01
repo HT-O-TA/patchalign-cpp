@@ -17,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = ROOT / "tests" / "fixtures" / "scoring"
 REPO_SOURCE = FIXTURE_DIR / "tiny_cpp_repo"
 EXPECTED_BASE_COMMIT = "d68a0718b4a066cb319e89efc21e5c2af9d1d093"
+EXPECTED_SUCCESS_SCORE_SHA256 = (
+    "sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44ed96b3a6a98dc0"
+)
 
 
 def load_json(path: Path) -> dict[str, object]:
@@ -154,6 +157,7 @@ def test_prediction_file_scores_successfully_and_deterministically(fixture_repo:
     assert first == second
     assert first["terminal_classification"] == "success"
     assert first["success"] is True
+    assert first["score_sha256"] == EXPECTED_SUCCESS_SCORE_SHA256
     assert all(stage["status"] == "passed" for stage in first["stages"].values())
 
     first_summary = summarize_scores([first])

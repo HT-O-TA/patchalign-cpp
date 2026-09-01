@@ -1,7 +1,7 @@
 # A0 评测协议
 
 状态：Draft
-版本：`0.1.0`
+版本：`0.2.0`
 
 ## 1. 固定执行顺序
 
@@ -21,6 +21,15 @@ raw model text
 ```
 
 阶段不得跳序。上游失败时，下游标记为 `not_run`，不得误记为失败或通过。
+
+标准应用命令为：
+
+```text
+git apply --recount --check -
+git apply --recount -
+```
+
+两条命令必须在同一个固定 `base_commit` 的独立干净工作树中依次执行。禁止启用 `--ignore-whitespace`、`--3way`、`--reject`、`--unsafe-paths` 或 `--unidiff-zero`。`--recount` 只容忍 hunk 行数计数错误；内容无法匹配仍为 `apply_failed`。具体输出边界见 [ADR-0002](../decisions/0002-patch-output-protocol.md)。
 
 ## 2. 终止分类优先级
 
@@ -122,3 +131,9 @@ Base、Prompt/Few-shot、SFT 和 DPO 必须使用：
 - 同时报告绝对样本数和百分比；
 - 不删除失败 run；
 - 在正式 SFT 前冻结最小有意义提升和可接受退化阈值。
+
+## 10. A0 确定性 fixture 证据
+
+自建微型 C++ fixture 已覆盖 generation、parse、policy、apply、build、public、hidden、regression 和 success 路径，并验证超时后停止下游阶段。同一成功预测重复评分得到相同阶段记录、汇总指标和评分 SHA256。证据见 [`a0-deterministic-scoring.md`](../evidence/a0-deterministic-scoring.md)。
+
+该 fixture 只证明受控输入上的评分器语义和确定性，不代表 A2 的不可信仓库沙箱、正式执行结果 Schema、sanitizer 或真实数据闭环已经完成。

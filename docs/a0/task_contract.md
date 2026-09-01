@@ -74,6 +74,8 @@
 
 解析器不得从任意自然语言中猜测或拼接多个 diff。无法提取唯一合法 patch 时记为 `parse_failed`。
 
+应用阶段采用 ADR-0002 的标准模式：先运行 `git apply --recount --check`，通过后使用同一 `--recount` 参数实际应用。该参数只重新推断 hunk header 的行数计数，不忽略删除行、上下文或空白差异。语法合法但无法应用时记为 `apply_failed`，不混入 `parse_failed`。
+
 ## 5. 允许修改范围
 
 样本通过 `allowed_paths` 显式定义可修改的仓库相对路径。第一版默认只允许目标 C/C++ 源文件或头文件。

@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2 自动测试已通过；本机与集群采用 Git 同步、运行产物集群本地化。
+> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2 与确定性评分 fixture 已通过；本机与集群采用 Git 同步、运行产物集群本地化。
 
 ## 1. 祝融当前结构
 
@@ -19,8 +19,11 @@
 │   ├── configs/
 │   ├── docs/
 │   ├── schemas/                            # sample v0.1/v0.2、prediction v0.1、run-manifest v0.1
-│   ├── src/
-│   ├── tests/                              # A0 Schema 正反例与版本兼容测试
+│   ├── src/patchalign/evaluation/          # strict patch parser、策略与确定性评分器
+│   ├── tests/
+│   │   ├── fixtures/a0/                    # A0 Schema 正例
+│   │   ├── fixtures/scoring/               # 微型 C++ repo、sample、prediction 和失败 patch
+│   │   └── unit/                           # Schema、parser、策略和评分闭环测试
 │   ├── scripts/
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
@@ -158,6 +161,14 @@ HT-O-TA/patchalign-cpp
 - run manifest 必须记录完整 Git commit；
 - 操作规范见 `docs/development/git-sync.md`。
 
+### 3.10 `src/patchalign/evaluation` 与 `tests/fixtures/scoring`
+
+- `patches.py` 严格解析唯一 unified diff，并实施单文件和允许路径策略；
+- `scorer.py` 在固定 base commit 的临时 clone 中按 parse → policy → apply → build → public → hidden → regression 顺序评分；
+- apply 固定使用 `--recount`，不启用忽略空白、三路合并或部分应用；
+- scoring fixture 完全自建，只用于接口、分类和确定性测试，不进入正式数据配额；
+- 正式不可信数据仍必须等待 A2 沙箱，不能直接套用 A0 fixture 的宿主执行方式。
+
 ## 4. 预计的正式项目结构
 
 以下是 A0～A2 逐步形成的目标结构。其中 README、pyproject、A0 文档、Schema 和最小包骨架已经存在，其余目录仍是规划：
@@ -289,3 +300,12 @@ patchalign-cpp/
 - 刷新 prefix 内 `repro/pip-freeze.txt`，保留环境依赖复现证据；
 - 设置 `PYTHONNOUSERSITE=1` 后连续两次全量 pytest 均为 `30 passed`；
 - Git 实现提交为 `ec9039646696fde16dfaf512350acf50ef877da2`；没有创建数据目录、GPU 作业或新 artifact。
+
+### 2026-09-01：新增确定性评分 fixture 与评分器
+
+- 新增 `src/patchalign/evaluation` 和 `tests/fixtures/scoring`；
+- ADR-0002 状态改为 `Accepted for A0`，标准应用冻结为 `git apply --recount`；
+- fixture base commit 固定为 `d68a0718b4a066cb319e89efc21e5c2af9d1d093`；
+- 集群隔离模式全量 pytest 连续两次均为 `53 passed`，评分专项为 `12 passed`；
+- 实现提交为 `c000f775071f7632f81edc5103455dfe93d271c2`；
+- 没有创建或修改正式数据、模型、GPU 作业和集群 artifact。
