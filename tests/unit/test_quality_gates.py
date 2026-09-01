@@ -47,6 +47,7 @@ def test_sft_gate_passes_at_exact_two_point_primary_threshold(
     )
     assert decision["passed"] is True
     assert decision["reasons"] == []
+    assert decision["paired_bootstrap_parameters"]["resamples"] == 2000
     assert decision["primary_paired_bootstrap"]["observed"] == pytest.approx(0.02)
 
 
@@ -205,6 +206,17 @@ def test_paired_bootstrap_rejects_denominator_mismatch() -> None:
         )
 
 
+def test_zero_bootstrap_resamples_are_rejected(gate_config: dict[str, object]) -> None:
+    with pytest.raises(ValueError, match="resamples must be positive"):
+        evaluate_training_gate(
+            "sft",
+            make_snapshot(),
+            make_snapshot(function_improvements=8),
+            gate_config,
+            bootstrap_resamples=0,
+        )
+
+
 def test_pilot_uses_resource_tiebreak_below_two_sample_difference(
     gate_config: dict[str, object],
 ) -> None:
@@ -257,3 +269,16 @@ def test_pilot_uses_quality_at_two_sample_difference(gate_config: dict[str, obje
     )
     assert decision["selected"] == "bf16_lora"
     assert decision["reason"] == "quality_difference_at_least_two_samples"
+
+
+def test_pilot_rejects_more_than_two_candidates(gate_config: dict[str, object]) -> None:
+    candidate = {
+        "name": "candidate",
+        "completed": True,
+        "stable": True,
+        "success_count": 1,
+        "peak_memory_bytes": 1,
+        "wall_time_seconds": 1,
+    }
+    with pytest.raises(ValueError, match="exactly two"):
+        select_pilot_candidate([candidate, candidate, candidate], gate_config)

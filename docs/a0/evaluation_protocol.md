@@ -1,7 +1,7 @@
 # A0 评测协议
 
 状态：Draft
-版本：`0.2.0`
+版本：`0.3.0`
 
 ## 1. 固定执行顺序
 
@@ -65,6 +65,8 @@ git apply --recount -
 | Timeout rate | 任一必需阶段超时数 / 总样本数 |
 
 第一主指标是 hidden-test Pass@1。Compile rate 或 public pass 不能代替真实修复成功。
+
+Sanitizer 是条件指标：只对 A2 执行配置中显式 `sanitizer_applicable=true` 的样本执行和统计；`false` 记为 `not_applicable`，缺失标记不得进入该指标。
 
 ## 4. Pass@k
 
@@ -130,7 +132,7 @@ Base、Prompt/Few-shot、SFT 和 DPO 必须使用：
 - 单次大训练明确资源限制；
 - 同时报告绝对样本数和百分比；
 - 不删除失败 run；
-- 在正式 SFT 前冻结最小有意义提升和可接受退化阈值。
+- 正式 SFT/DPO 的最小提升、退化上限、paired bootstrap 和分母门禁按 [ADR-0004](../decisions/0004-training-quality-gates-v1.md) 及机器配置冻结；不得在看到实验结果后更改。
 
 ## 10. A0 确定性 fixture 证据
 

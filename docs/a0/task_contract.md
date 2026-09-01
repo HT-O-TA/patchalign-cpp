@@ -1,6 +1,6 @@
 # A0 任务契约
 
-状态：Draft
+状态：Accepted for A0
 版本：`0.1.0`
 
 ## 1. 任务定义
@@ -118,9 +118,22 @@
 
 空 patch、只通过 public test、删除测试或硬编码公开输入都不算成功。
 
-## 8. 确定性与版本
+## 8. Sanitizer 适用性
+
+- sanitizer 不是所有样本的默认阶段；
+- A2 执行配置/结果 Schema 必须为每条正式可执行样本显式记录 `sanitizer_applicable`；
+- `sanitizer_applicable=true` 时必须绑定受控命令、工具版本、环境和 timeout；
+- `sanitizer_applicable=false` 时阶段记为 `not_applicable`，不进入 sanitizer pass rate 分母；
+- 缺少显式标记时不得猜测为 `false`，该样本不能进入正式 sanitizer 指标；
+- `sample-v0.2` 不静默追加该字段；A2 通过版本化执行 Schema 落地。现有 A0 合成 fixture 不提供 sanitizer 质量证据。
+
+## 9. 确定性与版本
 
 - prompt template、Schema 和评分器都必须有版本；
 - 样本内容由 `provenance_hash` 标识；
 - 同一预测和执行环境重复评分必须产生相同阶段状态；
 - 契约变化必须通过 ADR 和版本号记录，不能静默覆盖历史结果。
+
+## 10. 验收
+
+用户于 2026-09-01 接受本任务契约，并明确接受 sanitizer 只在显式适用样本上执行。

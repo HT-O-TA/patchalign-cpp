@@ -1,7 +1,7 @@
 # A0 实验与复现协议
 
 状态：Draft
-版本：`0.1.0`
+版本：`0.2.0`
 
 ## 1. 模型角色
 
@@ -127,3 +127,13 @@ G0 compatibility smoke
 ```
 
 任何后续阶段不得用计划或 mock 结果反向填充上游验收证据。
+
+## 10. 训练质量门禁
+
+- A3 pilot 成功数相差至少 2 条才按质量选择，否则按稳定性、峰值显存和 wall time 选择；
+- M1 对 M0 的 function Hidden-test Pass@1 至少提高 2.0 个绝对百分点；
+- M2 对 M1 至少提高 1.0 个绝对百分点；
+- 两者均要求95% paired-bootstrap 差值区间下界不小于0，并满足 parse/apply/compile、regression、timeout、file-window 和 external 退化上限；
+- validity violation、分母变化或 artifact/manifest 不匹配是一票否决。
+
+完整规则见 [ADR-0004](../decisions/0004-training-quality-gates-v1.md)，机器配置为 [`quality_gates_v1.json`](../../configs/evaluation/quality_gates_v1.json)。

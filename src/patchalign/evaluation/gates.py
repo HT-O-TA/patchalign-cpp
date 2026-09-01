@@ -133,13 +133,14 @@ def evaluate_training_gate(
         reasons.append("validity_violation")
 
     bootstrap = config["paired_bootstrap"]
+    effective_resamples = bootstrap["resamples"] if bootstrap_resamples is None else bootstrap_resamples
     primary_ci: dict[str, float] | None = None
     if denominators["function"][0] == denominators["function"][1] and denominators["function"][0] > 0:
         primary_ci = paired_bootstrap_difference(
             baseline.function_pass_at_1,
             candidate.function_pass_at_1,
             confidence_level=bootstrap["confidence_level"],
-            resamples=bootstrap_resamples or bootstrap["resamples"],
+            resamples=effective_resamples,
             seed=bootstrap["seed"],
         )
     else:
@@ -192,8 +193,17 @@ def evaluate_training_gate(
         "stage": stage,
         "passed": not unique_reasons,
         "reasons": unique_reasons,
+        "validity_violations": {
+            "baseline": sorted(baseline.validity_violations),
+            "candidate": sorted(candidate.validity_violations),
+        },
         "denominators": denominators,
         "primary_threshold": primary_threshold,
+        "paired_bootstrap_parameters": {
+            "confidence_level": bootstrap["confidence_level"],
+            "resamples": effective_resamples,
+            "seed": bootstrap["seed"],
+        },
         "primary_paired_bootstrap": primary_ci,
         "deltas": deltas,
         "config_sha256": _canonical_sha256(config),
@@ -205,6 +215,8 @@ def evaluate_training_gate(
 def select_pilot_candidate(candidates: Sequence[dict[str, Any]], config: dict[str, Any]) -> dict[str, Any]:
     """Select a stable pilot winner, using quality only for a difference of at least two successes."""
 
+    if len(candidates) != 2:
+        raise ValueError("the first-version pilot compares exactly two candidates")
     eligible = [candidate for candidate in candidates if candidate["completed"] and candidate["stable"]]
     if not eligible:
         raise ValueError("pilot has no completed and stable candidate")

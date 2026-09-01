@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2 与确定性评分 fixture 已通过；本机与集群采用 Git 同步、运行产物集群本地化。
+> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2、确定性评分 fixture 和训练质量门禁已通过；本机与集群采用 Git 同步、运行产物集群本地化。
 
 ## 1. 祝融当前结构
 
@@ -17,9 +17,11 @@
 │   ├── THIRD_PARTY_NOTICES.md              # 模型、依赖和未来数据来源的审计清单
 │   ├── README.md
 │   ├── configs/
+│   │   ├── evaluation/quality_gates_v1.json # SFT/DPO/pilot 机器门禁
+│   │   └── model/
 │   ├── docs/
 │   ├── schemas/                            # sample v0.1/v0.2、prediction v0.1、run-manifest v0.1
-│   ├── src/patchalign/evaluation/          # strict patch parser、策略与确定性评分器
+│   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
 │   │   ├── fixtures/scoring/               # 微型 C++ repo、sample、prediction 和失败 patch
@@ -169,6 +171,13 @@ HT-O-TA/patchalign-cpp
 - scoring fixture 完全自建，只用于接口、分类和确定性测试，不进入正式数据配额；
 - 正式不可信数据仍必须等待 A2 沙箱，不能直接套用 A0 fixture 的宿主执行方式。
 
+### 3.11 `configs/evaluation/quality_gates_v1.json`
+
+- 保存 A3 pilot、正式 SFT 和 DPO 的预注册质量门禁；
+- 与 `evaluation/gates.py` 共同实现固定分母、paired bootstrap、退化上限和 validity veto；
+- 正式运行必须保存配置 SHA256、有效 bootstrap 参数和决策 SHA256；
+- 不允许通过命令行临时降低阈值；变更必须新增配置版本并修订 ADR-0004。
+
 ## 4. 预计的正式项目结构
 
 以下是 A0～A2 逐步形成的目标结构。其中 README、pyproject、A0 文档、Schema 和最小包骨架已经存在，其余目录仍是规划：
@@ -309,3 +318,11 @@ patchalign-cpp/
 - 集群隔离模式全量 pytest 连续两次均为 `53 passed`，评分专项为 `12 passed`；
 - 实现提交为 `c000f775071f7632f81edc5103455dfe93d271c2`；
 - 没有创建或修改正式数据、模型、GPU 作业和集群 artifact。
+
+### 2026-09-01：冻结完整任务契约与训练质量门禁
+
+- `docs/a0/task_contract.md` 状态改为 `Accepted for A0`，sanitizer 显式适用字段由 A2 版本化执行 Schema 承接；
+- 新增 ADR-0004、`configs/evaluation/quality_gates_v1.json`、`evaluation/gates.py` 和质量门禁单元测试；
+- 集群首轮全量测试为 `73 passed`，专项为 `20 passed`；
+- 初始实现提交为 `db758373ce0f0a3152613a6475f64dfbe648d2ef`；最终验收 commit 见执行记录；
+- 未新增模型、数据、artifact、GPU 作业或 Conda 依赖。

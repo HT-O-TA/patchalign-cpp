@@ -572,7 +572,42 @@ success score SHA256: sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44e
 
 结论：A0 的输出协议验收、极小确定性评分 fixture 和重复评分门禁已关闭。该受控 fixture 不等于 A2 沙箱或真实数据评分闭环；A0 继续保持 Draft。本次未使用 GPU、未提交 Slurm 作业、未修改模型或数据。
 
-## 13. 下一次应更新的事件
+## 13. 完整任务契约与训练质量门禁冻结
+
+2026-09-01 用户接受完整第一版任务契约，并明确 sanitizer 只在显式适用样本上执行。落地规则：
+
+- `docs/a0/task_contract.md` 状态改为 `Accepted for A0`；
+- A2 执行配置/结果 Schema 必须显式记录 `sanitizer_applicable`；
+- `true` 必须绑定命令、工具版本、环境和 timeout，`false` 记为 `not_applicable`；
+- 缺少标记不能进入正式 sanitizer 指标，且不静默修改已验收的 `sample-v0.2`；
+- 该字段由 A2 版本化执行 Schema 承接。
+
+新增 `docs/decisions/0004-training-quality-gates-v1.md` 和 `configs/evaluation/quality_gates_v1.json`，冻结：
+
+- A3 pilot 成功数相差至少2条才按质量选择，否则按稳定性、峰值显存、wall time 和名称选择；
+- M1 对 M0 的 function Hidden-test Pass@1 至少 `+2.0 pp`；
+- M2 对 M1 至少 `+1.0 pp`；
+- 95% paired bootstrap，10,000次，seed `20260830`，差值区间下界必须 `>=0`；
+- parse/apply/compile 最大下降1.0 pp，regression 最大增加1.0 pp，timeout 最大增加0.5 pp；
+- file-window 最大下降3.0 pp，Defects4C C++ 外部切片最大下降2.0 pp；
+- 分母变化、数据泄漏、hidden test 暴露、修改测试或 artifact/manifest 不匹配一票否决。
+
+初始实现提交 `db758373ce0f0a3152613a6475f64dfbe648d2ef` 新增确定性门禁判定器、paired bootstrap、pilot 选择和专项测试。集群首轮结果：
+
+```text
+全量 pytest：73 passed in 9.19s
+质量门禁专项：20 passed in 3.94s
+```
+
+配置规范化 SHA256：
+
+```text
+sha256:a21772dbddf07b7c7d42f3813569515b23db1413f33c19f8dc062e7bd5bc7138
+```
+
+结论：完整任务契约、指标分母/跳过规则/失败优先级和正式训练质量阈值门禁已关闭。A0 仍为 Draft，剩余事项包括实验复现协议与真实性声明的最终审阅、未决事项 owner/进入条件，以及 A2 沙箱验证。本次未使用 GPU、未提交 Slurm 作业、未修改模型或数据。
+
+## 14. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 
