@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/patchalign/sample-v0.2.schema.json",
+  "title": "PatchAlign canonical sample v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sample_id",
+    "source_dataset",
+    "source_revision",
+    "repo_id",
+    "repo_family",
+    "base_commit",
+    "language",
+    "task_level",
+    "edit_type",
+    "changed_logical_lines",
+    "problem_statement",
+    "failure_evidence",
+    "context",
+    "file_window_lines",
+    "file_window_context_before",
+    "file_window_context_after",
+    "input_token_count",
+    "allowed_paths",
+    "gold_patch",
+    "build_command",
+    "public_test_command",
+    "hidden_test_command",
+    "regression_test_command",
+    "public_test_count",
+    "hidden_test_count",
+    "regression_test_count",
+    "timeout_seconds",
+    "license",
+    "split",
+    "provenance_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2.0"},
+    "sample_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$"},
+    "source_dataset": {"type": "string", "minLength": 1},
+    "source_revision": {"type": ["string", "null"], "minLength": 1},
+    "repo_id": {"type": "string", "minLength": 1},
+    "repo_family": {"type": "string", "minLength": 1},
+    "base_commit": {"type": "string", "minLength": 7},
+    "fix_commit": {"type": ["string", "null"], "minLength": 7},
+    "language": {"enum": ["c", "cpp"]},
+    "task_level": {"enum": ["function", "file_window"]},
+    "edit_type": {
+      "enum": ["single_line", "multi_line_local", "add_helper", "localized_refactor"]
+    },
+    "changed_logical_lines": {"type": "integer", "minimum": 1, "maximum": 40},
+    "problem_statement": {"type": "string", "minLength": 1},
+    "failure_evidence": {"type": "string", "minLength": 1},
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_file", "target_symbol", "start_line", "end_line", "buggy_code"],
+      "properties": {
+        "target_file": {"$ref": "#/$defs/repoPath"},
+        "target_symbol": {"type": ["string", "null"]},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "buggy_code": {"type": "string", "minLength": 1}
+      }
+    },
+    "file_window_lines": {
+      "oneOf": [{"type": "integer", "minimum": 1, "maximum": 256}, {"type": "null"}]
+    },
+    "file_window_context_before": {
+      "oneOf": [{"type": "integer", "minimum": 0, "maximum": 96}, {"type": "null"}]
+    },
+    "file_window_context_after": {
+      "oneOf": [{"type": "integer", "minimum": 0, "maximum": 96}, {"type": "null"}]
+    },
+    "input_token_count": {"type": "integer", "minimum": 1, "maximum": 4096},
+    "allowed_paths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/repoPath"}
+    },
+    "gold_patch": {"type": ["string", "null"]},
+    "build_command": {"$ref": "#/$defs/command"},
+    "public_test_command": {"oneOf": [{"$ref": "#/$defs/command"}, {"type": "null"}]},
+    "hidden_test_command": {"oneOf": [{"$ref": "#/$defs/command"}, {"type": "null"}]},
+    "regression_test_command": {"oneOf": [{"$ref": "#/$defs/command"}, {"type": "null"}]},
+    "public_test_count": {"type": "integer", "minimum": 0},
+    "hidden_test_count": {"type": "integer", "minimum": 0},
+    "regression_test_count": {"type": "integer", "minimum": 0},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+    "license": {"type": "string", "minLength": 1},
+    "split": {"enum": ["train", "validation", "internal_test", "external_test"]},
+    "provenance_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"task_level": {"const": "function"}}, "required": ["task_level"]},
+      "then": {
+        "properties": {
+          "file_window_lines": {"type": "null"},
+          "file_window_context_before": {"type": "null"},
+          "file_window_context_after": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "file_window_lines": {"type": "integer", "minimum": 1, "maximum": 256},
+          "file_window_context_before": {"type": "integer", "minimum": 0, "maximum": 96},
+          "file_window_context_after": {"type": "integer", "minimum": 0, "maximum": 96}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"edit_type": {"const": "single_line"}}, "required": ["edit_type"]},
+      "then": {"properties": {"changed_logical_lines": {"const": 1}}}
+    },
+    {
+      "if": {"properties": {"edit_type": {"const": "multi_line_local"}}, "required": ["edit_type"]},
+      "then": {"properties": {"changed_logical_lines": {"minimum": 2, "maximum": 20}}}
+    },
+    {
+      "if": {
+        "properties": {"edit_type": {"enum": ["add_helper", "localized_refactor"]}},
+        "required": ["edit_type"]
+      },
+      "then": {"properties": {"changed_logical_lines": {"minimum": 2, "maximum": 40}}}
+    },
+    {
+      "if": {"properties": {"split": {"const": "internal_test"}}, "required": ["split"]},
+      "then": {
+        "properties": {
+          "public_test_command": {"$ref": "#/$defs/command"},
+          "hidden_test_command": {"$ref": "#/$defs/command"},
+          "regression_test_command": {"$ref": "#/$defs/command"},
+          "public_test_count": {"minimum": 1},
+          "hidden_test_count": {"minimum": 1},
+          "regression_test_count": {"minimum": 3}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
