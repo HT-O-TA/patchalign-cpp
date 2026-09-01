@@ -334,4 +334,5 @@ patchalign-cpp/
 - A0 自动验收证据合为 `docs/evidence/a0-validation.md`；
 - 删除已过期的初始 handoff 当前副本和6份被合并文档，历史均可从 Git 恢复；
 - ADR、G0证据、Git同步规范、执行记录和目录台账保持独立；
+- 文档数量由18份降为14份，整理提交 `b75fc0214d482cc77eaa929c392158cc267a58d1` 在集群全量测试为 `75 passed`；
 - 未移动或删除代码、测试、环境、模型、数据和 artifact。
