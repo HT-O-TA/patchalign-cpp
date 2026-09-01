@@ -454,7 +454,7 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 空白规范化提交：`2de6363 style: normalize repository whitespace`。
 - A0 引导证据提交：`c5a1f4c docs: record local A0 bootstrap evidence`。
 
-本机与现有祝融环境当前没有安装 `jsonschema`，因此 pytest 尚未实际运行。A0 继续保持 Draft；不得把“测试代码已建立”写成“Schema 验收已通过”。
+建立 A0 Draft 时，本机与当时检查到的祝融项目环境尚未隔离验证 `jsonschema`，因此该阶段 pytest 未实际验收。此历史状态已由第 11 节的 Schema v0.2 隔离验收取代。
 
 ## 8. Git 同步与当前边界
 
@@ -514,9 +514,31 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 同一批 500 条内部评测样本必须同时具备 public、hidden 和 regression 阶段；
 - external function 使用所有可重放且符合契约的 Defects4C C++ 样本，目标至少 150；SWE-bench Multilingual 当前 12 条 C++ 任务只做仓库级扩展；
 - 当前冻结的是配额、筛选规则和报告分层；正式数据尚未下载或构建，最终来源 revision、可重放数量和 manifest SHA256 必须在 A1 实测后冻结；
-- `sample-v0.1` 尚未编码修改类型和窗口统计字段，A1 必须先升级 Schema 并补正反例测试。
+- 本节冻结数据组成时，`sample-v0.1` 尚未编码修改类型和窗口统计字段；该前置项随后已按第 11 节升级为 v0.2 并完成正反例测试。
 
-## 11. 下一次应更新的事件
+## 11. Schema v0.2 与自动测试闭环
+
+2026-09-01 完成 canonical sample Schema 的兼容升级和隔离测试验收：
+
+- 保留 `schemas/sample-v0.1.schema.json` 用于历史重放；
+- 新增 `schemas/sample-v0.2.schema.json`，新建 A1 样本必须使用 `0.2.0`；
+- 新增 edit type、逻辑修改行数、file-window 统计、输入 token 数和三阶段测试计数字段；
+- 编码单文件、修改类型行数、256/96/96/4096 上限和 internal test 最低测试数量联动；
+- 新增 3 个 v0.2 正例 fixture，并将测试扩展至路径逃逸、多文件、未知/缺失字段、版本错配及各类边界反例；
+- 实现提交：`ec9039646696fde16dfaf512350acf50ef877da2`。
+
+环境核验发现：未设置 `PYTHONNOUSERSITE` 的首次测试虽然为 `30 passed`，但 `jsonschema` 实际来自用户级 `~/.local`，不能作为项目环境验收。随后：
+
+1. 设置 `PYTHONNOUSERSITE=1` 复现 `ModuleNotFoundError`，确认环境污染；
+2. 仅在 `/mingli01/project/ht/.conda_envs/patchalign-cpp` 安装项目已声明范围 `jsonschema>=4.23,<5`；
+3. 确认版本为 `4.26.0`，模块路径位于该 Conda prefix 的 `site-packages`；
+4. 在 `PYTHONNOUSERSITE=1` 下连续运行两次全量 pytest，结果分别为 `30 passed in 0.29s` 和 `30 passed in 0.27s`；
+5. 刷新环境复现清单 `repro/pip-freeze.txt`，SHA256 为 `bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4`；
+6. 全程未使用 GPU、未提交 Slurm 作业、未修改模型或数据目录。
+
+结论：Schema 自动校验与正反例测试门禁已关闭，A0 仍为 Draft。确定性评分 fixture、严格 unified diff 输出协议用户验收、提升/退化阈值和沙箱验证仍待完成。
+
+## 12. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 

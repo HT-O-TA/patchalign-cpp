@@ -1,7 +1,7 @@
 # A0：问题、边界与实验协议
 
 状态：**Draft，尚未验收**
-Schema 版本：`0.1.0`
+当前 canonical sample Schema 版本：`0.2.0`
 任务协议版本：`0.1.0`
 
 A0 的目标是在下载正式数据和运行基线之前，冻结项目要解决的问题、模型可见输入、输出格式、评分顺序、复现证据和真实性边界。
@@ -22,9 +22,12 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 
 机器可校验 Schema：
 
+- [`sample-v0.2.schema.json`](../../schemas/sample-v0.2.schema.json)（当前 canonical sample）
 - [`sample-v0.1.schema.json`](../../schemas/sample-v0.1.schema.json)
 - [`prediction-v0.1.schema.json`](../../schemas/prediction-v0.1.schema.json)
 - [`run-manifest-v0.1.schema.json`](../../schemas/run-manifest-v0.1.schema.json)
+
+`sample-v0.1` 保留用于历史记录重放；新建 A1 样本必须使用 `sample-v0.2`。
 
 ## 已冻结
 
@@ -55,7 +58,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 A0 只有在以下事项全部满足后才能标记完成：
 
 - [ ] 用户审阅并接受任务契约和输出协议；
-- [ ] 三个 JSON Schema 通过自动校验和正反例测试；
+- [x] 所有当前 JSON Schema 通过自动校验和正反例测试；
 - [ ] 有一个不依赖大模型的极小 fixture 可从预测文件重复评分；
 - [ ] 同一预测重复评分得到相同阶段结果和指标；
 - [ ] 指标分母、跳过规则和失败优先级无歧义；

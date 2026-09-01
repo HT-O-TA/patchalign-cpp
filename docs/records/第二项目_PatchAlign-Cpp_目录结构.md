@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：准备/G0 已完成，A0 Draft 已建立；本机与集群采用 Git 同步、运行产物集群本地化。
+> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2 自动测试已通过；本机与集群采用 Git 同步、运行产物集群本地化。
 
 ## 1. 祝融当前结构
 
@@ -18,9 +18,9 @@
 │   ├── README.md
 │   ├── configs/
 │   ├── docs/
-│   ├── schemas/
+│   ├── schemas/                            # sample v0.1/v0.2、prediction v0.1、run-manifest v0.1
 │   ├── src/
-│   ├── tests/
+│   ├── tests/                              # A0 Schema 正反例与版本兼容测试
 │   ├── scripts/
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
@@ -124,6 +124,7 @@ HT-O-TA/patchalign-cpp
 - 依赖只能安装到该 prefix；
 - 不修改 `base`、`dirl_grpo`、`llamafactory_env` 等历史环境；
 - 环境中不再存放项目 smoke 源码或运行 artifact。
+- `jsonschema 4.26.0` 已安装在该 prefix 内；Schema 验收必须设置 `PYTHONNOUSERSITE=1`，禁止借用 `~/.local` 依赖。
 
 ### 3.6 `/mingli01/models/Qwen2.5-Coder-7B`
 
@@ -137,6 +138,7 @@ HT-O-TA/patchalign-cpp
 
 - 已创建的本地 Git 主工作区，当前分支为 `main`；
 - 已建立 README、A0 Draft 文档、ADR、Schema、模型配置和最小 Python 包骨架；
+- 当前 canonical sample 为 `schemas/sample-v0.2.schema.json`；v0.1 保留用于历史重放；
 - 原 `/home/lenovo/A/new` 中三份项目文档已迁入本仓库；
 - A0 尚未验收，不能写成已完成；
 - 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
@@ -278,3 +280,12 @@ patchalign-cpp/
 - 更新 A0 任务、Schema 说明和状态索引，明确数据配额、100% C++ 主范围、85/15 task-level 比例、修改类型配额和 file-window 截取规则；
 - 新增文件只属于 Git 跟踪的决策文档，没有创建、移动或删除数据目录、模型、环境或 artifact；
 - 正式数据仍未下载或构建；A1 后续生成 manifest 时必须再次更新本文和执行记录。
+
+### 2026-09-01：新增 sample Schema v0.2 并完成自动测试
+
+- 新增 `schemas/sample-v0.2.schema.json`；保留 v0.1，不移动或删除历史 Schema；
+- 在 `tests/fixtures/a0` 新增 3 个 v0.2 正例，在 `tests/unit/test_a0_schemas.py` 增加版本兼容和边界反例；
+- 集群项目 Conda prefix 内补装 `jsonschema 4.26.0`，未修改其他 Conda 环境；
+- 刷新 prefix 内 `repro/pip-freeze.txt`，保留环境依赖复现证据；
+- 设置 `PYTHONNOUSERSITE=1` 后连续两次全量 pytest 均为 `30 passed`；
+- Git 实现提交为 `ec9039646696fde16dfaf512350acf50ef877da2`；没有创建数据目录、GPU 作业或新 artifact。
