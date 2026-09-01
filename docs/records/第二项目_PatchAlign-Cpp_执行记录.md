@@ -18,6 +18,8 @@
 | 主模型实际路径 | `/mingli01/models/Qwen2.5-Coder-7B` |
 | 环境与 smoke | 允许自主创建和验证，但不得修改其他环境或既有内容 |
 | 本机—集群同步 | GitHub 作为同步中枢；代码和文档同步，运行产物保留在集群 |
+| 仓库原创内容许可 | Apache-2.0；`Copyright 2026 PatchAlign-Cpp contributors` |
+| 产物发布 | 正式 adapter 审计后可发布；中间状态和 G0 adapter 默认不公开；数据与完整预测须逐项审计 |
 
 ## 2. 本地与 GitHub
 
@@ -476,7 +478,24 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 没有修改 MeetingMind；
 - 没有提交新的 GPU 作业。
 
-## 9. 下一次应更新的事件
+## 9. 许可证与发布边界
+
+2026-09-01 经用户确认，已完成 A0 许可证与发布策略决策：
+
+- 新增标准 Apache License 2.0 `LICENSE`；
+- 新增 `NOTICE`，当前使用中性版权标识 `PatchAlign-Cpp contributors`；
+- 新增 `THIRD_PARTY_NOTICES.md` 初始清单；
+- 新增 `docs/a0/publication_policy.md` 并标记为 `Accepted for A0`；
+- 仓库原创代码、文档、Schema、配置和脚本采用 Apache-2.0；
+- 仓库许可证不重新许可模型、数据集、benchmark、生成补丁或依赖；
+- 正式 SFT/DPO adapter 可在逐项审计后发布；中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
+- 原始或重打包数据在逐来源许可审计前不公开；
+- 完整预测必须通过来源许可、敏感信息和漏洞披露检查；
+- 原始日志和内部路径不公开，但失败结果不能从统计分母中删除。
+
+该决策关闭 A0 的“项目代码许可证”和“产物公开范围”两个未决项，但不代表 A0 已完成。Schema 自动测试、确定性评分 fixture、输出协议用户验收、模型精确 revision、评测集阈值与沙箱等门禁仍待完成。
+
+## 10. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 

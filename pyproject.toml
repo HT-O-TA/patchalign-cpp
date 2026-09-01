@@ -7,6 +7,7 @@ name = "patchalign-cpp"
 version = "0.0.0"
 description = "Verifiable post-training for localized C++ defect repair"
 requires-python = ">=3.10,<3.11"
+license = {file = "LICENSE"}
 dependencies = []
 
 [project.optional-dependencies]

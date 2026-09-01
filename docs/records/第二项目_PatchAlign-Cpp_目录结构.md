@@ -12,6 +12,9 @@
 ├── patchalign-cpp/                         # Git 计算工作副本，与本机锁定到同一 commit
 │   ├── .git/                               # Git 元数据；origin 指向 GitHub
 │   ├── .gitignore                          # 忽略 artifact、日志、缓存、权重和密钥文件
+│   ├── LICENSE                             # Apache License 2.0 原文
+│   ├── NOTICE                              # 项目版权与许可边界说明
+│   ├── THIRD_PARTY_NOTICES.md              # 模型、依赖和未来数据来源的审计清单
 │   ├── README.md
 │   ├── configs/
 │   ├── docs/
@@ -51,6 +54,9 @@
 /home/lenovo/A/
 ├── patchalign-cpp/                         # 本地 Git 主工作区，main 分支
 │   ├── README.md
+│   ├── LICENSE
+│   ├── NOTICE
+│   ├── THIRD_PARTY_NOTICES.md
 │   ├── pyproject.toml
 │   ├── configs/model/
 │   ├── docs/
@@ -135,7 +141,14 @@ HT-O-TA/patchalign-cpp
 - A0 尚未验收，不能写成已完成；
 - 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
 
-### 3.8 Git 同步与产物本地化
+### 3.8 `LICENSE`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`
+
+- 仓库原创代码、文档、Schema、配置和脚本采用 Apache-2.0；
+- 当前版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`；
+- 仓库许可证不覆盖模型、数据集、生成补丁或第三方依赖；
+- 第三方清单当前是初始记录，正式 release 前必须按实际 revision 重新审阅。
+
+### 3.9 Git 同步与产物本地化
 
 - 跟踪内容：代码、配置、Schema、测试、Slurm 脚本和小型证据摘要；
 - 集群本地化内容：`artifacts/`、数据、日志、checkpoint、adapter、模型和 Conda prefix；
@@ -248,3 +261,12 @@ patchalign-cpp/
 - 祝融的 `artifacts/` 与并列的 `.conda_envs/patchalign-cpp` 保持原位，没有移动或删除；
 - 祝融项目目录初始化为 Git 工作副本，并与本机锁定到同一 commit；
 - GitHub 完成首次 push，后续用完整 commit 校验两端一致性。
+
+### 2026-09-01：冻结仓库许可证与产物发布边界
+
+- 新增根目录 `LICENSE`、`NOTICE` 和 `THIRD_PARTY_NOTICES.md`；
+- 新增 `docs/a0/publication_policy.md`，状态为 `Accepted for A0`；
+- 仓库原创内容采用 Apache-2.0，版权标识暂定为 `PatchAlign-Cpp contributors`；
+- 正式 adapter 只允许在逐项审计后发布；中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
+- 未完成许可审计前不公开原始/重打包数据，完整预测需通过许可和安全检查；
+- 本次只新增和更新 Git 文档及元数据，没有移动、删除或发布集群 artifact。

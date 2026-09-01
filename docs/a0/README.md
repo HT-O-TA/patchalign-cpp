@@ -15,6 +15,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [评测协议](evaluation_protocol.md) | 定义解析、应用、编译、测试和指标 | Draft |
 | [实验与复现协议](experiment_protocol.md) | 定义模型角色、seed、配置、artifact 和可比性 | Draft |
 | [真实性、污染与泄漏声明](authenticity_and_leakage.md) | 定义证据强度和禁止表述 | Draft |
+| [许可证与产物发布策略](publication_policy.md) | 定义仓库许可、第三方边界和 artifact 发布门禁 | Accepted for A0 |
 | [ADR-0001](../decisions/0001-model-and-resource-strategy.md) | 模型、LoRA/QLoRA 和资源策略 | Accepted for A0 |
 | [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出协议 | Proposed |
 
@@ -37,15 +38,16 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 - gold patch 不得出现在生成 prompt；
 - 第一主指标为 hidden-test Pass@1，同时报告解析、应用、编译和回归；
 - 不在 A2 执行闭环完成前训练。
+- 仓库原创内容采用 Apache-2.0，版权标识为 `PatchAlign-Cpp contributors`；
+- 正式 adapter 可在逐项审计后发布，中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
+- 未完成逐来源许可审计前不公开原始或重打包数据，完整预测需通过许可、敏感信息和漏洞披露检查。
 
 ## 尚待冻结的闸门
 
-1. 项目代码许可证；
-2. adapter、派生数据和完整预测的公开范围；
-3. Qwen2.5-Coder-7B 的精确 upstream revision；
-4. 第一版冻结评测集的样本数和组成；
-5. 正式训练前的最小有意义提升与可接受退化阈值；
-6. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制。
+1. Qwen2.5-Coder-7B 的精确 upstream revision；
+2. 第一版冻结评测集的样本数和组成；
+3. 正式训练前的最小有意义提升与可接受退化阈值；
+4. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制。
 
 ## A0 验收条件
 
@@ -58,7 +60,7 @@ A0 只有在以下事项全部满足后才能标记完成：
 - [ ] 指标分母、跳过规则和失败优先级无歧义；
 - [ ] 模型角色、生成参数、seed 和 artifact 规则冻结；
 - [ ] 真实性与污染声明模板通过审阅；
-- [ ] 项目代码许可证确定；
+- [x] 项目代码许可证与产物发布边界确定；
 - [ ] 所有未决事项都有明确 owner 或进入条件。
 
 验收前禁止把本文档的 Draft 条款写成已经完成的实验事实。

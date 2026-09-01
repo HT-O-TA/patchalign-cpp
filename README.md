@@ -21,6 +21,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [评测协议](docs/a0/evaluation_protocol.md)
 - [实验与复现协议](docs/a0/experiment_protocol.md)
 - [真实性、污染与泄漏声明](docs/a0/authenticity_and_leakage.md)
+- [许可证与产物发布策略](docs/a0/publication_policy.md)
 - [决策记录](docs/decisions/)
 - [Codex 交接说明](docs/handoff/第二项目_PatchAlign-Cpp_Codex交接说明.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
@@ -61,3 +62,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 ## 开发状态
 
 在 [A0 验收条件](docs/a0/README.md#a0-验收条件) 全部满足前，不进入正式数据下载、基线生成或训练。
+
+## 许可证与发布边界
+
+本仓库原创代码、文档、Schema、配置和脚本按 [Apache License 2.0](LICENSE) 发布，版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`。模型、数据集、benchmark repository、生成补丁和第三方依赖仍受各自条款约束，详见 [发布策略](docs/a0/publication_policy.md) 与 [第三方声明](THIRD_PARTY_NOTICES.md)。
