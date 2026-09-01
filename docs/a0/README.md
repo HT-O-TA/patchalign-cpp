@@ -10,16 +10,16 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 
 | 文档 | 作用 | 当前状态 |
 |---|---|---|
-| [任务契约](task_contract.md) | 定义输入、输出、允许修改范围和任务层级 | Accepted for A0 |
+| [核心任务与评测协议](core_protocol.md) | 定义输入、输出、修改范围、执行顺序、指标和沙箱 | 任务 Accepted；评测 Draft |
 | [样本与运行 Schema](sample_schema.md) | 定义规范样本、预测、执行结果和 run manifest | Draft |
-| [评测协议](evaluation_protocol.md) | 定义解析、应用、编译、测试和指标 | Draft |
 | [实验与复现协议](experiment_protocol.md) | 定义模型角色、seed、配置、artifact 和可比性 | Draft |
-| [真实性、污染与泄漏声明](authenticity_and_leakage.md) | 定义证据强度和禁止表述 | Draft |
-| [许可证与产物发布策略](publication_policy.md) | 定义仓库许可、第三方边界和 artifact 发布门禁 | Accepted for A0 |
+| [真实性、许可与发布治理](governance.md) | 定义证据、污染、归因、许可和发布门禁 | 真实性 Draft；发布 Accepted |
 | [ADR-0001](../decisions/0001-model-and-resource-strategy.md) | 模型、LoRA/QLoRA 和资源策略 | Accepted for A0 |
 | [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出与 `--recount` 应用协议 | Accepted for A0 |
 | [ADR-0003](../decisions/0003-dataset-composition-v1.md) | 第一版数据配额、语言、任务层级、修改类型和测试覆盖 | Accepted for A0 |
 | [ADR-0004](../decisions/0004-training-quality-gates-v1.md) | SFT/DPO 提升阈值、退化上限和 pilot 选择 | Accepted for A0 |
+
+自动验收、fixture 和质量门禁的合并证据见 [`a0-validation.md`](../evidence/a0-validation.md)。历史执行细节保留在[执行记录](../records/第二项目_PatchAlign-Cpp_执行记录.md)，不在本索引重复展开。
 
 机器可校验 Schema：
 

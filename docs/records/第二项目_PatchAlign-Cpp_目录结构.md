@@ -65,12 +65,11 @@
 │   ├── pyproject.toml
 │   ├── configs/model/
 │   ├── docs/
-│   │   ├── a0/
+│   │   ├── a0/                            # 索引、核心协议、Schema、实验、治理
 │   │   ├── decisions/
 │   │   ├── development/
-│   │   ├── evidence/
-│   │   ├── handoff/
-│   │   └── records/
+│   │   ├── evidence/                      # A0 合并证据与 G0 作业证据
+│   │   └── records/                       # 执行记录与独立目录台账
 │   ├── schemas/
 │   ├── scripts/smoke/
 │   ├── slurm/
@@ -269,7 +268,7 @@ patchalign-cpp/
 ### 2026-08-30：创建本地 Git 仓库与 A0 Draft
 
 - 创建 `/home/lenovo/A/patchalign-cpp`，初始化 `main` 分支；
-- 将 `/home/lenovo/A/new` 中三份 PatchAlign-Cpp 文档迁入 `docs/handoff` 和 `docs/records`；
+- 将 `/home/lenovo/A/new` 中三份 PatchAlign-Cpp 文档迁入仓库；初始交接说明后续合并并由 Git 历史保留；
 - 新增 README、pyproject、A0 文档、ADR、模型配置和 JSON Schema；
 - A0 明确标记为 Draft，尚未通过 fixture、评分闭环、许可证等验收门禁；
 - 建立本地提交 `aaecacf`，并以 `2de6363` 规范化仓库空白；
@@ -287,7 +286,7 @@ patchalign-cpp/
 ### 2026-09-01：冻结仓库许可证与产物发布边界
 
 - 新增根目录 `LICENSE`、`NOTICE` 和 `THIRD_PARTY_NOTICES.md`；
-- 新增 `docs/a0/publication_policy.md`，状态为 `Accepted for A0`；
+- 新增发布策略，状态为 `Accepted for A0`；该内容后合并至 `docs/a0/governance.md`；
 - 仓库原创内容采用 Apache-2.0，版权标识暂定为 `PatchAlign-Cpp contributors`；
 - 正式 adapter 只允许在逐项审计后发布；中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
 - 未完成许可审计前不公开原始/重打包数据，完整预测需通过许可和安全检查；
@@ -321,9 +320,18 @@ patchalign-cpp/
 
 ### 2026-09-01：冻结完整任务契约与训练质量门禁
 
-- `docs/a0/task_contract.md` 状态改为 `Accepted for A0`，sanitizer 显式适用字段由 A2 版本化执行 Schema 承接；
+- 任务契约状态改为 `Accepted for A0`，sanitizer 显式适用字段由 A2 版本化执行 Schema 承接；该内容后合并至 `docs/a0/core_protocol.md`；
 - 新增 ADR-0004、`configs/evaluation/quality_gates_v1.json`、`evaluation/gates.py` 和质量门禁单元测试；
 - 集群首轮全量测试为 `73 passed`，专项为 `20 passed`；
 - 初始实现提交为 `db758373ce0f0a3152613a6475f64dfbe648d2ef`；最终验收 commit 见执行记录；
 - 最终实现提交 `b236fcafe0d22b4612e5d64c3e4b7c8aa20e1101` 验收为全量 `75 passed`、专项 `22 passed`；
 - 未新增模型、数据、artifact、GPU 作业或 Conda 依赖。
+
+### 2026-09-01：整理并合并当前文档
+
+- A0 任务与评测合为 `docs/a0/core_protocol.md`；
+- 真实性与发布治理合为 `docs/a0/governance.md`；
+- A0 自动验收证据合为 `docs/evidence/a0-validation.md`；
+- 删除已过期的初始 handoff 当前副本和6份被合并文档，历史均可从 Git 恢复；
+- ADR、G0证据、Git同步规范、执行记录和目录台账保持独立；
+- 未移动或删除代码、测试、环境、模型、数据和 artifact。

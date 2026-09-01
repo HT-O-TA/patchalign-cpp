@@ -28,7 +28,7 @@
 ### 2.1 已完成
 
 - 初次检查时 `/home/lenovo/A/patchalign-cpp` 不存在；2026-08-30 已创建本地 Git 仓库并使用 `main` 分支。
-- 原 `/home/lenovo/A/new` 下三份 PatchAlign-Cpp 文档已移动到本仓库的 `docs/handoff` 和 `docs/records`。
+- 原 `/home/lenovo/A/new` 下三份 PatchAlign-Cpp 文档已移动到本仓库；初始交接说明后于2026-09-01完成内容合并并从当前树删除，历史由 Git 保留。
 - 已建立 A0 Draft 文档、ADR、模型配置和三个机器可校验 JSON Schema。
 - 已配置 `origin`：HTTPS fetch、`github-patchalign-cpp` SSH push。
 - 已形成明确标注为 A0 Draft 的本地 Git 历史。
@@ -480,7 +480,7 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 新增标准 Apache License 2.0 `LICENSE`；
 - 新增 `NOTICE`，当前使用中性版权标识 `PatchAlign-Cpp contributors`；
 - 新增 `THIRD_PARTY_NOTICES.md` 初始清单；
-- 新增 `docs/a0/publication_policy.md` 并标记为 `Accepted for A0`；
+- 新增发布策略并标记为 `Accepted for A0`；该内容后合并至 `docs/a0/governance.md`；
 - 仓库原创代码、文档、Schema、配置和脚本采用 Apache-2.0；
 - 仓库许可证不重新许可模型、数据集、benchmark、生成补丁或依赖；
 - 正式 SFT/DPO adapter 可在逐项审计后发布；中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
@@ -576,7 +576,7 @@ success score SHA256: sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44e
 
 2026-09-01 用户接受完整第一版任务契约，并明确 sanitizer 只在显式适用样本上执行。落地规则：
 
-- `docs/a0/task_contract.md` 状态改为 `Accepted for A0`；
+- 任务契约状态改为 `Accepted for A0`；该内容后合并至 `docs/a0/core_protocol.md`；
 - A2 执行配置/结果 Schema 必须显式记录 `sanitizer_applicable`；
 - `true` 必须绑定命令、工具版本、环境和 timeout，`false` 记为 `not_applicable`；
 - 缺少标记不能进入正式 sanitizer 指标，且不静默修改已验收的 `sample-v0.2`；
@@ -614,7 +614,20 @@ sha256:a21772dbddf07b7c7d42f3813569515b23db1413f33c19f8dc062e7bd5bc7138
 
 结论：完整任务契约、指标分母/跳过规则/失败优先级和正式训练质量阈值门禁已关闭。A0 仍为 Draft，剩余事项包括实验复现协议与真实性声明的最终审阅、未决事项 owner/进入条件，以及 A2 沙箱验证。本次未使用 GPU、未提交 Slurm 作业、未修改模型或数据。
 
-## 14. 下一次应更新的事件
+## 14. 文档结构整理与合并
+
+2026-09-01 对现有文档进行去重，保持 ADR、执行记录、目录台账和 G0 作业证据独立：
+
+- `task_contract.md` 与 `evaluation_protocol.md` 合并为 `docs/a0/core_protocol.md`；
+- `authenticity_and_leakage.md` 与 `publication_policy.md` 合并为 `docs/a0/governance.md`，分别保留 Draft 与 Accepted 状态；
+- 两份 A0 合成验收证据合并为 `docs/evidence/a0-validation.md`；
+- 初始 Codex 交接说明已被当前 A0、ADR、执行记录和目录台账完全取代，从当前工作树删除；
+- 根 README 与 A0 索引改为只指向当前权威文档；
+- 被删除文件仍可通过 Git 历史恢复，没有删除运行 artifact、模型、数据或环境内容。
+
+整理原则：当前规范只保留一个入口；历史执行事实留在本文；不可变决策继续留在独立 ADR；用户要求的目录台账继续独立维护。
+
+## 15. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 

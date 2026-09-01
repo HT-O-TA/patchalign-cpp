@@ -16,14 +16,12 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 ## 当前入口
 
 - [A0 阶段索引](docs/a0/README.md)
-- [任务契约](docs/a0/task_contract.md)
+- [核心任务与评测协议](docs/a0/core_protocol.md)
 - [样本与运行 Schema](docs/a0/sample_schema.md)
-- [评测协议](docs/a0/evaluation_protocol.md)
 - [实验与复现协议](docs/a0/experiment_protocol.md)
-- [真实性、污染与泄漏声明](docs/a0/authenticity_and_leakage.md)
-- [许可证与产物发布策略](docs/a0/publication_policy.md)
+- [真实性、许可与发布治理](docs/a0/governance.md)
 - [决策记录](docs/decisions/)
-- [Codex 交接说明](docs/handoff/第二项目_PatchAlign-Cpp_Codex交接说明.md)
+- [A0 自动验收证据](docs/evidence/a0-validation.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
@@ -65,4 +63,4 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 许可证与发布边界
 
-本仓库原创代码、文档、Schema、配置和脚本按 [Apache License 2.0](LICENSE) 发布，版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`。模型、数据集、benchmark repository、生成补丁和第三方依赖仍受各自条款约束，详见 [发布策略](docs/a0/publication_policy.md) 与 [第三方声明](THIRD_PARTY_NOTICES.md)。
+本仓库原创代码、文档、Schema、配置和脚本按 [Apache License 2.0](LICENSE) 发布，版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`。模型、数据集、benchmark repository、生成补丁和第三方依赖仍受各自条款约束，详见 [治理规范](docs/a0/governance.md) 与 [第三方声明](THIRD_PARTY_NOTICES.md)。
