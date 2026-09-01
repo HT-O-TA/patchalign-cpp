@@ -325,4 +325,5 @@ patchalign-cpp/
 - 新增 ADR-0004、`configs/evaluation/quality_gates_v1.json`、`evaluation/gates.py` 和质量门禁单元测试；
 - 集群首轮全量测试为 `73 passed`，专项为 `20 passed`；
 - 初始实现提交为 `db758373ce0f0a3152613a6475f64dfbe648d2ef`；最终验收 commit 见执行记录；
+- 最终实现提交 `b236fcafe0d22b4612e5d64c3e4b7c8aa20e1101` 验收为全量 `75 passed`、专项 `22 passed`；
 - 未新增模型、数据、artifact、GPU 作业或 Conda 依赖。

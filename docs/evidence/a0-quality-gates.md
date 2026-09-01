@@ -47,3 +47,14 @@ sha256:d873fe7b5306a5bb27fcd55825bf14610c01b3c53ed54409fbd03da46d562421
 ```
 
 最终同步提交和复跑结果记录在项目执行记录中。本证据不表示已运行真实模型比较，也不替代 A2 沙箱和正式数据 manifest。
+
+## 最终实现验收
+
+验收对象提交：`b236fcafe0d22b4612e5d64c3e4b7c8aa20e1101`。
+
+```text
+全量 pytest：75 passed in 9.06s
+质量门禁专项：22 passed in 4.04s
+```
+
+最终版本额外验证实际 bootstrap 参数进入决策记录、零次 bootstrap 被拒绝，以及第一版 pilot 只允许比较两个候选。

@@ -599,6 +599,13 @@ success score SHA256: sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44e
 质量门禁专项：20 passed in 3.94s
 ```
 
+补齐有效 bootstrap 参数审计、零次 bootstrap 拒绝和双候选 pilot 限制后，对提交 `b236fcafe0d22b4612e5d64c3e4b7c8aa20e1101` 最终复验：
+
+```text
+全量 pytest：75 passed in 9.06s
+质量门禁专项：22 passed in 4.04s
+```
+
 配置规范化 SHA256：
 
 ```text
