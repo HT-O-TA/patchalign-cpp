@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "run_id": "fixture-score-run-v1",
+  "sample_id": "fixture:deterministic-add-v1",
+  "model": {
+    "model_id": "synthetic/deterministic-fixture",
+    "revision": "fixture-v1",
+    "config_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "adapter_sha256": null
+  },
+  "prompt_version": "function-unidiff-v0.1",
+  "prompt_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "seed": 20260830,
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 512,
+    "temperature": null,
+    "top_p": null
+  },
+  "raw_text": "--- a/src/add.cpp\n+++ b/src/add.cpp\n@@ -1,99 +1,42 @@\n-int add(int a, int b) { return a - b; }\n+int add(int a, int b) { return a + b; }\n",
+  "extracted_patch": "--- a/src/add.cpp\n+++ b/src/add.cpp\n@@ -1,99 +1,42 @@\n-int add(int a, int b) { return a - b; }\n+int add(int a, int b) { return a + b; }\n",
+  "status": "ok",
+  "error": null,
+  "input_tokens": 128,
+  "output_tokens": 54,
+  "latency_seconds": 0,
+  "max_gpu_memory_bytes": null
+}

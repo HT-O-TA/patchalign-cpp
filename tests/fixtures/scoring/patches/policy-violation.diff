@@ -1,0 +1,12 @@
+diff --git a/src/add.cpp b/src/add.cpp
+--- a/src/add.cpp
++++ b/src/add.cpp
+@@ -1 +1 @@
+-int add(int a, int b) { return a - b; }
++int add(int a, int b) { return a + b; }
+diff --git a/tests/test_driver.cpp b/tests/test_driver.cpp
+--- a/tests/test_driver.cpp
++++ b/tests/test_driver.cpp
+@@ -1 +1 @@
+-#include <cstdlib>
++#include <cstdlib> // modified test
