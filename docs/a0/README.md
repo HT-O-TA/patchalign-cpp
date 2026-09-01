@@ -18,6 +18,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [许可证与产物发布策略](publication_policy.md) | 定义仓库许可、第三方边界和 artifact 发布门禁 | Accepted for A0 |
 | [ADR-0001](../decisions/0001-model-and-resource-strategy.md) | 模型、LoRA/QLoRA 和资源策略 | Accepted for A0 |
 | [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出协议 | Proposed |
+| [ADR-0003](../decisions/0003-dataset-composition-v1.md) | 第一版数据配额、语言、任务层级、修改类型和测试覆盖 | Accepted for A0 |
 
 机器可校验 Schema：
 
@@ -41,13 +42,13 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 - 仓库原创内容采用 Apache-2.0，版权标识为 `PatchAlign-Cpp contributors`；
 - 正式 adapter 可在逐项审计后发布，中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
 - 未完成逐来源许可审计前不公开原始或重打包数据，完整预测需通过许可、敏感信息和漏洞披露检查。
+- Qwen2.5-Coder-7B upstream revision 固定为 `0396a76181e127dfc13e5c5ec48a8cee09938b02`；
+- 第一版数据组成和目标配额按 ADR-0003 冻结；最终可重放数量、来源 revision 和 manifest SHA256 在 A1 实测后冻结。
 
 ## 尚待冻结的闸门
 
-1. Qwen2.5-Coder-7B 的精确 upstream revision；
-2. 第一版冻结评测集的样本数和组成；
-3. 正式训练前的最小有意义提升与可接受退化阈值；
-4. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制。
+1. 正式训练前的最小有意义提升与可接受退化阈值；
+2. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制。
 
 ## A0 验收条件
 

@@ -12,7 +12,7 @@
 | M1 | M0 + SFT adapter | 本项目 SFT 结果 |
 | M2 | M1 + DPO adapter | 本项目 DPO 结果 |
 
-Qwen2.5-Coder-7B 本地目录缺少精确 Hugging Face snapshot revision 元数据。补齐来源前，报告必须写“本地文件哈希已记录，upstream revision 未知”。
+Qwen2.5-Coder-7B 固定 revision 为 `0396a76181e127dfc13e5c5ec48a8cee09938b02`。集群的 config、权重索引、tokenizer 和 tokenizer config 哈希已与该官方 revision 匹配；在四个权重分片逐片对照上游 LFS OID 前，报告必须披露“revision 与元数据已验证，完整权重供应链证明待补强”。
 
 ## 2. 当前 G0 证据
 

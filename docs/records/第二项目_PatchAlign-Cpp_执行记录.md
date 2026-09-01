@@ -16,10 +16,12 @@
 | GitHub fetch / push | HTTPS fetch；SSH alias `github-patchalign-cpp` push |
 | 祝融项目环境 | 显式 prefix `/mingli01/project/ht/.conda_envs/patchalign-cpp` |
 | 主模型实际路径 | `/mingli01/models/Qwen2.5-Coder-7B` |
+| 主模型 upstream revision | `0396a76181e127dfc13e5c5ec48a8cee09938b02`；官方 commit 与四个元数据哈希已匹配 |
 | 环境与 smoke | 允许自主创建和验证，但不得修改其他环境或既有内容 |
 | 本机—集群同步 | GitHub 作为同步中枢；代码和文档同步，运行产物保留在集群 |
 | 仓库原创内容许可 | Apache-2.0；`Copyright 2026 PatchAlign-Cpp contributors` |
 | 产物发布 | 正式 adapter 审计后可发布；中间状态和 G0 adapter 默认不公开；数据与完整预测须逐项审计 |
+| 第一版数据组成 | ADR-0003：5,000 train、500 validation、400 function test、100 file-window test；主范围 100% C++ |
 
 ## 2. 本地与 GitHub
 
@@ -237,14 +239,7 @@ CPU 侧静态核验结果：
 - README 标题为 `Qwen2.5-Coder-7B`，不是 Instruct 模型卡；
 - 许可证文件和模型卡声明 Apache-2.0。
 
-下载目录没有保留 Hugging Face snapshot revision 元数据，因此精确 upstream commit 当前未知。后续仍需：
-
-- 文件完整性；
-- 模型 ID 和精确 revision；
-- tokenizer/config；
-- 全目录或文件级哈希；
-- 真实 tokenizer/config 加载；
-- 计算节点 BF16 与 NF4 加载。
+下载目录没有保留 Hugging Face snapshot 元数据。2026-09-01 已通过用户提供的官方 commit 和四个元数据文件哈希恢复精确 revision；真实 tokenizer/config 加载及计算节点 BF16/NF4 链路也已由 Job `90719` 验证。当前仅剩四个权重分片与上游 LFS OID 的逐片对照作为供应链证据补强项。
 
 ## 6. GPU 环境 smoke
 
@@ -493,13 +488,40 @@ a62195d62e27a646e11408ffa4d1bf9fb210a9440a715938098577f2434d8656  slurm/g0_smoke
 - 完整预测必须通过来源许可、敏感信息和漏洞披露检查；
 - 原始日志和内部路径不公开，但失败结果不能从统计分母中删除。
 
-该决策关闭 A0 的“项目代码许可证”和“产物公开范围”两个未决项，但不代表 A0 已完成。Schema 自动测试、确定性评分 fixture、输出协议用户验收、模型精确 revision、评测集阈值与沙箱等门禁仍待完成。
+该决策关闭 A0 的“项目代码许可证”和“产物公开范围”两个未决项，但不代表 A0 已完成。Schema 自动测试、确定性评分 fixture、输出协议用户验收、评测集阈值与沙箱等门禁仍待完成。
 
-## 10. 下一次应更新的事件
+## 10. 模型 revision 与第一版数据组成冻结
+
+2026-09-01 完成两项 A0 决策记录。
+
+模型身份：
+
+- 用户确认 `Qwen/Qwen2.5-Coder-7B` upstream revision 为 `0396a76181e127dfc13e5c5ec48a8cee09938b02`；
+- 官方 Hugging Face commit 已确认存在；
+- 集群模型的 `config.json`、`model.safetensors.index.json`、`tokenizer.json` 和 `tokenizer_config.json` SHA256 与该 revision 官方文件一致；
+- 四个权重分片尚未逐片对照上游 LFS OID，记录为 provenance 证据补强项；
+- `configs/model/qwen2_5_coder_7b_base.yaml` 和 ADR-0001 已更新。
+
+数据组成：
+
+- 新增 `docs/decisions/0003-dataset-composition-v1.md`，状态为 `Accepted for A0`；
+- 目标配额：5,000 train、500 validation、400 internal function test、100 internal file-window test；
+- train 来源目标为 2,000 CommitPackFT C++ + 3,000 RunBugRun C++；validation 为 200 + 300；
+- 主训练、验证和主指标为 100% C++，Python/Java 为 0%；C 如使用只做独立外部切片；
+- train/validation 的 function/file-window 目标比例为 85%/15%；
+- 修改类型目标比例为单行 35%、函数内多行 50%、新增辅助函数 10%、局部重构 5%；
+- file-window 最多 256 行、目标前后各最多 96 行、完整输入最多 4,096 tokens，禁止截断目标函数；
+- 同一批 500 条内部评测样本必须同时具备 public、hidden 和 regression 阶段；
+- external function 使用所有可重放且符合契约的 Defects4C C++ 样本，目标至少 150；SWE-bench Multilingual 当前 12 条 C++ 任务只做仓库级扩展；
+- 当前冻结的是配额、筛选规则和报告分层；正式数据尚未下载或构建，最终来源 revision、可重放数量和 manifest SHA256 必须在 A1 实测后冻结；
+- `sample-v0.1` 尚未编码修改类型和窗口统计字段，A1 必须先升级 Schema 并补正反例测试。
+
+## 11. 下一次应更新的事件
 
 发生以下任一事件时更新本文：
 
-1. 补充 Qwen2.5-Coder-7B 权重哈希及可获得的来源 revision；
+1. 对 Qwen2.5-Coder-7B 四个权重分片补充上游 LFS OID 对照；
 2. A0 验收；
-3. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理；
-4. 新增重要目录、模型、环境、作业或 artifact 迁移。
+3. A1 固定数据源 revision、完成过滤统计并冻结 manifest；
+4. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理；
+5. 新增重要目录、模型、环境、作业或 artifact 迁移。

@@ -131,7 +131,7 @@ HT-O-TA/patchalign-cpp
 - 不复制进项目仓库；
 - 不在原目录保存 adapter、cache 或训练输出；
 - 当前 4 个 safetensors 分片均存在；
-- 精确 Hugging Face upstream revision 尚未从下载元数据恢复。
+- 下载目录未保存 snapshot 元数据；现已通过用户提供的官方 commit 和四个元数据文件哈希恢复 upstream revision `0396a76181e127dfc13e5c5ec48a8cee09938b02`，权重分片 LFS OID 对照仍待补强。
 
 ### 3.7 `/home/lenovo/A/patchalign-cpp`
 
@@ -270,3 +270,11 @@ patchalign-cpp/
 - 正式 adapter 只允许在逐项审计后发布；中间 checkpoint、optimizer state 和 G0 smoke adapter 默认不公开；
 - 未完成许可审计前不公开原始/重打包数据，完整预测需通过许可和安全检查；
 - 本次只新增和更新 Git 文档及元数据，没有移动、删除或发布集群 artifact。
+
+### 2026-09-01：冻结模型 revision 与第一版数据组成
+
+- 新增 `docs/decisions/0003-dataset-composition-v1.md`；
+- 更新 `configs/model/qwen2_5_coder_7b_base.yaml`，记录 upstream revision、四个已匹配的元数据哈希和权重分片待核验状态；
+- 更新 A0 任务、Schema 说明和状态索引，明确数据配额、100% C++ 主范围、85/15 task-level 比例、修改类型配额和 file-window 截取规则；
+- 新增文件只属于 Git 跟踪的决策文档，没有创建、移动或删除数据目录、模型、环境或 artifact；
+- 正式数据仍未下载或构建；A1 后续生成 manifest 时必须再次更新本文和执行记录。

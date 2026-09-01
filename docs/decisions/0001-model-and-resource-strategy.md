@@ -10,6 +10,7 @@
 ## 决策
 
 - 主训练 Base：`Qwen/Qwen2.5-Coder-7B`；
+- 固定 upstream revision：`0396a76181e127dfc13e5c5ec48a8cee09938b02`；
 - 祝融只读路径：`/mingli01/models/Qwen2.5-Coder-7B`；
 - 外部强基线：`/mingli01/models/Qwen3-8B`；
 - 第一版单张 A800 80GB 串行；
@@ -21,6 +22,8 @@
 ## 证据
 
 Job `90719` 已完成真实模型 G0：BF16 LoRA 和 NF4 QLoRA 单步、adapter 保存/重载均通过。该证据仅支持兼容性，不支持质量选择。
+
+2026-09-01 已核验官方 Hugging Face commit 存在，且集群模型的 `config.json`、`model.safetensors.index.json`、`tokenizer.json` 和 `tokenizer_config.json` SHA256 与该 revision 的官方文件一致。四个权重分片尚未逐片对照上游 LFS OID，因此完整供应链证明仍需补强。
 
 ## 影响
 
@@ -35,7 +38,7 @@ Job `90719` 已完成真实模型 G0：BF16 LoRA 和 NF4 QLoRA 单步、adapter 
 
 - 模型代际早于 Qwen3；
 - 基础模型污染未知；
-- 当前本地权重没有保留精确 upstream revision；
+- 权重转移目录未保留 snapshot 元数据，当前 revision 由用户提供并通过官方 commit 与四个元数据哈希恢复；
 - QLoRA 是否值得采用仍需 pilot，而非由显存节省单独决定。
 
 ## 重新评估条件

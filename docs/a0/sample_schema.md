@@ -103,3 +103,23 @@ summary script commit/hash
 必须先确定 `repo_family` 和外部 benchmark 黑名单，再分配 split，之后才生成函数或上下文样本。禁止先随机切分样本再补仓库隔离。
 
 RunBugRun 按题目/程序标识隔离，不得把它描述成 repository-family 隔离。
+
+## 7. 已冻结的数据组成与下一版字段
+
+第一版目标配额、100% C++ 主范围、85/15 task-level 比例、修改类型配额、file-window 上限和 public/hidden/regression 覆盖规则见 [ADR-0003](../decisions/0003-dataset-composition-v1.md)。
+
+当前 `sample-v0.1.schema.json` 尚未编码以下字段；A1 必须先形成向后兼容的 Schema 版本升级和正反例测试，再生成正式 manifest：
+
+```text
+edit_type
+changed_logical_lines
+file_window_lines
+file_window_context_before
+file_window_context_after
+input_token_count
+public_test_count
+hidden_test_count
+regression_test_count
+```
+
+冻结 ADR 不等于数据已经构建，也不允许在 Schema 未升级时把这些属性塞入 `additionalProperties: false` 的 v0.1 样本。
