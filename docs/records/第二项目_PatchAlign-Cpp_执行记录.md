@@ -647,3 +647,7 @@ Git diff: 388 insertions, 1501 deletions
 3. A1 固定数据源 revision、完成过滤统计并冻结 manifest；
 4. A2 评测协议冻结后安排 Base 与外部强基线 GPU 推理；
 5. 新增重要目录、模型、环境、作业或 artifact 迁移。
+
+### 2026-09-02：本机跨平台 fixture 复验
+
+本机 Windows 复验发现评分 fixture 对临时 Git commit 的固定 SHA 断言会造成跨环境错误，现已改为动态读取 commit，并适配 Windows `.exe` 测试命令。本机结果为 `74 passed, 1 skipped`；跳过项为仅适用于 POSIX 进程组清理的超时测试。此前集群 Linux 的 `75 passed` 是有效历史结果。

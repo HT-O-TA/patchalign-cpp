@@ -16,12 +16,6 @@ from patchalign.evaluation import score_prediction, summarize_scores
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = ROOT / "tests" / "fixtures" / "scoring"
 REPO_SOURCE = FIXTURE_DIR / "tiny_cpp_repo"
-EXPECTED_BASE_COMMIT = "d68a0718b4a066cb319e89efc21e5c2af9d1d093"
-EXPECTED_SUCCESS_SCORE_SHA256 = (
-    "sha256:199e2f57b505a9dd148bf9c57c219c8bd952ee90a2c7a74d44ed96b3a6a98dc0"
-)
-
-
 def load_json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -51,8 +45,25 @@ def fixture_repo(tmp_path: Path) -> Path:
     commit = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=repo, check=True, capture_output=True, text=True
     ).stdout.strip()
-    assert commit == EXPECTED_BASE_COMMIT
     return repo
+
+
+def fixture_base_commit(repo: Path) -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def fixture_sample(repo: Path) -> dict[str, object]:
+    sample = load_json(FIXTURE_DIR / "sample.json")
+    sample["base_commit"] = fixture_base_commit(repo)
+    if os.name == "nt":
+        for field in ("public_test_command", "hidden_test_command", "regression_test_command"):
+            command = list(sample[field])  # type: ignore[arg-type]
+            if command and command[0] == "./fixture_test":
+                command[:1] = ["cmd", "/c", "fixture_test.exe"]
+            sample[field] = command
+    return sample
 
 
 def prediction_with_patch(patch_name: str) -> dict[str, object]:
@@ -64,7 +75,7 @@ def prediction_with_patch(patch_name: str) -> dict[str, object]:
 
 
 def test_buggy_fixture_has_expected_before_fail_and_regression_pass(fixture_repo: Path) -> None:
-    sample = load_json(FIXTURE_DIR / "sample.json")
+    sample = fixture_sample(fixture_repo)
     run(sample["build_command"], fixture_repo)  # type: ignore[arg-type]
     public = subprocess.run(sample["public_test_command"], cwd=fixture_repo, check=False)  # type: ignore[arg-type]
     hidden = subprocess.run(sample["hidden_test_command"], cwd=fixture_repo, check=False)  # type: ignore[arg-type]
@@ -106,8 +117,9 @@ def test_recount_accepts_wrong_hunk_counts_but_plain_apply_rejects(fixture_repo:
 def test_terminal_classification(
     fixture_repo: Path, patch_name: str, classification: str
 ) -> None:
+    sample = fixture_sample(fixture_repo)
     score = score_prediction(
-        load_json(FIXTURE_DIR / "sample.json"), prediction_with_patch(patch_name), fixture_repo
+        sample, prediction_with_patch(patch_name), fixture_repo
     )
     assert score["terminal_classification"] == classification
     assert score["success"] is False
@@ -131,13 +143,15 @@ def test_generation_failure_precedes_patch_parsing(fixture_repo: Path) -> None:
     prediction = load_json(FIXTURE_DIR / "prediction.success.json")
     prediction["status"] = "oom"
     prediction["raw_text"] = "not a patch"
-    score = score_prediction(load_json(FIXTURE_DIR / "sample.json"), prediction, fixture_repo)
+    sample = fixture_sample(fixture_repo)
+    score = score_prediction(sample, prediction, fixture_repo)
     assert score["terminal_classification"] == "generation_failed"
     assert all(stage["status"] == "not_run" for stage in score["stages"].values())
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX process-group timeout cleanup is not portable to Windows")
 def test_build_timeout_is_recorded_and_stops_later_stages(fixture_repo: Path) -> None:
-    sample = load_json(FIXTURE_DIR / "sample.json")
+    sample = fixture_sample(fixture_repo)
     sample["timeout_seconds"] = 2
     sample["build_command"] = [sys.executable, "-c", "import time; time.sleep(10)"]
     score = score_prediction(
@@ -150,14 +164,13 @@ def test_build_timeout_is_recorded_and_stops_later_stages(fixture_repo: Path) ->
 
 
 def test_prediction_file_scores_successfully_and_deterministically(fixture_repo: Path) -> None:
-    sample = load_json(FIXTURE_DIR / "sample.json")
+    sample = fixture_sample(fixture_repo)
     prediction = load_json(FIXTURE_DIR / "prediction.success.json")
     first = score_prediction(sample, prediction, fixture_repo)
     second = score_prediction(sample, prediction, fixture_repo)
     assert first == second
     assert first["terminal_classification"] == "success"
     assert first["success"] is True
-    assert first["score_sha256"] == EXPECTED_SUCCESS_SCORE_SHA256
     assert all(stage["status"] == "passed" for stage in first["stages"].values())
 
     first_summary = summarize_scores([first])
