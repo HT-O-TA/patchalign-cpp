@@ -64,6 +64,8 @@ sha256:d873fe7b5306a5bb27fcd55825bf14610c01b3c53ed54409fbd03da46d562421
 
 本机 Windows 复验发现评分 fixture 不应断言临时 Git 提交的固定 SHA；已改为动态读取 fixture commit，并保留同输入双次评分完全一致的断言。同时对 Windows 的 `.exe` 测试命令做平台适配。复验结果为 `74 passed, 1 skipped`；跳过项是 POSIX 进程组超时清理测试，集群 Linux 验证仍覆盖该路径。历史集群结果 `75 passed` 保持不变。
 
+集群复验已完成：工作副本 commit 为 `6b45fdf0b9a230dea146cca366cfc048c9c6670e`，使用项目专属 Python 环境并设置 `PYTHONNOUSERSITE=1`，完整 pytest 结果为 `75 passed in 9.70s`。
+
 ## 4. 边界
 
 测试均未使用 GPU、未提交 Slurm、未修改模型或数据；评分使用临时 clone，结束后 Git 工作树干净。A2 仍须验证 OCI/Slurm 隔离、不可信构建、正式执行结果 Schema、sanitizer 和真实数据重放。

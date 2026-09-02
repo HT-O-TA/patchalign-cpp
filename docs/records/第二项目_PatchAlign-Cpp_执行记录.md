@@ -651,3 +651,5 @@ Git diff: 388 insertions, 1501 deletions
 ### 2026-09-02：本机跨平台 fixture 复验
 
 本机 Windows 复验发现评分 fixture 对临时 Git commit 的固定 SHA 断言会造成跨环境错误，现已改为动态读取 commit，并适配 Windows `.exe` 测试命令。本机结果为 `74 passed, 1 skipped`；跳过项为仅适用于 POSIX 进程组清理的超时测试。此前集群 Linux 的 `75 passed` 是有效历史结果。
+
+用户随后完成集群复验：`/mingli01/project/ht/patchalign-cpp` 的 `git rev-parse HEAD` 为 `6b45fdf0b9a230dea146cca366cfc048c9c6670e`，使用 `/mingli01/project/ht/.conda_envs/patchalign-cpp/bin/python` 并设置 `PYTHONNOUSERSITE=1`，pytest 结果为 `75 passed in 9.70s`。
