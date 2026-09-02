@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：准备/G0 已完成，A0 Draft 已建立，Schema v0.2、确定性评分 fixture 和训练质量门禁已通过；本机与集群采用 Git 同步、运行产物集群本地化。
+> 当前状态：G0 已完成，A0 技术验收与治理声明已冻结，A1 pilot 已生成并完成 Schema 校验；A2 安全执行仍待集群验证。
 
 ## 1. 祝融当前结构
 
@@ -144,7 +144,7 @@ HT-O-TA/patchalign-cpp
 - 已建立 README、A0 Draft 文档、ADR、Schema、模型配置和最小 Python 包骨架；
 - 当前 canonical sample 为 `schemas/sample-v0.2.schema.json`；v0.1 保留用于历史重放；
 - 原 `/home/lenovo/A/new` 中三份项目文档已迁入本仓库；
-- A0 尚未验收，不能写成已完成；
+- A0 技术验收已完成；A2 安全沙箱和真实执行评测仍不可提前写成完成；
 - 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
 
 ### 3.8 `LICENSE`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`

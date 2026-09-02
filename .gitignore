@@ -21,6 +21,8 @@ slurm-*.out
 
 data/raw/
 data/processed/
+/a1/raw/
+/a1/processed/
 checkpoints/
 models/
 outputs/

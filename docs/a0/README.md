@@ -1,6 +1,6 @@
 # A0：问题、边界与实验协议
 
-状态：**Draft，尚未验收**
+状态：**A0 技术验收完成；A2 安全执行门禁后置**
 当前 canonical sample Schema 版本：`0.2.0`
 任务协议版本：`0.1.0`
 
@@ -10,10 +10,10 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 
 | 文档 | 作用 | 当前状态 |
 |---|---|---|
-| [核心任务与评测协议](core_protocol.md) | 定义输入、输出、修改范围、执行顺序、指标和沙箱 | 任务 Accepted；评测 Draft |
-| [样本与运行 Schema](sample_schema.md) | 定义规范样本、预测、执行结果和 run manifest | Draft |
-| [实验与复现协议](experiment_protocol.md) | 定义模型角色、seed、配置、artifact 和可比性 | Draft |
-| [真实性、许可与发布治理](governance.md) | 定义证据、污染、归因、许可和发布门禁 | 真实性 Draft；发布 Accepted |
+| [核心任务与评测协议](core_protocol.md) | 定义输入、输出、修改范围、执行顺序、指标和沙箱 | Accepted for A0；安全执行在 A2 验证 |
+| [样本与运行 Schema](sample_schema.md) | 定义规范样本、预测、执行结果和 run manifest | Accepted for A0；执行结果 Schema 在 A2 扩展 |
+| [实验与复现协议](experiment_protocol.md) | 定义模型角色、seed、配置、artifact 和可比性 | Accepted for A0 |
+| [真实性、许可与发布治理](governance.md) | 定义证据、污染、归因、许可和发布门禁 | Accepted for A0；污染未知边界保留 |
 | [ADR-0001](../decisions/0001-model-and-resource-strategy.md) | 模型、LoRA/QLoRA 和资源策略 | Accepted for A0 |
 | [ADR-0002](../decisions/0002-patch-output-protocol.md) | 唯一 unified diff 输出与 `--recount` 应用协议 | Accepted for A0 |
 | [ADR-0003](../decisions/0003-dataset-composition-v1.md) | 第一版数据配额、语言、任务层级、修改类型和测试覆盖 | Accepted for A0 |
@@ -52,9 +52,9 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 - SFT/DPO 正式质量门禁和 A3 pilot 选择规则按 ADR-0004 冻结；
 - sanitizer 仅在 A2 执行配置显式标记适用的样本上运行和统计。
 
-## 尚待冻结的闸门
+## 后置到 A2 的闸门
 
-1. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制。
+1. OCI/Slurm 沙箱能否满足禁网、非特权和资源限制；该项不阻塞 A0 文档与协议验收，但阻塞真实执行评测。
 
 ## A0 验收条件
 
@@ -66,9 +66,9 @@ A0 只有在以下事项全部满足后才能标记完成：
 - [x] 有一个不依赖大模型的极小 fixture 可从预测文件重复评分；
 - [x] 同一预测重复评分得到相同阶段结果、指标和规范化哈希；
 - [x] 指标分母、跳过规则和失败优先级无歧义；
-- [ ] 模型角色、生成参数、seed 和 artifact 规则冻结；
-- [ ] 真实性与污染声明模板通过审阅；
+- [x] 模型角色、生成参数、seed 和 artifact 规则冻结；
+- [x] 真实性与污染声明模板通过审阅；
 - [x] 项目代码许可证与产物发布边界确定；
-- [ ] 所有未决事项都有明确 owner 或进入条件。
+- [x] 所有未决事项都有明确 owner 或进入条件。
 
-验收前禁止把本文档的 Draft 条款写成已经完成的实验事实。
+本状态只表示 A0 的协议、Schema、证据和治理模板已经完成；不表示 A1 数据集、A2 沙箱、基线、训练或模型质量实验已经完成。

@@ -1,6 +1,6 @@
 # A0 实验与复现协议
 
-状态：Draft
+状态：Accepted for A0
 版本：`0.2.0`
 
 ## 1. 模型角色
@@ -137,3 +137,7 @@ G0 compatibility smoke
 - validity violation、分母变化或 artifact/manifest 不匹配是一票否决。
 
 完整规则见 [ADR-0004](../decisions/0004-training-quality-gates-v1.md)，机器配置为 [`quality_gates_v1.json`](../../configs/evaluation/quality_gates_v1.json)。
+
+## 11. A0 未决事项责任
+
+项目负责人和唯一当前 owner：用户本人。A1 进入条件是来源 revision、许可证、原始文件哈希和 pilot manifest 可审计；A2 进入条件是禁网、非特权、资源限制、不可信构建和执行结果 Schema 在集群验证通过。A2 验证前不得把宿主机 fixture 执行结果写成真实安全评测结果。
