@@ -69,3 +69,33 @@ sha256:d873fe7b5306a5bb27fcd55825bf14610c01b3c53ed54409fbd03da46d562421
 ## 4. 边界
 
 测试均未使用 GPU、未提交 Slurm、未修改模型或数据；评分使用临时 clone，结束后 Git 工作树干净。A2 仍须验证 OCI/Slurm 隔离、不可信构建、正式执行结果 Schema、sanitizer 和真实数据重放。
+
+## 5. A0 closeout
+
+### 5.1 已确认边界
+
+A0 已确认 C/C++ localized patch repair 的任务协议、sample/prediction/run-manifest Schema、严格 unified diff 解析与单文件路径策略、parse/policy/apply/build/public/hidden/regression 评分链、SFT/DPO 质量门禁，以及 BF16 LoRA/NF4 QLoRA 的 G0 运行兼容性。A0 不包含正式数据集构建、SFT/DPO 训练、模型质量结论、A2 安全沙箱或外部 benchmark 正式结果。
+
+### 5.2 已知限制
+
+- 临时 Git fixture 不再断言跨平台固定 commit SHA；评分确定性通过同一输入双次结果一致验证。
+- Windows 跳过 POSIX 进程组超时清理测试；该路径已在 Linux 集群执行。
+- 当前没有正式训练数据、真实 SFT/DPO 质量结果或 A2 安全沙箱结果。
+- Qwen2.5-Coder-7B 的 revision 和元数据已核验，但四个权重分片的上游 LFS OID 尚未逐片核对。
+- 模型、数据、adapter、日志和其他运行产物保留在集群，不进入 Git；Git 仅保存可复现代码、配置和证据摘要。
+
+### 5.3 证据索引
+
+- 代码与测试修复提交：`6b45fdf0b9a230dea146cca366cfc048c9c6670e`。
+- 集群复验：项目专属 Python 环境，`PYTHONNOUSERSITE=1`，`75 passed in 9.70s`。
+- 本机复验：`74 passed, 1 skipped`。
+- 质量门禁配置：`configs/evaluation/quality_gates_v1.json`。
+- 协议与治理：`docs/a0/core_protocol.md`、`docs/a0/governance.md`、`docs/development/git-sync.md`。
+- 运行证据：本文档、`docs/records/第二项目_PatchAlign-Cpp_执行记录.md`、`docs/records/第二项目_PatchAlign-Cpp_目录结构.md`。
+- 文档记录提交：`195c819`。
+
+### 5.4 项目责任
+
+本项目由用户本人独立完成。用户同时承担项目负责人、数据、评测、集群运维、模型训练和发布治理责任；A1/A2 的每项产物、运行记录和最终决策均由用户审核并确认。
+
+结论：A0 技术验收与证据闭环完成，允许进入 A1 数据 pilot；A1/A2 和正式训练结果不得提前表述为已完成。
