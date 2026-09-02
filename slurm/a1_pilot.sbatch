@@ -1,10 +1,11 @@
 #!/bin/bash
 #SBATCH --partition=gre
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
-#SBATCH --time=24:00:00
-#SBATCH --cpus-per-task=8
+# A1 parsing and sampling is CPU-only; do not reserve an A800 for this job.
+# Keep the request small to avoid unnecessary QOS per-user memory pressure.
+#SBATCH --mem=16G
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=4
 #SBATCH --output=slurm-%j.out
 
 set -euo pipefail
