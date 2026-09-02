@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "purpose": "A1 data-line pilot",
+  "target_counts": {"train": 300, "validation": 50},
+  "language": "cpp",
+  "task_level_ratio": {"function": 0.85, "file_window": 0.15},
+  "sources": ["CommitPackFT", "RunBugRun"],
+  "external_sources_allowed": false,
+  "synthetic_fixtures_allowed": false,
+  "schema": "schemas/sample-v0.2.schema.json",
+  "max_input_tokens": 4096,
+  "max_changed_logical_lines": 40,
+  "split_isolation": ["repository_family", "problem_id", "commit"],
+  "required_outputs": [
+    "dataset-manifest.json",
+    "filter-report.json",
+    "split-report.json",
+    "schema-validation-report.json"
+  ]
+}
