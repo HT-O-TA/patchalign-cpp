@@ -23,7 +23,7 @@
 
 ```text
 /mingli01/data/patchalign-cpp/a1/raw/commitpackft/
-/mingli01/data/patchalign-cpp/a1/raw/runbugrun/
+/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data/
 ```
 
 不要覆盖已有文件；文件名应保留上游名称，另附 `source-record.json` 记录 URL、revision、下载时间、许可证和 SHA256。传输完成后先在集群校验 SHA256，再开始解析和过滤。

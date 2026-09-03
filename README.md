@@ -2,7 +2,7 @@
 
 PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目研究在固定数据、提示和评测协议下，LoRA/QLoRA SFT 与 DPO 是否能提高开放权重 Base 模型生成可应用、可编译、通过隐藏测试且修改克制的补丁的能力。
 
-当前状态：**A0 技术验收完成，A1 数据 pilot 进行中**。基础环境和 Qwen2.5-Coder-7B 的 G0 兼容性 smoke 已完成；真实评测基线和正式训练尚未开始。
+当前状态：**A0 技术验收完成，A1 pilot 已生成，A2 沙箱待集群验收**。基础环境和 Qwen2.5-Coder-7B 的 G0 兼容性 smoke 已完成；真实评测基线和正式训练尚未开始。
 
 ## 第一阶段范围
 
@@ -22,6 +22,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [真实性、许可与发布治理](docs/a0/governance.md)
 - [决策记录](docs/decisions/)
 - [A0 自动验收证据](docs/evidence/a0-validation.md)
+- [A2 沙箱与真实执行入口](docs/a2_sandbox.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
@@ -53,13 +54,13 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 - G0 仅证明环境、BF16 LoRA、NF4 QLoRA 和 adapter 生命周期兼容；
 - 当前没有 Base/SFT/DPO 质量指标；
-- 当前没有下载或处理正式训练数据；
+- 当前只有 A1 pilot 和 A2 holdout，尚未构建正式训练规模数据；
 - 当前没有完成 A2 安全执行沙箱；
 - 基础模型预训练污染未知，只能披露，不能声称完全排除。
 
 ## 开发状态
 
-A0 协议验收已完成；在 A1 pilot 和 A2 安全执行闭环完成前，不进入正式训练。
+A0 协议验收和 A1 pilot 生产链已完成；在 A2 安全执行闭环完成前，不进入正式训练。
 
 ## 许可证与发布边界
 
