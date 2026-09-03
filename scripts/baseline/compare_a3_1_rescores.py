@@ -149,7 +149,9 @@ def build_comparison(m0_score_dir: Path, external_score_dir: Path) -> dict[str, 
         "roles": {},
     }
     for role, run in runs.items():
-        v1_summary = load_json(run["run_dir"] / "scoring" / "score-summary.json")
+        v1_summary = load_json(
+            Path(run["run_dir"]) / "scoring" / "score-summary.json"
+        )
         v1 = counts(v1_summary)
         v2 = counts(run["summary"])
         result["roles"][role] = {
