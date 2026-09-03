@@ -8,13 +8,13 @@
     "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
   },
   "data": {
-    "root": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v1-stratified",
+    "root": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v2-isolated",
     "manifest": "dataset-manifest.json",
-    "manifest_sha256": "sha256:7eb2c16d94072e4f48144a6f4111b725b8c42e25e00cf66f1dae16a1fac23bd1",
+    "manifest_sha256": "sha256:e078753bbfe69044641ef8e71c935340a7785886627993b8042956a72ba6b9a4",
     "train": "train.jsonl",
     "train_sha256": "sha256:af549373d147ff294e138d8aeaa01a6d512cc3cc61b031f10be10781bd1c5d98",
     "validation": "validation.jsonl",
-    "validation_sha256": "sha256:54c64567697ffe98a1e28bf276914515509023bb4cf66b06b431f6a94eff3c48",
+    "validation_sha256": "sha256:8b1f168befe506c221380b02b1263ea006917fddbe10fb15a2e8c988236bd0bd",
     "expected_counts": {
       "train": 300,
       "validation": 50

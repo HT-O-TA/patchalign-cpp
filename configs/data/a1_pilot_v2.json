@@ -1,0 +1,56 @@
+{
+  "version": "1.1.0",
+  "purpose": "A1 data-line pilot with global train/validation isolation",
+  "supersedes": "configs/data/a1_pilot_v1.json",
+  "output_root": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v2-isolated",
+  "target_counts": {
+    "train": 300,
+    "validation": 50
+  },
+  "language": "cpp",
+  "task_level_ratio": {
+    "function": 0.85,
+    "file_window": 0.15
+  },
+  "sources": [
+    "CommitPackFT",
+    "RunBugRun"
+  ],
+  "source_counts": {
+    "train": {
+      "CommitPackFT": 120,
+      "RunBugRun": 180
+    },
+    "validation": {
+      "CommitPackFT": 20,
+      "RunBugRun": 30
+    }
+  },
+  "external_sources_allowed": false,
+  "synthetic_fixtures_allowed": false,
+  "schema": "schemas/sample-v0.2.schema.json",
+  "max_input_tokens": 4096,
+  "max_changed_logical_lines": 40,
+  "split_isolation": [
+    "repository_family",
+    "problem_id",
+    "commit"
+  ],
+  "split_isolation_scope": "global_across_train_and_validation",
+  "artifact_sha256": {
+    "dataset-manifest.json": "e078753bbfe69044641ef8e71c935340a7785886627993b8042956a72ba6b9a4",
+    "filter-report.json": "13c71b6a4395b67421c526761bfd5e0e448ee93afbc7185b213dcba45a4d3f8c",
+    "schema-validation-report.json": "7b13201c0c5eea4ce9b0eabe013f769092873f49d7a212d7465e7e19fc56c6bb",
+    "split-report.json": "4d8792d7fb209a58e188751898a876c95479e5fa93c3aa70f317df53bf731e44",
+    "train.jsonl": "af549373d147ff294e138d8aeaa01a6d512cc3cc61b031f10be10781bd1c5d98",
+    "validation.jsonl": "8b1f168befe506c221380b02b1263ea006917fddbe10fb15a2e8c988236bd0bd",
+    "sha256sums.txt": "cccf9ae176b4fc86c5e226e828677d2ba7c8780049fcab6acbccabf98f89df84"
+  },
+  "required_outputs": [
+    "dataset-manifest.json",
+    "filter-report.json",
+    "split-report.json",
+    "schema-validation-report.json",
+    "sha256sums.txt"
+  ]
+}
