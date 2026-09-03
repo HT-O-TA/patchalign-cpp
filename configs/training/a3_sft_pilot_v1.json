@@ -1,0 +1,86 @@
+{
+  "version": "a3-sft-pilot-v1",
+  "seed": 20260830,
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "data": {
+    "root": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v1-stratified",
+    "manifest": "dataset-manifest.json",
+    "manifest_sha256": "sha256:7eb2c16d94072e4f48144a6f4111b725b8c42e25e00cf66f1dae16a1fac23bd1",
+    "train": "train.jsonl",
+    "train_sha256": "sha256:af549373d147ff294e138d8aeaa01a6d512cc3cc61b031f10be10781bd1c5d98",
+    "validation": "validation.jsonl",
+    "validation_sha256": "sha256:54c64567697ffe98a1e28bf276914515509023bb4cf66b06b431f6a94eff3c48",
+    "expected_counts": {
+      "train": 300,
+      "validation": 50
+    },
+    "expected_task_levels": {
+      "train": {
+        "function": 255,
+        "file_window": 45
+      },
+      "validation": {
+        "function": 43,
+        "file_window": 7
+      }
+    }
+  },
+  "training": {
+    "epochs": 1,
+    "max_sequence_tokens": 2048,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.0001,
+    "warmup_steps": 4,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "gradient_checkpointing": true,
+    "lora": {
+      "r": 8,
+      "alpha": 16,
+      "dropout": 0.0,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj"
+      ]
+    },
+    "modes": {
+      "bf16_lora": {
+        "quantization": "none",
+        "compute_dtype": "bfloat16"
+      },
+      "nf4_qlora": {
+        "quantization": "nf4",
+        "compute_dtype": "bfloat16",
+        "double_quant": true
+      }
+    }
+  },
+  "evaluation": {
+    "holdout_root": "/mingli01/data/patchalign-cpp/a2/holdout-v3",
+    "holdout_manifest_sha256": "sha256:10930b2dc915606b8ad17e15bb61c34919d8fc74f755d55e4c0b885899b28305",
+    "prompt_version": "a3-cpp-repair-v1",
+    "allowed_path": "main.cpp",
+    "determinism_probe_count": 3,
+    "scoring_protocol": "a3-scoring-v2",
+    "generation": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "num_return_sequences": 1,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 512
+    }
+  }
+}

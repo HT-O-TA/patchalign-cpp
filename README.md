@@ -2,7 +2,7 @@
 
 PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目研究在固定数据、提示和评测协议下，LoRA/QLoRA SFT 与 DPO 是否能提高开放权重 Base 模型生成可应用、可编译、通过隐藏测试且修改克制的补丁的能力。
 
-当前状态：**A0 技术验收完成，A1 pilot 已生成，A2 rootless 安全执行与 70 条真实评分闭环完成，A3.0 双基线 executable pilot 与 A3.1 scoring v2 重评分均已完成**。正式训练尚未开始。
+当前状态：**A0、A1、A2、A3.0 和 A3.1 已完成，A3.2 LoRA/QLoRA SFT 小规模训练 pilot 已进入实现与预检**。正式训练尚未开始。
 
 ## 第一阶段范围
 
@@ -25,6 +25,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [A2 沙箱与真实执行入口](docs/a2_sandbox.md)
 - [A3.0 冻结基线协议](docs/a3_baseline.md)
 - [A3.1 评分协议与重评分](docs/a3_1_scoring.md)
+- [A3.2 LoRA/QLoRA SFT 训练 pilot](docs/a3_2_sft_pilot.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
@@ -62,7 +63,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 开发状态
 
-A0 协议验收、A1 pilot、A2 安全执行闭环、A3.0 双基线和 A3.1 终止 LF scoring v2 重评分均已完成；下一步进入 LoRA/QLoRA 小规模训练 pilot。
+A0 协议验收、A1 pilot、A2 安全执行闭环、A3.0 双基线和 A3.1 终止 LF scoring v2 重评分均已完成；A3.2 正在实现并预检 BF16 LoRA 与 NF4 QLoRA 的公平训练 pilot。
 
 ## 许可证与发布边界
 

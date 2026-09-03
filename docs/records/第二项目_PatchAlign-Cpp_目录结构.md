@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0 与 A0、A1 pilot、A2 rootless 安全执行与 70 条真实评分闭环、A3.0 双基线 executable pilot、A3.1 scoring v2 重评分均已完成；下一步是 LoRA/QLoRA 小规模训练 pilot。
+> 当前状态：G0、A0、A1、A2、A3.0、A3.1 均已完成；A3.2 LoRA/QLoRA SFT 小规模训练 pilot 已进入实现与预检。
 
 ## 1. 祝融当前结构
 
@@ -21,7 +21,9 @@
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
 │   │   │   └── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
-│   │   └── model/
+│   │   ├── model/
+│   │   └── training/
+│   │       └── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
 │   ├── docs/
 │   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
@@ -43,6 +45,7 @@
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
+│   │   ├── training/                        # A3.2 训练、重载生成、预检、比较和提交
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -54,6 +57,10 @@
 │   │   ├── a3_compare.sbatch                # CPU-only A3.0 双基线比较
 │   │   ├── a3_1_rescore.sbatch              # CPU-only scoring v2 重评分
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
+│   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
+│   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
+│   │   ├── a3_2_score.sbatch                # CPU-only scoring v2
+│   │   ├── a3_2_compare.sbatch              # CPU-only 可比性审计与选择
 │   │   └── g0_smoke.sbatch                 # 适配祝融和当前显式 prefix 的 G0 作业脚本
 │   ├── pyproject.toml
 │   └── artifacts/                          # 集群本地化产物；被 Git 忽略
@@ -422,3 +429,9 @@ patchalign-cpp/
 - 原 A3.0 prediction 与 strict-v1 评分保持不变；v2 artifact 单独落盘并记录 raw/evaluated SHA256；
 - scoring v2 令 M0 apply/compile 从 0 增至 2，External 从 0 增至 13，但两组 Pass 仍为 0；
 - A3.1 已关闭；下一步进入 LoRA/QLoRA 小规模训练 pilot。
+### 2026-09-03：进入 A3.2 SFT 训练 pilot
+
+- 新增 `configs/training/a3_sft_pilot_v1.json` 与 `docs/a3_2_sft_pilot.md`；
+- 新增 `scripts/training`，承载 fail-closed 预检、BF16/NF4 训练、adapter 重载生成、比较与提交入口；
+- 新增四个 `slurm/a3_2_*.sbatch`，训练链以依赖方式串行，最多同时使用一张 GPU；
+- A3.2 当前处于实现和 CPU 预检阶段，正式 SFT 尚未开始。
