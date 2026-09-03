@@ -13,20 +13,10 @@ from jsonschema import Draft202012Validator
 
 try:
     from .a2_output_matcher import matcher_metadata, outputs_match
-    from .a2_sandbox_runtime import (
-        SANDBOX_VERSION,
-        public_result,
-        resolve_bwrap,
-        run_sandboxed,
-    )
+    from .a2_sandbox_runtime import SANDBOX_VERSION, public_result, resolve_bwrap, run_sandboxed
 except ImportError:
     from a2_output_matcher import matcher_metadata, outputs_match
-    from a2_sandbox_runtime import (
-        SANDBOX_VERSION,
-        public_result,
-        resolve_bwrap,
-        run_sandboxed,
-    )
+    from a2_sandbox_runtime import SANDBOX_VERSION, public_result, resolve_bwrap, run_sandboxed
 
 
 def load_tests(case: Path) -> tuple[dict[str, dict[str, Any]], dict[str, list[Any]]]:
@@ -75,6 +65,8 @@ def execute_version(
     bwrap: Path,
     tests: dict[str, dict[str, Any]],
     suites: dict[str, list[Any]],
+    *,
+    stop_on_timeout: bool = False,
 ) -> dict[str, Any]:
     source = case / f"{version}.cpp"
     if not source.is_file() or source.is_symlink():
@@ -115,14 +107,12 @@ def execute_version(
                 matched = test_result["status"] == "pass" and outputs_match(
                     test["output"], test_result["stdout"], problem_id
                 )
-                outcome = {
-                    "test_id": test_id,
-                    "matched": matched,
-                    **public_result(test_result),
-                }
+                outcome = {"test_id": test_id, "matched": matched, **public_result(test_result)}
                 if test_result["status"] != "pass":
                     outcome["error_tail"] = test_result["stderr"][-1000:]
                 outcomes.append(outcome)
+                if stop_on_timeout and test_result["timed_out"]:
+                    break
             version_result["suites"][suite] = outcomes
     version_result["summary"] = {
         suite: {
@@ -140,11 +130,7 @@ def acceptance_record(case_result: dict[str, Any]) -> dict[str, bool]:
     fixed_suites = case_result["versions"]["fixed"].get("suites", {})
     regression_buggy = buggy_suites.get("regression", [])
     target_buggy = buggy_suites.get("public", []) + buggy_suites.get("hidden", [])
-    all_fixed = (
-        fixed_suites.get("regression", [])
-        + fixed_suites.get("public", [])
-        + fixed_suites.get("hidden", [])
-    )
+    all_fixed = fixed_suites.get("regression", []) + fixed_suites.get("public", []) + fixed_suites.get("hidden", [])
     fixed_all = bool(all_fixed) and all(item["matched"] for item in all_fixed)
     partition_contract = (
         len(regression_buggy) >= 3
@@ -156,19 +142,13 @@ def acceptance_record(case_result: dict[str, Any]) -> dict[str, bool]:
         and fixed_all
     )
     return {
-        "buggy_target_failure_observed": bool(target_buggy)
-        and any(not item["matched"] for item in target_buggy),
+        "buggy_target_failure_observed": bool(target_buggy) and any(not item["matched"] for item in target_buggy),
         "fixed_all_tests_matched": fixed_all,
         "partition_contract_satisfied": partition_contract,
     }
 
 
-def execute_case(
-    item: dict[str, Any],
-    case: Path,
-    bwrap: Path,
-    suites: dict[str, list[Any]],
-) -> dict[str, Any]:
+def execute_case(item: dict[str, Any], case: Path, bwrap: Path, suites: dict[str, list[Any]]) -> dict[str, Any]:
     tests = {
         str(test["id"]): test
         for test in map(json.loads, (case / "tests.jsonl").read_text(encoding="utf-8").splitlines())

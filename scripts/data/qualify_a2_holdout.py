@@ -99,9 +99,15 @@ def repartition_version(
 
 
 def rejection_reasons(
-    buggy: dict[str, Any], fixed: dict[str, Any], counts: dict[str, int]
+    buggy: dict[str, Any],
+    fixed: dict[str, Any],
+    counts: dict[str, int],
+    *,
+    execution_complete: bool = True,
 ) -> list[str]:
     reasons = []
+    if not execution_complete:
+        reasons.append("test_execution_incomplete")
     if buggy["compile"]["status"] != "pass":
         reasons.append("buggy_compile_failed")
     if fixed["compile"]["status"] != "pass":
@@ -161,10 +167,17 @@ def main() -> None:
                     bwrap,
                     tests,
                     suites,
+                    stop_on_timeout=True,
                 )
                 for version in ("buggy", "fixed")
             }
-            if all(versions[v]["compile"]["status"] == "pass" for v in versions):
+            execution_complete = all(
+                versions[v]["compile"]["status"] == "pass"
+                and len(versions[v].get("suites", {}).get("all", []))
+                == len(ordered_ids)
+                for v in versions
+            )
+            if execution_complete:
                 partitions, counts = partition_ids(
                     ordered_ids, versions["buggy"], versions["fixed"]
                 )
@@ -176,7 +189,12 @@ def main() -> None:
                     "target_failures": 0,
                     "regression_passes": 0,
                 }
-            reasons = rejection_reasons(versions["buggy"], versions["fixed"], counts)
+            reasons = rejection_reasons(
+                versions["buggy"],
+                versions["fixed"],
+                counts,
+                execution_complete=execution_complete,
+            )
             decision = {
                 "case_id": item["case_id"],
                 "problem_id": item["problem_id"],

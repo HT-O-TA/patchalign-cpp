@@ -12,6 +12,7 @@ PatchAlign-Cpp 的 Apache-2.0 许可证只覆盖本仓库原创代码、文档�
 | Qwen3-8B | 外部强基线 | 待正式基线前核验并固定 revision | 权重不进入本仓库 |
 | PyTorch、Transformers、Datasets、Accelerate、PEFT、TRL、bitsandbytes | 运行与训练依赖 | 必须以实际冻结版本的上游许可证为准 | 依赖源码和二进制不进入本仓库 |
 | Bubblewrap v0.12.0, source commit `2a76602a8c71f36c1527cf9fc3417d9149822e0c` | A2 非特权执行沙箱 | LGPL-2.0-or-later（依据官方源码 SPDX 与 COPYING） | 源码和二进制只保留在集群 `.tools`，不进入本仓库；项目仅跟踪构建脚本、版本和哈希记录 |
+| RunBugRun data v0.0.1；匹配器语义固定到 legacy commit `5c023d6273ced705a5f83063b6b4cbf67aa81fa5` | A1/A2 C++ 数据与测试判定 | CodeNet 来源许可仍须逐项审计 | 原始代码、测试、候选池和 holdout 仅保留在集群数据目录，不进入 Git；仓库仅保存独立实现的兼容匹配语义及来源 revision |
 | 未来 C++ 修复数据源和 benchmark repository | 训练与评测 | 尚未开始逐来源审计 | 未获再分发许可前不发布原始或重打包内容 |
 
 ## 发布要求
