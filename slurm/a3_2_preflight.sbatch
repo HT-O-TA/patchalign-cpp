@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
+#SBATCH --mem=2G
 #SBATCH --time=00:30:00
 #SBATCH --output=/mingli01/project/ht/patchalign-cpp/artifacts/a3/logs/a32-preflight-%j.out
 
