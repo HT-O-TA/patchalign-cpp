@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 已拆为 holdout 构造与沙箱执行，rootless Bubblewrap 自检通过，真实回放仍待完成。
+> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 rootless 安全执行与 70 条真实评分闭环已完成，下一步是 Base/外部强基线推理。
 
 ## 1. 祝融当前结构
 
@@ -29,9 +29,14 @@
 │   ├── scripts/
 │   │   ├── data/
 │   │   │   ├── a2_sandbox_runtime.py       # 最小权限 Bubblewrap 命令与资源限制
-│   │   │   ├── check_a2_sandbox.py         # A2b fail-closed 自检
-│   │   │   ├── build_a2_holdout.py         # A2a 70 条 holdout 构造
-│   │   │   └── run_a2_cases.py             # A2b 逐案例执行
+│   │   │   ├── check_a2_sandbox.py         # A2b fail-closed 沙箱自检
+│   │   │   ├── build_a2_holdout.py         # A2a 候选池构造
+│   │   │   ├── qualify_a2_holdout.py        # 真实回放、稳定性门禁和 70 条分区
+│   │   │   ├── run_a2_cases.py              # 冻结 holdout 独立重放
+│   │   │   ├── a2_output_matcher.py         # RunBugRun legacy 输出匹配语义
+│   │   │   ├── a2_stability.py              # 回放结果确定性投影
+│   │   │   ├── check_a2_replay_stability.py # 资格回放与最终回放精确核验
+│   │   │   └── summarize_a2_results.py      # A2 汇总与验收门禁
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   └── smoke/
@@ -160,7 +165,7 @@ HT-O-TA/patchalign-cpp
 - 已建立 README、A0 Draft 文档、ADR、Schema、模型配置和最小 Python 包骨架；
 - 当前 canonical sample 为 `schemas/sample-v0.2.schema.json`；v0.1 保留用于历史重放；
 - 原 `/home/lenovo/A/new` 中三份项目文档已迁入本仓库；
-- A0 技术验收已完成；A2 安全沙箱和真实执行评测仍不可提前写成完成；
+- A0 技术验收和 A2 的 70 条安全执行 pilot 均已完成；正式 500 条评测集与模型质量评测尚未完成；
 - 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
 
 ### 3.8 `LICENSE`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`
@@ -184,7 +189,7 @@ HT-O-TA/patchalign-cpp
 - `scorer.py` 在固定 base commit 的临时 clone 中按 parse → policy → apply → build → public → hidden → regression 顺序评分；
 - apply 固定使用 `--recount`，不启用忽略空白、三路合并或部分应用；
 - scoring fixture 完全自建，只用于接口、分类和确定性测试，不进入正式数据配额；
-- 正式不可信数据仍必须等待 A2 沙箱，不能直接套用 A0 fixture 的宿主执行方式。
+- 正式不可信数据必须复用已验证的 A2 沙箱边界，不能直接套用 A0 fixture 的宿主执行方式。
 
 ### 3.11 `configs/evaluation/quality_gates_v1.json`
 
@@ -195,12 +200,13 @@ HT-O-TA/patchalign-cpp
 
 ### 3.12 A2 数据、沙箱与 `.tools/bubblewrap`
 
-- A2a 只构造 `/mingli01/data/patchalign-cpp/a2/holdout-v1`，不运行 C++；
-- A2b 必须先执行 `check_a2_sandbox.py`，自检通过后才运行 holdout；
+- A2a 构造候选池，不运行 C++；A2b 资格阶段真实回放候选并执行双回放稳定性门禁；
+- 正式 pilot 位于 `/mingli01/data/patchalign-cpp/a2/holdout-v3`，包含 50 条 function 和 20 条 file-window；
+- 冻结集合必须先执行 `check_a2_sandbox.py`，自检通过后再独立重放，并用 `check_a2_replay_stability.py` 与资格结果逐测试核验；
 - Bubblewrap v0.12.0 位于独立 `.tools` 前缀，不修改项目 Conda 环境；
 - 沙箱不映射宿主根目录、`/home` 或 `/mingli01`，只映射系统运行目录和单案例工作区；
 - A2 诊断日志保存在 Git 忽略的 `artifacts/a2-diagnostics`；
-- 当前仅完成最小边界自检，70 条真实回放仍未完成。
+- Job `93650` 已完成 70/70 独立重放和验收，qualification 与 final 的状态及输出哈希完全稳定；全流程为 CPU-only。
 
 ## 4. 预计的正式项目结构
 
@@ -370,4 +376,14 @@ patchalign-cpp/
 - Bubblewrap 固定官方 tag `v0.12.0`、源码 commit `2a76602a8c71f36c1527cf9fc3417d9149822e0c`；
 - Job `93628` 在 `gpu28` 完成九项自检，包含最小边界、受控 C++ 编译和执行；
 - 诊断 Job 均未申请 GPU，也未运行数据集中的 C++；
-- A2 holdout 和真实执行结果尚未生成，A2 仍未完成。
+- 此状态后由正式 A2 pilot 关闭，见下一条变更记录。
+
+### 2026-09-03：关闭 A2 真实安全执行 pilot
+
+- 候选池扩大为 120 function + 60 file-window，并对初次合格候选执行第二次完整回放；
+- 非确定性样本 `p02971` 被稳定性门禁剔除，未进入冻结集合；
+- 冻结 `/mingli01/data/patchalign-cpp/a2/holdout-v3`，共 50 function + 20 file-window；
+- Job `93650` 在 `gpu25` 以 CPU-only 资源完成第三次独立重放，70/70 满足 buggy 目标失败、fixed 全通过和分区契约；
+- 共执行 4,470 个 regression、518 个 public、1,931 个 hidden 测试，超时和输出截断均为 0；
+- 新增资格/最终回放精确稳定性检查器，70/70 的状态、匹配结果、输出长度和 SHA256 一致；
+- A2 安全执行与真实评分 pilot 已关闭；正式 500 条评测集、模型质量和训练仍未开始。

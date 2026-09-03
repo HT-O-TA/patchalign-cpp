@@ -677,3 +677,43 @@ Git diff: 388 insertions, 1501 deletions
 - 未提交实现时在集群临时克隆完成最终全量测试：`87 passed in 9.60s`。
 
 结论：最小 rootless Bubblewrap 边界已在计算节点通过，但 A2a holdout、70 条真实 A2b 回放、结果汇总和 Draft Schema 冻结尚未完成；A2 继续保持未关闭。本轮所有诊断作业均未申请 GPU，且除自建沙箱探针外未运行数据集 C++。
+
+## 17. A2 真实回放、稳定性门禁与正式关闭
+
+2026-09-03 在已验证的 rootless Bubblewrap 边界内继续推进 A2。Job `93630`、`93631` 的首版回放证明执行链可用，同时暴露了两个协议问题：不能用逐字节 stdout 等价替代 RunBugRun 官方数值容差语义，也不能在真实执行前静态决定 public/hidden/regression 分区。
+
+修订内容：
+
+- 输出匹配固定到 RunBugRun v0.0.1 对应 legacy commit `5c023d6273ced705a5f83063b6b4cbf67aa81fa5`：保持行结构及非数值 token 严格匹配，数值 token 默认绝对误差 `1e-4`，并保留官方 problem 特例；
+- 先真实执行候选，要求 fixed 全部通过、buggy 至少两个目标失败且至少三个 regression 通过，再按稳定哈希划分 public/hidden；
+- 候选池从 50+20 扩展为 75+30，最终扩展为 120 function + 60 file-window；
+- Job `93639` 因早期性能判断主动取消，没有形成正式 artifact；Job `93645` 因 function 合格候选少 4 条而 fail closed；
+- 初次合格候选追加第二次完整回放，状态、matched、stdout/stderr 长度与 SHA256 任一变化即拒绝；因此存在未初始化内存读取的 `p02971` 以 `nondeterministic_replay` 被排除；
+- 新增 `check_a2_replay_stability.py`，对资格结果和冻结集合第三次独立重放执行逐 test_id 精确投影比较。
+
+最终 Job `93650`：
+
+- 状态：`COMPLETED 0:0`，节点 `gpu25`，耗时 `00:30:05`，MaxRSS `216292K`；作业没有申请 GPU；
+- 候选评估 114 条；拒绝原因分别为 regression 少于 3 个 28 条、target failure 少于 2 个 14 条、fixed 失败 3 条、非确定性 1 条；
+- 冻结 70 条：50 function + 20 file-window，全部已通过两次资格回放和第三次独立回放；
+- buggy/fixed 编译均为 70/70；4,470 个 regression 的 buggy/fixed 均匹配；518 个 public 与 1,931 个 hidden 均为 buggy 不匹配、fixed 匹配；
+- 70/70 满足 `buggy_target_failure_observed`、`fixed_all_tests_matched` 和 `partition_contract_satisfied`；
+- 超时 0，输出截断 0；Schema 均为 `0.2.0-draft`，matcher 均为 `runbugrun-legacy-5c023d62`；
+- qualification 与 final 的编译/运行状态、matched、输出长度和 stdout/stderr SHA256 为 70/70 完全一致。
+
+冻结路径：
+
+- holdout：`/mingli01/data/patchalign-cpp/a2/holdout-v3`；
+- 结果：`/mingli01/data/patchalign-cpp/a2/execution-results-v3.jsonl`；
+- 汇总：`/mingli01/data/patchalign-cpp/a2/execution-summary-v3.json`。
+
+关键 SHA256：
+
+- holdout manifest：`10930b2dc915606b8ad17e15bb61c34919d8fc74f755d55e4c0b885899b28305`；
+- qualification report：`addb1df9db26b62f999a29e762f1b9af845048b337488b838bea82caebf790e7`；
+- qualification results：`7383c8fe0af13423a7f7339407bed859348b034b381845e2ffb0459914563150`；
+- holdout checksum file：`ee75e1bcd076fa636678b95a86d5906548b63af7bead5dfe55f22139242e37a8`；
+- final result：`0742cfea8a93c6fe9c2a72d6eeeb3ddf0a781fce24ad6494a39db9139c4bba95`；
+- summary：`f96c6d3730c2403e0ebacd9819737ecc2a6524bdc28f1b2b60b7cb3f54798b4b`。
+
+结论：A2 rootless 安全执行与 70 条真实评分 pilot 已关闭。该结论不覆盖正式 500 条内部评测集、Base/SFT/DPO 模型质量、训练或 RunBugRun/CodeNet 发布许可审计；下一步进入 Base 与外部强基线 GPU 推理准备。

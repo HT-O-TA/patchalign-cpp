@@ -54,6 +54,7 @@ python -m py_compile scripts/data/a2_sandbox_runtime.py
 python -m py_compile scripts/data/check_a2_sandbox.py
 python -m py_compile scripts/data/qualify_a2_holdout.py
 python -m py_compile scripts/data/run_a2_cases.py
+python -m py_compile scripts/data/check_a2_replay_stability.py
 python -m py_compile scripts/data/summarize_a2_results.py
 python scripts/data/check_a2_sandbox.py --bwrap "${BWRAP}"
 python scripts/data/qualify_a2_holdout.py \
@@ -74,6 +75,9 @@ python scripts/data/run_a2_cases.py \
   --bwrap "${BWRAP}" \
   --holdout-dir "${HOLDOUT}" \
   --output "${RESULT}"
+python scripts/data/check_a2_replay_stability.py \
+  --qualification "${HOLDOUT}/qualification-results.jsonl" \
+  --final "${RESULT}"
 python scripts/data/summarize_a2_results.py \
   --input "${RESULT}" \
   --output "${SUMMARY}"
