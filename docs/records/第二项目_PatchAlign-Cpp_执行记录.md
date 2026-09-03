@@ -653,3 +653,26 @@ Git diff: 388 insertions, 1501 deletions
 本机 Windows 复验发现评分 fixture 对临时 Git commit 的固定 SHA 断言会造成跨环境错误，现已改为动态读取 commit，并适配 Windows `.exe` 测试命令。本机结果为 `74 passed, 1 skipped`；跳过项为仅适用于 POSIX 进程组清理的超时测试。此前集群 Linux 的 `75 passed` 是有效历史结果。
 
 用户随后完成集群复验：`/mingli01/project/ht/patchalign-cpp` 的 `git rev-parse HEAD` 为 `6b45fdf0b9a230dea146cca366cfc048c9c6670e`，使用 `/mingli01/project/ht/.conda_envs/patchalign-cpp/bin/python` 并设置 `PYTHONNOUSERSITE=1`，pytest 结果为 `75 passed in 9.70s`。
+
+## 16. A2 失败诊断、阶段拆分与 rootless 沙箱自检
+
+2026-09-03 对 A2 Job `93569`、`93575` 的“一秒失败、空日志”进行控制面和计算节点复验。两作业均被 Slurm 正常接收并在 `gpu28` 启动；根因是旧脚本启用 `set -e` 后静默执行 `command -v bwrap >/dev/null`，而计算节点没有系统 Bubblewrap，命令返回 1 后立即退出。旧版本在此之前没有日志或 ERR trap，因此输出文件为零字节。这不是 Conda、数据、仓库路径、资源或 Slurm 语法错误。
+
+诊断证据：
+
+- Job `93602`：`gpu28` 上 `bwrap`、Apptainer、Singularity 均缺失；项目 Python、Git 仓库、RAW 和 A1 pilot 路径全部正常；
+- Job `93603`：`unshare --user --map-root-user --net` 成功，单独 `unshare --net` 返回 `Operation not permitted`；
+- Job `93620`：仅证明计算节点看不到管理节点本地 `/tmp`，未进入沙箱自检；
+- Job `93621`：`gpu22` 上完成 Bubblewrap v0.12.0 自检，命令、工作区、只读系统路径、私有 `/tmp`、隐藏 `/home`/`/mingli01` 和仅 loopback 网络全部通过。
+- Job `93628`：`gpu28` 上完成升级后的九项自检，额外确认受控 C++ 可在最小文件系统内编译和执行。
+
+实现与环境变更：
+
+- A2 拆为 CPU-only A2a holdout 构造和 A2b 沙箱执行，A2b 不再隐式创建 holdout；
+- 新增最小权限运行时和 fail-closed 自检，删除 `--ro-bind / /`，每次编译和测试使用独立临时工作区；
+- 新增 `a2-execution-v0.1` Draft Schema，显式记录 `sanitizer_applicable`，缺少适用性不能进入正式指标；
+- Bubblewrap 使用官方 tag `v0.12.0`、源码 commit `2a76602a8c71f36c1527cf9fc3417d9149822e0c`，独立安装在 `.tools`，未修改项目 Conda 环境；
+- 安装二进制 SHA256：`c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda`；
+- 未提交实现时在集群临时克隆完成最终全量测试：`87 passed in 9.60s`。
+
+结论：最小 rootless Bubblewrap 边界已在计算节点通过，但 A2a holdout、70 条真实 A2b 回放、结果汇总和 Draft Schema 冻结尚未完成；A2 继续保持未关闭。本轮所有诊断作业均未申请 GPU，且除自建沙箱探针外未运行数据集 C++。

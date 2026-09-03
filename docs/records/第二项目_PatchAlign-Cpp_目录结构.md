@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0 已完成，A0 技术验收与治理声明已冻结，A1 pilot 已生成并完成 Schema 校验；A2 安全执行仍待集群验证。
+> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 已拆为 holdout 构造与沙箱执行，rootless Bubblewrap 自检通过，真实回放仍待完成。
 
 ## 1. 祝融当前结构
 
@@ -20,19 +20,30 @@
 │   │   ├── evaluation/quality_gates_v1.json # SFT/DPO/pilot 机器门禁
 │   │   └── model/
 │   ├── docs/
-│   ├── schemas/                            # sample v0.1/v0.2、prediction v0.1、run-manifest v0.1
+│   ├── schemas/                            # A0 Schema 与 A2 execution Draft Schema
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
 │   │   ├── fixtures/scoring/               # 微型 C++ repo、sample、prediction 和失败 patch
 │   │   └── unit/                           # Schema、parser、策略和评分闭环测试
 │   ├── scripts/
+│   │   ├── data/
+│   │   │   ├── a2_sandbox_runtime.py       # 最小权限 Bubblewrap 命令与资源限制
+│   │   │   ├── check_a2_sandbox.py         # A2b fail-closed 自检
+│   │   │   ├── build_a2_holdout.py         # A2a 70 条 holdout 构造
+│   │   │   └── run_a2_cases.py             # A2b 逐案例执行
+│   │   ├── setup/
+│   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
+│   │   ├── a2_holdout.sbatch               # CPU-only A2a
+│   │   ├── a2_sandbox.sbatch               # CPU-only A2b
 │   │   └── g0_smoke.sbatch                 # 适配祝融和当前显式 prefix 的 G0 作业脚本
 │   ├── pyproject.toml
 │   └── artifacts/                          # 集群本地化产物；被 Git 忽略
+│       ├── a2-diagnostics/                 # A2 环境探测和沙箱自检证据
+│       │   └── selftest-code-v1/           # Job 93621、93628 使用的自检代码副本
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -42,12 +53,17 @@
 │           │   ├── 90719/
 │           │   └── generated/
 │           └── logs/                       # Job 90574、90699、90719 的原始 Slurm 日志
-└── .conda_envs/                            # 项目环境统一父目录；不属于 Git 仓库
-    └── patchalign-cpp/                     # PatchAlign-Cpp 专属 Conda prefix
-        ├── bin/
-        ├── conda-meta/
-        ├── lib/
-        └── repro/                          # Conda explicit 清单与 pip freeze
+├── .conda_envs/                            # 项目环境统一父目录；不属于 Git 仓库
+│   └── patchalign-cpp/                     # PatchAlign-Cpp 专属 Conda prefix
+│       ├── bin/
+│       ├── conda-meta/
+│       ├── lib/
+│       └── repro/                          # Conda explicit 清单与 pip freeze
+└── .tools/
+    └── bubblewrap/0.12.0/                  # 项目自带 rootless 沙箱工具；不属于 Git
+        ├── build-env/                      # 独立 Conda 构建依赖
+        ├── src/                            # 固定官方源码提交
+        └── install/bin/bwrap               # A2b 固定执行文件
 ```
 
 ## 2. 相关外部路径
@@ -176,6 +192,15 @@ HT-O-TA/patchalign-cpp
 - 与 `evaluation/gates.py` 共同实现固定分母、paired bootstrap、退化上限和 validity veto；
 - 正式运行必须保存配置 SHA256、有效 bootstrap 参数和决策 SHA256；
 - 不允许通过命令行临时降低阈值；变更必须新增配置版本并修订 ADR-0004。
+
+### 3.12 A2 数据、沙箱与 `.tools/bubblewrap`
+
+- A2a 只构造 `/mingli01/data/patchalign-cpp/a2/holdout-v1`，不运行 C++；
+- A2b 必须先执行 `check_a2_sandbox.py`，自检通过后才运行 holdout；
+- Bubblewrap v0.12.0 位于独立 `.tools` 前缀，不修改项目 Conda 环境；
+- 沙箱不映射宿主根目录、`/home` 或 `/mingli01`，只映射系统运行目录和单案例工作区；
+- A2 诊断日志保存在 Git 忽略的 `artifacts/a2-diagnostics`；
+- 当前仅完成最小边界自检，70 条真实回放仍未完成。
 
 ## 4. 预计的正式项目结构
 
@@ -336,3 +361,13 @@ patchalign-cpp/
 - ADR、G0证据、Git同步规范、执行记录和目录台账保持独立；
 - 文档数量由18份降为14份，整理提交 `b75fc0214d482cc77eaa929c392158cc267a58d1` 在集群全量测试为 `75 passed`；
 - 未移动或删除代码、测试、环境、模型、数据和 artifact。
+
+### 2026-09-03：拆分 A2 并建立 rootless Bubblewrap 边界
+
+- 将 A2 拆为 CPU-only `a2_holdout.sbatch` 和 `a2_sandbox.sbatch`；
+- 新增 A2 execution Draft Schema、正反 fixture 和沙箱单元测试；
+- 新增 `/mingli01/project/ht/.tools/bubblewrap/0.12.0`，构建环境与项目 Conda prefix 隔离；
+- Bubblewrap 固定官方 tag `v0.12.0`、源码 commit `2a76602a8c71f36c1527cf9fc3417d9149822e0c`；
+- Job `93628` 在 `gpu28` 完成九项自检，包含最小边界、受控 C++ 编译和执行；
+- 诊断 Job 均未申请 GPU，也未运行数据集中的 C++；
+- A2 holdout 和真实执行结果尚未生成，A2 仍未完成。

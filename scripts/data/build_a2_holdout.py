@@ -113,7 +113,8 @@ def main() -> None:
         chosen.extend(matches[:count])
     samples: list[dict[str, Any]] = []
     for index, item in enumerate(chosen):
-        record = item["record"]; problem = record["problem_id"]; case_id = f"rbr-a2-{problem}-{record['id']}"
+        record = item["record"]; problem = record["problem_id"]
+        case_id = f"rbr-a2-{index:04d}-{stable([problem, record['id']])[:16]}"
         case_dir = output / "cases" / case_id; case_dir.mkdir(parents=True)
         (case_dir / "buggy.cpp").write_text(item["old"], encoding="utf-8")
         (case_dir / "fixed.cpp").write_text(item["new"], encoding="utf-8")
@@ -122,7 +123,22 @@ def main() -> None:
         partitions = {"regression": [test["id"] for test in ordered_tests[:3]], "public": [test["id"] for test in ordered_tests[3:max(4, len(ordered_tests) // 5 + 3)]], "hidden": [test["id"] for test in ordered_tests[max(4, len(ordered_tests) // 5 + 3):]]}
         (case_dir / "tests.jsonl").write_text("".join(json.dumps(test, ensure_ascii=False, sort_keys=True) + "\n" for test in ordered_tests), encoding="utf-8")
         (case_dir / "test-partition.json").write_text(json.dumps(partitions, indent=2) + "\n", encoding="utf-8")
-        samples.append({"case_id": case_id, "source_dataset": "RunBugRun", "source_revision": "0.0.1", "problem_id": problem, "bug_id": record["id"], "task_level": item["level"], "changed_logical_lines": item["changed"], "buggy_submission_id": record["buggy_submission_id"], "fixed_submission_id": record["fixed_submission_id"], "test_count": len(ordered_tests), "test_partition": partitions, "license": "CodeNet source license; audit required"})
+        samples.append({
+            "case_id": case_id,
+            "source_dataset": "RunBugRun",
+            "source_revision": "0.0.1",
+            "problem_id": problem,
+            "bug_id": record["id"],
+            "task_level": item["level"],
+            "changed_logical_lines": item["changed"],
+            "buggy_submission_id": record["buggy_submission_id"],
+            "fixed_submission_id": record["fixed_submission_id"],
+            "test_count": len(ordered_tests),
+            "test_partition": partitions,
+            "sanitizer_applicable": False,
+            "sanitizer_status": "not_applicable",
+            "license": "CodeNet source license; audit required",
+        })
     (output / "a2-manifest.json").write_text(json.dumps({"version": "a2-holdout-v1", "excluded_pilot_problem_ids": sorted(excluded), "function_count": args.function_count, "file_window_count": args.file_window_count, "cases": samples}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (output / "holdout-report.json").write_text(json.dumps({"raw_records_seen": raw_records_seen, "candidate_count": len(candidates), "selected_count": len(samples), "selected_task_levels": {"function": sum(s["task_level"] == "function" for s in samples), "file_window": sum(s["task_level"] == "file_window" for s in samples)}, "rejected": rejected, "problem_id_exclusion": True, "selection": "stable SHA256; one eligible record per unseen problem_id; at least five tests"}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"output_dir": str(output), "selected": len(samples), "function": args.function_count, "file_window": args.file_window_count}, sort_keys=True))
