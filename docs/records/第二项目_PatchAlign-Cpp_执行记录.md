@@ -747,6 +747,6 @@ Comparison: /mingli01/project/ht/patchalign-cpp/artifacts/a3/comparison/93721/co
   sha256      87ef35d9cf8c860d72c9de0e4ddb36dd5ce19565cb0ddb2451d0a546b48211dc
 ```
 
-比较器确认两组 Git commit、配置、数据 manifest、seed、案例顺序和 canonical prompt 完全一致。额外诊断发现全部 56 个成功解析的 raw completion 均缺少终止 LF；仅追加一个 LF 后，M0 2/2 与 External 13/50 的原 apply failure 可通过 `git apply --recount --check`，其余仍是内容/上下文错误。该诊断未覆盖原始 artifact、未重评分，正式结果保持 0/70。A3.1 必须先版本化终止 LF 的输出/评分入口语义，再启动训练 pilot。
+比较器确认两组 Git commit、配置、数据 manifest、seed、案例顺序和 canonical prompt 完全一致。额外诊断发现 56 个成功解析的 raw completion 中有 55 个缺少终止 LF（M0 2/2、External 53/54）；External 唯一带 LF 的样本仍为 apply failure。仅追加一个 LF 的诊断中，M0 2/2 与 External 13/50 的原 apply failure 可通过 `git apply --recount --check`，其余仍是内容/上下文错误。该诊断未覆盖原始 artifact、未重评分，正式结果保持 0/70。A3.1 必须先版本化终止 LF 的输出/评分入口语义，再启动训练 pilot。
 
 结论：A3.0 双基线的真实模型生成、确定性重放、rootless CPU 安全评分、可比性检查和 artifact 留存均已闭环；这是 executable pilot，不是正式 500 条质量评测。

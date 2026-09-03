@@ -406,5 +406,5 @@ patchalign-cpp/
 - 两个推理作业各使用 1 张 GPU，在 `gpu14` 串行完成；其余 A3.0 作业均未申请 GPU；
 - 完整预测、逐案例评分和日志只留在集群并被 Git 忽略，Git 只跟踪协议、代码、测试和摘要；
 - 两组 70 条生成均无 failure/OOM/timeout，确定性 probe 全部稳定；严格原样评分均为 0/70；
-- 发现 strict parse 成功的 raw completion 均缺少终止 LF，作为 A3.1 协议问题记录，未修改或回填 A3.0 artifact；
+- 发现 56 个 strict parse 成功的 raw completion 中有 55 个缺少终止 LF，作为 A3.1 协议问题记录，未修改或回填 A3.0 artifact；
 - A3.0 已关闭；正式 500 条评测集、SFT/DPO 训练和质量结论仍未开始。

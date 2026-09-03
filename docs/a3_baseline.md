@@ -153,6 +153,6 @@ Comparison:           87ef35d9cf8c860d72c9de0e4ddb36dd5ce19565cb0ddb2451d0a546b4
 
 ## 10. 行尾诊断与 A3.1 边界
 
-本次所有通过 strict diff parser 的 56 个 raw completion 都没有以 LF 结尾。只用于诊断地给 raw completion 追加一个 `\n` 后，M0 的 2/2 和 External 的 13/50 apply failure 可通过 `git apply --recount --check`；External 其余 37 条仍因内容或上下文不匹配失败。该探针不属于冻结评分，没有覆盖 artifact，也没有重计 Pass；A3.0 的正式结果仍是两组 0/70。
+本次通过 strict diff parser 的 56 个 raw completion 中，55 个没有以 LF 结尾（M0 2/2、External 53/54）；External 唯一带终止 LF 的样本仍为 apply failure。只用于诊断地给 completion 追加一个 `\n` 后，M0 的 2/2 和 External 的 13/50 apply failure 可通过 `git apply --recount --check`；External 其余 37 条仍因内容或上下文不匹配失败。该探针不属于冻结评分，没有覆盖 artifact，也没有重计 Pass；A3.0 的正式结果仍是两组 0/70。
 
 A3.1 在训练前必须显式选择并版本化以下一种语义：要求模型输出终止 LF，或在评分入口做固定、可审计的单个终止 LF 规范化。决定前不得静默改变 `a3-baseline-v1`、回填本次结果或据此启动正式质量比较。
