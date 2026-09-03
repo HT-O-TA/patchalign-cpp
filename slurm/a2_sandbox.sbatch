@@ -12,7 +12,7 @@ trap 'rc=$?; echo "A2b command failed: line=${LINENO} exit=${rc} command=${BASH_
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 BWRAP=/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap
-CANDIDATES=/mingli01/data/patchalign-cpp/a2/candidates-v2
+CANDIDATES=/mingli01/data/patchalign-cpp/a2/candidates-v3
 HOLDOUT=/mingli01/data/patchalign-cpp/a2/holdout-v2
 RESULT=/mingli01/data/patchalign-cpp/a2/execution-results-v2.jsonl
 

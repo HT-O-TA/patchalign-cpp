@@ -13,7 +13,7 @@ ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 RAW=/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data
 PILOT=/mingli01/data/patchalign-cpp/a1/processed/pilot-v1-stratified
-CANDIDATES=/mingli01/data/patchalign-cpp/a2/candidates-v2
+CANDIDATES=/mingli01/data/patchalign-cpp/a2/candidates-v3
 
 export PATH="${ENV_PREFIX}/bin:${PATH}"
 export PYTHONNOUSERSITE=1

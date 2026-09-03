@@ -99,8 +99,8 @@ def main() -> None:
     parser.add_argument("--raw-dir", type=Path, required=True)
     parser.add_argument("--pilot-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--function-candidates", type=int, default=75)
-    parser.add_argument("--file-window-candidates", type=int, default=30)
+    parser.add_argument("--function-candidates", type=int, default=120)
+    parser.add_argument("--file-window-candidates", type=int, default=60)
     parser.add_argument("--required-function", type=int, default=50)
     parser.add_argument("--required-file-window", type=int, default=20)
     args = parser.parse_args()
@@ -203,7 +203,7 @@ def main() -> None:
             }
         )
     manifest = {
-        "version": "a2-candidate-pool-v2",
+        "version": "a2-candidate-pool-v3",
         "excluded_pilot_problem_ids": sorted(excluded),
         "required_task_levels": {
             "function": args.required_function,
