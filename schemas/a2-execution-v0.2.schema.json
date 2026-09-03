@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/patchalign/a2-execution-v0.2.schema.json",
+  "title": "PatchAlign A2 execution result v0.2 draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "problem_id", "task_level", "sandbox", "output_matcher", "sanitizer", "versions", "acceptance"],
+  "properties": {
+    "schema_version": {"const": "0.2.0-draft"},
+    "case_id": {"type": "string", "minLength": 1},
+    "problem_id": {"type": ["string", "integer"]},
+    "task_level": {"enum": ["function", "file_window"]},
+    "sandbox": {
+      "type": "object", "additionalProperties": false,
+      "required": ["backend", "policy_version"],
+      "properties": {"backend": {"const": "bubblewrap"}, "policy_version": {"const": "bubblewrap-rootless-v1"}}
+    },
+    "output_matcher": {"$ref": "#/$defs/outputMatcher"},
+    "sanitizer": {"$ref": "#/$defs/sanitizer"},
+    "versions": {
+      "type": "object", "additionalProperties": false, "required": ["buggy", "fixed"],
+      "properties": {"buggy": {"$ref": "#/$defs/versionResult"}, "fixed": {"$ref": "#/$defs/versionResult"}}
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["buggy_target_failure_observed", "fixed_all_tests_matched", "partition_contract_satisfied"],
+      "properties": {
+        "buggy_target_failure_observed": {"type": "boolean"},
+        "fixed_all_tests_matched": {"type": "boolean"},
+        "partition_contract_satisfied": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "outputMatcher": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version", "upstream_repository", "upstream_commit", "default_absolute_epsilon"],
+      "properties": {
+        "name": {"const": "RunBugRun SubmissionOutputMatcher-compatible"},
+        "version": {"const": "runbugrun-legacy-5c023d62"},
+        "upstream_repository": {"const": "https://github.com/giganticode/run_bug_run"},
+        "upstream_commit": {"const": "5c023d6273ced705a5f83063b6b4cbf67aa81fa5"},
+        "default_absolute_epsilon": {"const": "0.0001"}
+      }
+    },
+    "commandResult": {
+      "type": "object",
+      "required": ["status", "exit_code", "timed_out", "elapsed_seconds", "stdout_sha256", "stderr_sha256", "stdout_bytes", "stderr_bytes", "stdout_truncated", "stderr_truncated", "sandbox_backend", "sandbox_version"],
+      "properties": {
+        "status": {"enum": ["pass", "fail", "timeout"]},
+        "exit_code": {"type": ["integer", "null"]},
+        "timed_out": {"type": "boolean"},
+        "elapsed_seconds": {"type": "number", "minimum": 0},
+        "stdout_sha256": {"$ref": "#/$defs/sha256"},
+        "stderr_sha256": {"$ref": "#/$defs/sha256"},
+        "stdout_bytes": {"type": "integer", "minimum": 0, "maximum": 1048576},
+        "stderr_bytes": {"type": "integer", "minimum": 0, "maximum": 1048576},
+        "stdout_truncated": {"type": "boolean"},
+        "stderr_truncated": {"type": "boolean"},
+        "sandbox_backend": {"const": "bubblewrap"},
+        "sandbox_version": {"const": "bubblewrap-rootless-v1"}
+      }
+    },
+    "outcome": {
+      "allOf": [
+        {"$ref": "#/$defs/commandResult"},
+        {"type": "object", "required": ["test_id", "matched"], "properties": {"test_id": {"type": ["string", "integer"]}, "matched": {"type": "boolean"}, "error_tail": {"type": "string", "maxLength": 1000}}}
+      ],
+      "unevaluatedProperties": false
+    },
+    "suiteSummary": {
+      "type": "object", "additionalProperties": false, "required": ["total", "matched", "all_matched"],
+      "properties": {"total": {"type": "integer", "minimum": 0}, "matched": {"type": "integer", "minimum": 0}, "all_matched": {"type": "boolean"}}
+    },
+    "versionResult": {
+      "type": "object", "additionalProperties": false, "required": ["compile", "summary"],
+      "properties": {
+        "compile": {"allOf": [{"$ref": "#/$defs/commandResult"}], "unevaluatedProperties": false},
+        "compile_error_tail": {"type": "string", "maxLength": 2000},
+        "suites": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "regression": {"type": "array", "items": {"$ref": "#/$defs/outcome"}},
+            "public": {"type": "array", "items": {"$ref": "#/$defs/outcome"}},
+            "hidden": {"type": "array", "items": {"$ref": "#/$defs/outcome"}}
+          }
+        },
+        "summary": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "regression": {"$ref": "#/$defs/suiteSummary"},
+            "public": {"$ref": "#/$defs/suiteSummary"},
+            "hidden": {"$ref": "#/$defs/suiteSummary"}
+          }
+        }
+      }
+    },
+    "sanitizer": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false, "required": ["sanitizer_applicable", "status"],
+          "properties": {"sanitizer_applicable": {"const": false}, "status": {"const": "not_applicable"}}
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["sanitizer_applicable", "status", "command", "tool_version", "environment_sha256", "timeout_seconds"],
+          "properties": {
+            "sanitizer_applicable": {"const": true},
+            "status": {"enum": ["not_run", "passed", "failed"]},
+            "command": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+            "tool_version": {"type": "string", "minLength": 1},
+            "environment_sha256": {"$ref": "#/$defs/sha256"},
+            "timeout_seconds": {"type": "integer", "minimum": 1}
+          }
+        }
+      ]
+    }
+  }
+}

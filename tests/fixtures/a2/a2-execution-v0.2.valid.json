@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.2.0-draft",
+  "case_id": "rbr-a2-demo-1",
+  "problem_id": "p00001",
+  "task_level": "function",
+  "sandbox": {"backend": "bubblewrap", "policy_version": "bubblewrap-rootless-v1"},
+  "output_matcher": {
+    "name": "RunBugRun SubmissionOutputMatcher-compatible",
+    "version": "runbugrun-legacy-5c023d62",
+    "upstream_repository": "https://github.com/giganticode/run_bug_run",
+    "upstream_commit": "5c023d6273ced705a5f83063b6b4cbf67aa81fa5",
+    "default_absolute_epsilon": "0.0001"
+  },
+  "sanitizer": {"sanitizer_applicable": false, "status": "not_applicable"},
+  "versions": {
+    "buggy": {
+      "compile": {
+        "status": "fail", "exit_code": 1, "timed_out": false, "elapsed_seconds": 0.1,
+        "stdout_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "stderr_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "stdout_bytes": 0, "stderr_bytes": 0, "stdout_truncated": false, "stderr_truncated": false,
+        "sandbox_backend": "bubblewrap", "sandbox_version": "bubblewrap-rootless-v1"
+      },
+      "compile_error_tail": "compile failed",
+      "summary": {}
+    },
+    "fixed": {
+      "compile": {
+        "status": "fail", "exit_code": 1, "timed_out": false, "elapsed_seconds": 0.1,
+        "stdout_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "stderr_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "stdout_bytes": 0, "stderr_bytes": 0, "stdout_truncated": false, "stderr_truncated": false,
+        "sandbox_backend": "bubblewrap", "sandbox_version": "bubblewrap-rootless-v1"
+      },
+      "compile_error_tail": "compile failed",
+      "summary": {}
+    }
+  },
+  "acceptance": {
+    "buggy_target_failure_observed": false,
+    "fixed_all_tests_matched": false,
+    "partition_contract_satisfied": false
+  }
+}
