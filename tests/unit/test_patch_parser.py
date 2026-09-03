@@ -82,6 +82,12 @@ def test_policy_rejects_multiple_plain_unified_diff_sections() -> None:
 +++ b/tests/test.cpp
 @@ -1 +1 @@
 -old test
++new test
+"""
+    parsed = parse_unified_diff(patch)
+    assert len(parsed.files) == 2
+    with pytest.raises(PatchPolicyError, match="exactly one"):
+        enforce_patch_policy(parsed, ["src/add.cpp"])
 
 
 def test_terminal_lf_normalization_appends_exactly_one_lf() -> None:
@@ -103,10 +109,3 @@ def test_terminal_lf_normalization_does_not_strip_or_recover_content() -> None:
     normalized, added = normalize_terminal_lf(raw)
     assert added is True
     assert normalized == raw + "\n"
-
-+new test
-"""
-    parsed = parse_unified_diff(patch)
-    assert len(parsed.files) == 2
-    with pytest.raises(PatchPolicyError, match="exactly one"):
-        enforce_patch_policy(parsed, ["src/add.cpp"])
