@@ -832,6 +832,24 @@ BF16 反向传播日志包含 Flash Attention 非严格确定性警告，因此�
 
 关键 artifact：
 
+
+## 21. A3.3 正式 SFT 准备与冻结
+
+2026-09-04 启动 A3.3。正式静态契约冻结为 5,000 train、500 validation、400 function holdout 与 100 file-window holdout；训练采用 A3.2 资源平局选出的 NF4 QLoRA，3 epochs、micro batch 1、gradient accumulation 8、学习率 1e-4、4,096 token 上限、每 200 optimizer steps 及 epoch 末 checkpoint，完整 validation loss 选择最佳 checkpoint。
+
+正式留出集从排除 A1 pilot problem family 的 RunBugRun 候选中构建，先取 900 function + 250 file-window 候选，再经 Bubblewrap 真实 buggy/fixed 双重稳定回放冻结 400/100。函数级分类修正为“变更被任一完整花括号 span 包含”，避免嵌套控制块把函数内修改误判为 file-window。
+
+正式 SFT 数据保留 A1 isolated-v2 300/50，最终配额为：
+
+- train：CommitPackFT 2,000 + RunBugRun 3,000；function 4,250 + file-window 750；
+- validation：CommitPackFT 200 + RunBugRun 300；function 425 + file-window 75；
+- train/validation repository family 零交叉，RunBugRun 与正式 holdout problem family 零交叉，exact payload 零重复，单一 family 每 split 最多 2 条。
+
+35% single-line、50% multi-line、10% add-helper、5% localized-refactor 继续作为分布目标。来源审计确认 add-helper/refactor 真实候选不足以无损填满目标，因此构建器报告实际值和偏差，不合成数据、不放松资格条件。
+
+作业入口拆为 CPU 数据构建与哈希锁、GPU M0 推理、GPU 正式训练、GPU M1 推理、两组 CPU scoring v2 和 CPU 质量门比较。三个 GPU 阶段使用 `afterok` 严格串行；训练和推理均可从稳定目录恢复。正式内部门可以运行，但 Defects4C 不少于 150 条的外部门仍缺失，完成前不得声明完整 promotion gate 通过。
+
+集群 Job ID、最终数据哈希、实际修改类型分布、训练和评测结果待作业执行后续写。
 ```text
 artifacts/a3/sft-pilot/bf16_lora/93951
   adapter      5eb7b3d939c02fbe7cacc7090dba9c7cc564eccd21ca8df622d7c127a713d8cd

@@ -1,0 +1,101 @@
+{
+  "version": "a3-formal-data-v1",
+  "seed": 20260830,
+  "raw": {
+    "commitpackft_cpp": "/mingli01/data/patchalign-cpp/a1/raw/commitpackft/data/c++/data.jsonl",
+    "runbugrun": "/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data"
+  },
+  "pilot_subset": {
+    "root": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v2-isolated",
+    "manifest_sha256": "sha256:e078753bbfe69044641ef8e71c935340a7785886627993b8042956a72ba6b9a4",
+    "train_count": 300,
+    "validation_count": 50
+  },
+  "formal_holdout": {
+    "candidate_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-candidates-v1",
+    "root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "candidate_counts": {
+      "function": 900,
+      "file_window": 250
+    },
+    "required_counts": {
+      "function": 400,
+      "file_window": 100
+    },
+    "qualification_workers": 16,
+    "problem_family_unique": true,
+    "double_replay_required": true
+  },
+  "formal_sft": {
+    "root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
+    "counts": {
+      "train": 5000,
+      "validation": 500
+    },
+    "source_counts": {
+      "train": {
+        "CommitPackFT": 2000,
+        "RunBugRun": 3000
+      },
+      "validation": {
+        "CommitPackFT": 200,
+        "RunBugRun": 300
+      }
+    },
+    "task_level_counts": {
+      "train": {
+        "function": 4250,
+        "file_window": 750
+      },
+      "validation": {
+        "function": 425,
+        "file_window": 75
+      }
+    },
+    "source_task_cells": {
+      "train": {
+        "CommitPackFT": {
+          "function": 1277,
+          "file_window": 723
+        },
+        "RunBugRun": {
+          "function": 2973,
+          "file_window": 27
+        }
+      },
+      "validation": {
+        "CommitPackFT": {
+          "function": 129,
+          "file_window": 71
+        },
+        "RunBugRun": {
+          "function": 296,
+          "file_window": 4
+        }
+      }
+    },
+    "edit_type_targets": {
+      "train": {
+        "single_line": 1750,
+        "multi_line_local": 2500,
+        "add_helper": 500,
+        "localized_refactor": 250
+      },
+      "validation": {
+        "single_line": 175,
+        "multi_line_local": 250,
+        "add_helper": 50,
+        "localized_refactor": 25
+      }
+    },
+    "edit_type_policy": "report_actual_and_deviation; never synthesize to fill target",
+    "maximum_samples_per_repository_family": 2,
+    "max_sequence_tokens": 4096
+  },
+  "isolation": {
+    "train_validation_repository_family_overlap": 0,
+    "sft_formal_holdout_problem_family_overlap": 0,
+    "exact_payload_overlap": 0,
+    "hidden_content_in_sft": false
+  }
+}

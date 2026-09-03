@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.2 已选择 NF4 QLoRA，正式 SFT 尚未启动。
+> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 正式数据、训练、评测契约与作业入口已建立，等待集群数据冻结和作业排队。
 
 ## 1. 祝融当前结构
 
@@ -14,6 +14,8 @@
 │   ├── .gitignore                          # 忽略 artifact、日志、缓存、权重和密钥文件
 │   ├── LICENSE                             # Apache License 2.0 原文
 │   ├── NOTICE                              # 项目版权与许可边界说明
+│   │   ├── data/a3_formal_v1.json          # A3.3 正式数据配额、隔离和候选池契约
+│   │   ├── training/a3_sft_formal_v1.json  # A3.3 NF4 QLoRA 训练与正式评测契约
 │   ├── THIRD_PARTY_NOTICES.md              # 模型、依赖和未来数据来源的审计清单
 │   ├── README.md
 │   ├── configs/
@@ -45,7 +47,7 @@
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
-│   │   ├── training/                        # A3.2 训练、重载生成、预检、比较和提交
+│   │   ├── training/                        # A3.2 pilot 与 A3.3 可恢复训练、推理、冻结和比较
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -56,6 +58,11 @@
 │   │   ├── a3_score.sbatch                  # CPU-only rootless 评分
 │   │   ├── a3_compare.sbatch                # CPU-only A3.0 双基线比较
 │   │   ├── a3_1_rescore.sbatch              # CPU-only scoring v2 重评分
+│   │   ├── a3_3_data.sbatch                # CPU 正式数据构建、资格回放、哈希锁与 preflight
+│   │   ├── a3_3_infer.sbatch               # 单 GPU、可恢复的 M0/M1 正式推理
+│   │   ├── a3_3_train.sbatch               # 单 GPU、checkpoint 可恢复的正式 NF4 QLoRA
+│   │   ├── a3_3_score.sbatch               # CPU-only 正式 scoring v2
+│   │   ├── a3_3_compare.sbatch             # CPU-only 冻结质量门比较
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -71,6 +78,7 @@
 │       │   │   └── scoring-v2/{93822,93823}/# A3.1 两组独立重评分 artifact
 │       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
 │       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
+│       │   ├── formal/                      # A3.3 preflight、M0/M1、checkpoint、评分和比较
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3.0～A3.2 Slurm 原始日志
@@ -99,6 +107,10 @@
 ## 2. 相关外部路径
 
 ```text
+/mingli01/data/patchalign-cpp/a3/
+├── formal-holdout-candidates-v1/           # 900/250 待资格回放候选
+├── formal-holdout-v1/                      # 冻结 400 function + 100 file-window
+└── formal-sft-v1/                          # 冻结 5,000 train + 500 validation 与哈希锁
 /mingli01/models/
 └── Qwen2.5-Coder-7B/                       # 主训练 Base 模型，只读使用
 
