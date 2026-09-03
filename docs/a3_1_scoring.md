@@ -87,14 +87,14 @@ M0 有 67/70 条、External 有 69/70 条原始输出被追加恰好一个终止
 M0 scoring-v2:
   artifacts/a3/baseline/m0_base/93717/scoring-v2/93822
   scores.jsonl sha256 ef309d81db6c695cfa457c8b628e7e1562e2cb9e5843290036697fb9d93f8936
-  summary.json  sha256 e4d2d82af00c965db5bacdc944600f716adbf9022bebd1f6bb7ef7529944db44
-  manifest.json sha256 60626dc8c34e81d1912eb4c9cf5cf80ee02709fad72c078940a4c091ddf4f345
+  score-summary.json  sha256 e4d2d82af00c965db5bacdc944600f716adbf9022bebd1f6bb7ef7529944db44
+  score-manifest.json sha256 60626dc8c34e81d1912eb4c9cf5cf80ee02709fad72c078940a4c091ddf4f345
 
 External scoring-v2:
   artifacts/a3/baseline/external/93718/scoring-v2/93823
   scores.jsonl sha256 3be9eb8ba53d00f2a7940bd64678e6598e87dc2ff6eba1611f066ecc7739f854
-  summary.json  sha256 00544a9fab8ec0ee316bce647dc93890403fe52f22855138fc76d0b1833560de
-  manifest.json sha256 ae65e4f5f5814a44a92570c35b3ceaf647630240a3cda09cc393301291e093e5
+  score-summary.json  sha256 00544a9fab8ec0ee316bce647dc93890403fe52f22855138fc76d0b1833560de
+  score-manifest.json sha256 ae65e4f5f5814a44a92570c35b3ceaf647630240a3cda09cc393301291e093e5
 
 Comparison:
   artifacts/a3/comparison-a31/93828/comparison.json
