@@ -849,7 +849,11 @@ BF16 反向传播日志包含 Flash Attention 非严格确定性警告，因此�
 
 作业入口拆为 CPU 数据构建与哈希锁、GPU M0 推理、GPU 正式训练、GPU M1 推理、两组 CPU scoring v2 和 CPU 质量门比较。三个 GPU 阶段使用 `afterok` 严格串行；训练和推理均可从稳定目录恢复。正式内部门可以运行，但 Defects4C 不少于 150 条的外部门仍缺失，完成前不得声明完整 promotion gate 通过。
 
-集群 Job ID、最终数据哈希、实际修改类型分布、训练和评测结果待作业执行后续写。
+首次集群实现提交 `6d4aea03a9e7021d10735d870602294ae6a32072` 通过 `133 passed`；恢复与资源补强后集群同步至 `54a610333fc4f8fee1fca817d550470308967ec1`，再次为 `133 passed`。
+
+CPU 数据与 preflight Job 为 `94111`。正式依赖链已提交：M0 GPU 推理 `94118` → GPU SFT `94120` → M1 GPU 推理 `94121`；M0/M1 CPU 评分分别为 `94119`/`94122`，最终 CPU 比较为 `94123`。三个 GPU 阶段严格串行，均受 `afterok` 约束；提交后显示 `PD (Dependency)`，不会在 94111 失败时运行。
+
+最终数据哈希、实际修改类型分布、训练和评测结果待作业执行后续写。
 ```text
 artifacts/a3/sft-pilot/bf16_lora/93951
   adapter      5eb7b3d939c02fbe7cacc7090dba9c7cc564eccd21ca8df622d7c127a713d8cd
