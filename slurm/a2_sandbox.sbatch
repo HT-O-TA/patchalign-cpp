@@ -13,8 +13,9 @@ ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 BWRAP=/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap
 CANDIDATES=/mingli01/data/patchalign-cpp/a2/candidates-v3
-HOLDOUT=/mingli01/data/patchalign-cpp/a2/holdout-v2
-RESULT=/mingli01/data/patchalign-cpp/a2/execution-results-v2.jsonl
+HOLDOUT=/mingli01/data/patchalign-cpp/a2/holdout-v3
+RESULT=/mingli01/data/patchalign-cpp/a2/execution-results-v3.jsonl
+SUMMARY=/mingli01/data/patchalign-cpp/a2/execution-summary-v3.json
 
 export PATH="${ENV_PREFIX}/bin:${PATH}"
 export PYTHONNOUSERSITE=1
@@ -36,6 +37,7 @@ test -f "${CANDIDATES}/candidate-manifest.json"
 test -f "${CANDIDATES}/sha256sums.txt"
 test ! -e "${HOLDOUT}"
 test ! -e "${RESULT}"
+test ! -e "${SUMMARY}"
 echo "python=$(command -v python)"
 echo "python_prefix=$(python -c 'import sys; print(sys.prefix)')"
 echo "bwrap_version=$(${BWRAP} --version)"
@@ -52,6 +54,7 @@ python -m py_compile scripts/data/a2_sandbox_runtime.py
 python -m py_compile scripts/data/check_a2_sandbox.py
 python -m py_compile scripts/data/qualify_a2_holdout.py
 python -m py_compile scripts/data/run_a2_cases.py
+python -m py_compile scripts/data/summarize_a2_results.py
 python scripts/data/check_a2_sandbox.py --bwrap "${BWRAP}"
 python scripts/data/qualify_a2_holdout.py \
   --bwrap "${BWRAP}" \
@@ -71,6 +74,9 @@ python scripts/data/run_a2_cases.py \
   --bwrap "${BWRAP}" \
   --holdout-dir "${HOLDOUT}" \
   --output "${RESULT}"
+python scripts/data/summarize_a2_results.py \
+  --input "${RESULT}" \
+  --output "${SUMMARY}"
 
 echo "git_commit=$(git rev-parse HEAD)"
 echo "manifest_sha256=$(sha256sum "${HOLDOUT}/a2-manifest.json" | cut -d' ' -f1)"
@@ -78,3 +84,4 @@ echo "qualification_report_sha256=$(sha256sum "${HOLDOUT}/qualification-report.j
 echo "qualification_results_sha256=$(sha256sum "${HOLDOUT}/qualification-results.jsonl" | cut -d' ' -f1)"
 echo "holdout_sha256s_sha256=$(sha256sum "${HOLDOUT}/sha256sums.txt" | cut -d' ' -f1)"
 echo "result_sha256=$(sha256sum "${RESULT}" | cut -d' ' -f1)"
+echo "summary_sha256=$(sha256sum "${SUMMARY}" | cut -d' ' -f1)"

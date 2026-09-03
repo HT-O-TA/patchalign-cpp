@@ -13,10 +13,12 @@ from typing import Any
 from jsonschema import Draft202012Validator
 
 try:
+    from .a2_stability import stable_replay
     from .a2_output_matcher import matcher_metadata
     from .a2_sandbox_runtime import SANDBOX_VERSION, resolve_bwrap
     from .run_a2_cases import execute_version, resolve_case, sanitizer_record
 except ImportError:
+    from a2_stability import stable_replay
     from a2_output_matcher import matcher_metadata
     from a2_sandbox_runtime import SANDBOX_VERSION, resolve_bwrap
     from run_a2_cases import execute_version, resolve_case, sanitizer_record
@@ -147,7 +149,7 @@ def main() -> None:
     selected_results = []
     args.holdout_dir.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(
-        tempfile.mkdtemp(prefix="a2-holdout-v2-building-", dir=args.holdout_dir.parent)
+        tempfile.mkdtemp(prefix="a2-holdout-v3-building-", dir=args.holdout_dir.parent)
     )
     try:
         (temporary / "cases").mkdir()
@@ -195,12 +197,30 @@ def main() -> None:
                 counts,
                 execution_complete=execution_complete,
             )
+            stability_replayed = False
+            if not reasons:
+                stability_replayed = True
+                verification_versions = {
+                    version: execute_version(
+                        case,
+                        version,
+                        str(item["problem_id"]),
+                        bwrap,
+                        tests,
+                        suites,
+                        stop_on_timeout=True,
+                    )
+                    for version in ("buggy", "fixed")
+                }
+                if not stable_replay(versions, verification_versions):
+                    reasons.append("nondeterministic_replay")
             decision = {
                 "case_id": item["case_id"],
                 "problem_id": item["problem_id"],
                 "task_level": task_level,
                 "candidate_order": item["candidate_order"],
                 "selected": not reasons,
+                "stability_replayed": stability_replayed,
                 "reasons": reasons,
                 **counts,
             }
@@ -248,7 +268,7 @@ def main() -> None:
         if missing:
             raise RuntimeError(f"candidate pool could not fill holdout: {missing}")
         manifest = {
-            "version": "a2-holdout-v2",
+            "version": "a2-holdout-v3",
             "source_candidate_version": candidate_manifest["version"],
             "task_level_counts": dict(selected_counts),
             "partition_rule": "F=buggy-fail/fixed-pass; public=stable first ceil(20%) of F; hidden=remaining F; regression=buggy-pass/fixed-pass",
