@@ -6,6 +6,7 @@ from patchalign.evaluation.patches import (
     PatchParseError,
     PatchPolicyError,
     enforce_patch_policy,
+    normalize_terminal_lf,
     parse_unified_diff,
 )
 
@@ -81,6 +82,28 @@ def test_policy_rejects_multiple_plain_unified_diff_sections() -> None:
 +++ b/tests/test.cpp
 @@ -1 +1 @@
 -old test
+
+
+def test_terminal_lf_normalization_appends_exactly_one_lf() -> None:
+    raw = "--- a/main.cpp\n+++ b/main.cpp\n@@ -1 +1 @@\n-old\n+new"
+    normalized, added = normalize_terminal_lf(raw)
+    assert added is True
+    assert normalized == raw + "\n"
+
+
+@pytest.mark.parametrize("raw", ("", "already\n", "windows\r\n"))
+def test_terminal_lf_normalization_preserves_already_terminated_text(raw: str) -> None:
+    normalized, added = normalize_terminal_lf(raw)
+    assert added is False
+    assert normalized == raw
+
+
+def test_terminal_lf_normalization_does_not_strip_or_recover_content() -> None:
+    raw = "explanation\n\n```diff\n--- a/main.cpp  "
+    normalized, added = normalize_terminal_lf(raw)
+    assert added is True
+    assert normalized == raw + "\n"
+
 +new test
 """
     parsed = parse_unified_diff(patch)

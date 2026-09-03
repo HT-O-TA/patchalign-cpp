@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/patchalign/run-manifest-v0.2.schema.json",
+  "title": "PatchAlign evaluation run manifest v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "stage",
+    "started_at",
+    "finished_at",
+    "git_commit",
+    "dirty_worktree",
+    "config_sha256",
+    "model_id",
+    "model_revision",
+    "model_config_sha256",
+    "adapter_sha256",
+    "dataset_manifest_sha256",
+    "environment_sha256",
+    "seed",
+    "slurm_job_id",
+    "prediction_artifact_sha256",
+    "execution_artifact_sha256",
+    "source_inference_git_commit",
+    "source_inference_config_sha256",
+    "scoring_protocol_version",
+    "scoring_config_sha256",
+    "summary_artifact_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "stage": {"const": "evaluation"},
+    "started_at": {"type": "string", "format": "date-time"},
+    "finished_at": {"type": "string", "format": "date-time"},
+    "git_commit": {"$ref": "#/$defs/commit"},
+    "dirty_worktree": {"const": false},
+    "config_sha256": {"$ref": "#/$defs/sha256"},
+    "model_id": {"type": "string", "minLength": 1},
+    "model_revision": {"type": ["string", "null"]},
+    "model_config_sha256": {"$ref": "#/$defs/sha256"},
+    "adapter_sha256": {
+      "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "dataset_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "environment_sha256": {"$ref": "#/$defs/sha256"},
+    "seed": {"type": "integer", "minimum": 0},
+    "slurm_job_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]+(?:_[0-9]+)?$"
+    },
+    "prediction_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "execution_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "source_inference_git_commit": {"$ref": "#/$defs/commit"},
+    "source_inference_config_sha256": {"$ref": "#/$defs/sha256"},
+    "scoring_protocol_version": {"const": "a3-scoring-v2"},
+    "scoring_config_sha256": {"$ref": "#/$defs/sha256"},
+    "summary_artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "notes": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

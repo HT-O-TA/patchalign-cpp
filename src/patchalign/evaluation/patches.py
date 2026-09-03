@@ -46,6 +46,18 @@ class ParsedPatch:
     files: tuple[PatchedFile, ...]
 
 
+def normalize_terminal_lf(raw_text: str) -> tuple[str, bool]:
+    """Append one transport LF when non-empty model text lacks one.
+
+    This deliberately does not trim, rewrite, recover, or otherwise alter the
+    model output. The returned boolean records whether the single LF was added.
+    """
+
+    if raw_text and not raw_text.endswith("\n"):
+        return raw_text + "\n", True
+    return raw_text, False
+
+
 def _path_from_marker(line: str, marker: str) -> str:
     if not line.startswith(marker):
         raise PatchParseError(f"expected {marker.strip()} file marker")

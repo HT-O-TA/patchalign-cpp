@@ -2,7 +2,7 @@
 
 PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目研究在固定数据、提示和评测协议下，LoRA/QLoRA SFT 与 DPO 是否能提高开放权重 Base 模型生成可应用、可编译、通过隐藏测试且修改克制的补丁的能力。
 
-当前状态：**A0 技术验收完成，A1 pilot 已生成，A2 rootless 安全执行与 70 条真实评分闭环完成，A3.0 双基线 executable pilot 已完成**。基础环境和 Qwen2.5-Coder-7B 的 G0 兼容性 smoke 已完成；正式训练尚未开始。
+当前状态：**A0 技术验收完成，A1 pilot 已生成，A2 rootless 安全执行与 70 条真实评分闭环完成，A3.0 双基线 executable pilot 已完成，A3.1 scoring v2 已冻结并进入 CPU 重评分**。正式训练尚未开始。
 
 ## 第一阶段范围
 
@@ -24,6 +24,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [A0 自动验收证据](docs/evidence/a0-validation.md)
 - [A2 沙箱与真实执行入口](docs/a2_sandbox.md)
 - [A3.0 冻结基线协议](docs/a3_baseline.md)
+- [A3.1 评分协议与重评分](docs/a3_1_scoring.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
@@ -61,7 +62,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 开发状态
 
-A0 协议验收、A1 pilot、A2 安全执行闭环和 A3.0 双基线已完成；下一步先冻结终止换行的评分入口语义，再进入 A3 LoRA/QLoRA 小规模训练 pilot。
+A0 协议验收、A1 pilot、A2 安全执行闭环和 A3.0 双基线已完成；A3.1 已冻结终止 LF 的 scoring v2，正在对不可变基线预测执行 CPU-only 重评分，完成后再进入 LoRA/QLoRA 小规模训练 pilot。
 
 ## 许可证与发布边界
 

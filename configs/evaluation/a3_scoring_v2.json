@@ -1,0 +1,25 @@
+{
+  "version": "a3-scoring-v2",
+  "input_field": "raw_text",
+  "transport_normalization": {
+    "rule": "append_one_lf_if_nonempty_and_missing",
+    "maximum_added_bytes": 1
+  },
+  "parser": "strict_unified_diff",
+  "allowed_paths": [
+    "main.cpp"
+  ],
+  "apply_command": [
+    "git",
+    "apply",
+    "--recount"
+  ],
+  "forbidden_transforms": [
+    "strip_markdown_fences",
+    "strip_explanations",
+    "trim_whitespace",
+    "rewrite_hunk_headers",
+    "rewrite_paths",
+    "recover_partial_diff"
+  ]
+}

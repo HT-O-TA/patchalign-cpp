@@ -16,6 +16,7 @@ FIXTURE_DIR = ROOT / "tests" / "fixtures" / "a0"
 
 CASES = (
     ("sample-v0.1.schema.json", "sample.valid.json"),
+    ("run-manifest-v0.2.schema.json", "run-manifest-v0.2.valid.json"),
     ("sample-v0.2.schema.json", "sample-v0.2.function-single-line.valid.json"),
     ("sample-v0.2.schema.json", "sample-v0.2.function-multi-line.valid.json"),
     ("sample-v0.2.schema.json", "sample-v0.2.file-window-add-helper.valid.json"),
