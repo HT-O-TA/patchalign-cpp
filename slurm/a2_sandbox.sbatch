@@ -9,9 +9,6 @@
 set -euo pipefail
 trap 'rc=$?; echo "A2b command failed: line=${LINENO} exit=${rc} command=${BASH_COMMAND}" >&2; exit ${rc}' ERR
 
-module load conda/3
-source /persist_data/apps/miniconda3/etc/profile.d/conda.sh
-
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 BWRAP=/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap

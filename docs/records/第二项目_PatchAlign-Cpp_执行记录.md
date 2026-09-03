@@ -665,6 +665,7 @@ Git diff: 388 insertions, 1501 deletions
 - Job `93620`：仅证明计算节点看不到管理节点本地 `/tmp`，未进入沙箱自检；
 - Job `93621`：`gpu22` 上完成 Bubblewrap v0.12.0 自检，命令、工作区、只读系统路径、私有 `/tmp`、隐藏 `/home`/`/mingli01` 和仅 loopback 网络全部通过。
 - Job `93628`：`gpu28` 上完成升级后的九项自检，额外确认受控 C++ 可在最小文件系统内编译和执行。
+- Job `93629`：首次 A2a 在 `gpu28` 因批处理 shell 不提供 `module` 函数而以 `127:0` 退出，未进入 holdout 构造；A2a/A2b 随后删除不必要的 module 与 conda.sh 依赖，保留绝对 Conda prefix 校验。
 
 实现与环境变更：
 

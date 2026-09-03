@@ -77,6 +77,7 @@ sbatch slurm/a2_sandbox.sbatch
 - Job `93620`：因计算节点不可见管理节点 `/tmp` 而未进入自检；
 - Job `93621`：在 `gpu22` 完成 rootless Bubblewrap 自检，全部七项检查通过；未运行数据集代码。
 - Job `93628`：在 `gpu28` 完成升级自检，九项检查通过，包括受控 C++ 的沙箱内编译和执行；未运行数据集代码。
+- Job `93629`：A2a 在 `gpu28` 因批处理 shell 没有 `module` 函数而于数据构造前失败；A2 脚本随后删除不必要的 module/conda.sh 依赖，继续使用绝对 prefix。
 
 诊断证据位于：
 

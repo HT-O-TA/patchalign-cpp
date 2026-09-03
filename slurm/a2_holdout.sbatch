@@ -9,9 +9,6 @@
 set -euo pipefail
 trap 'rc=$?; echo "A2a command failed: line=${LINENO} exit=${rc} command=${BASH_COMMAND}" >&2; exit ${rc}' ERR
 
-module load conda/3
-source /persist_data/apps/miniconda3/etc/profile.d/conda.sh
-
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 RAW=/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data
