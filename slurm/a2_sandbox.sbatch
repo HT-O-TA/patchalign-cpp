@@ -7,6 +7,7 @@
 #SBATCH --output=slurm-%j.out
 
 set -euo pipefail
+trap 'rc=$?; echo "A2 command failed: line=${LINENO} exit=${rc} command=${BASH_COMMAND}" >&2; exit ${rc}' ERR
 
 module load conda/3
 source /persist_data/apps/miniconda3/etc/profile.d/conda.sh
@@ -22,11 +23,21 @@ export PATH="${ENV_PREFIX}/bin:${PATH}"
 export PYTHONNOUSERSITE=1
 hash -r
 
+echo "host=$(hostname)"
+echo "job_id=${SLURM_JOB_ID:-unknown}"
+echo "repo=${REPO}"
+echo "raw=${RAW}"
+echo "pilot=${PILOT}"
+echo "holdout=${HOLDOUT}"
+
 test "$(command -v python)" = "${ENV_PREFIX}/bin/python"
 test "$(python -c 'import sys; print(sys.prefix)')" = "${ENV_PREFIX}"
 test -d "${REPO}/.git"
 test -d "${RAW}"
 test -d "${PILOT}"
+echo "python=$(command -v python)"
+echo "python_prefix=$(python -c 'import sys; print(sys.prefix)')"
+echo "bwrap=$(command -v bwrap || true)"
 command -v bwrap >/dev/null
 
 cd "${REPO}"
