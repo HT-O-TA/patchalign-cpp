@@ -35,12 +35,20 @@ def config() -> dict:
 
 @pytest.fixture
 def sample() -> dict:
-    return json.loads(
+    record = json.loads(
         (
             ROOT
             / "tests/fixtures/a0/sample-v0.2.function-multi-line.valid.json"
         ).read_text(encoding="utf-8")
     )
+    record["gold_patch"] = (
+        "--- a/src/clamp.cpp\n"
+        "+++ b/src/clamp.cpp\n"
+        "@@ -1 +1 @@\n"
+        "-int clamp(int x) { return x; }\n"
+        "+int clamp(int x) { return x < 0 ? 0 : x; }\n"
+    )
+    return record
 
 
 def test_frozen_pilot_config_is_accepted(config: dict) -> None:
