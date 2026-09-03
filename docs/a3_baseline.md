@@ -1,6 +1,6 @@
 # A3.0 冻结基线协议
 
-状态：执行中
+状态：已完成（A3.0 executable pilot）
 
 版本：`a3-baseline-v1`
 
@@ -101,3 +101,58 @@ A3.0 只有同时满足以下条件才关闭：
 5. 可比性检查确认 Git commit、配置、数据 manifest、seed、样本顺序和 canonical prompt hash 一致；
 6. 保存比较结果、资源统计、完整失败分类及全部关键 SHA256；
 7. 仓库测试通过，本机、GitHub 和集群同步到同一干净提交。
+
+## 8. 最终运行与资源
+
+2026-09-03 完成以下作业链。两个推理作业各申请 1 张 GPU，按队列先后在 `gpu14` 串行运行；预检、评分和比较均未申请 GPU。提交时课题组 GPU 配额为 20 张且已占满，因此作业最初因 `AssocGrpGRES` 排队；未取消或修改他人作业，仅将本项目推理时限从 6 小时收紧为 2 小时以利于 backfill。
+
+| 阶段 | Job | 状态 | 节点 | 耗时 | GPU | MaxRSS |
+|---|---:|---|---|---:|---:|---:|
+| CPU 预检 | 93715 | COMPLETED 0:0 | - | 00:03:30 | 0 | 1,179,520K |
+| M0 推理 | 93717 | COMPLETED 0:0 | gpu14 | 00:16:29 | 1 | 16,578,320K |
+| External 推理 | 93718 | COMPLETED 0:0 | gpu14 | 00:14:54 | 1 | 16,504,228K |
+| M0 评分 | 93719 | COMPLETED 0:0 | gpu16 | 00:00:02 | 0 | 3,056K |
+| External 评分 | 93720 | COMPLETED 0:0 | gpu16 | 00:00:05 | 0 | 7,984K |
+| 比较 | 93721 | COMPLETED 0:0 | gpu16 | 00:00:01 | 0 | 716K |
+
+预检在提交 `c548c154381eb64389b35eadd1273ab839f9ea30` 上完成 `111 passed`、九项 Bubblewrap 自检和 gold patch 全链路评分。70 条 prompt 的最大长度为 M0 1,984 tokens、External 1,996 tokens，均低于 4,096；冻结配置 SHA256 为 `d1747f8ad4ddaa904a2ab618e6648cf0a40a4da05e51e2543c6609b6ec9730dc`。
+
+## 9. 基线结果
+
+| 指标 | M0 Base | External |
+|---|---:|---:|
+| generation failure / OOM / timeout | 0 / 0 / 0 | 0 / 0 / 0 |
+| 确定性 probe | 3/3 稳定 | 3/3 稳定 |
+| strict diff parse | 2/70 | 54/70 |
+| apply / compile / success | 0/70 | 0/70 |
+| 终态分类 | 68 parse_failed, 2 apply_failed | 16 parse_failed, 4 policy_violation, 50 apply_failed |
+| 输入 / 输出 tokens | 45,256 / 28,982 | 46,096 / 23,499 |
+| 模型加载 / 生成 | 297.905s / 615.975s | 92.631s / 757.835s |
+| 峰值 GPU tensor bytes | 15,638,064,128 | 16,898,003,456 |
+
+M0 的 function/file-window 成功数为 `0/50`、`0/20`；External 同为 `0/50`、`0/20`，External-M0 差值为 0。比较器确认 Git commit、配置、A2 manifest、seed、案例顺序和 canonical prompt 均一致。该结果只证明 A3.0 生成—安全评分闭环和当前提示/输出协议下的 pilot 起点，不支持模型质量优劣或 SFT/DPO 效果结论。
+
+Artifact：
+
+```text
+M0:        /mingli01/project/ht/patchalign-cpp/artifacts/a3/baseline/m0_base/93717
+External:  /mingli01/project/ht/patchalign-cpp/artifacts/a3/baseline/external/93718
+Comparison:/mingli01/project/ht/patchalign-cpp/artifacts/a3/comparison/93721/comparison.json
+Logs:      /mingli01/project/ht/patchalign-cpp/artifacts/a3/logs
+```
+
+关键 SHA256：
+
+```text
+M0 predictions:       681ba6bdb080dcef5992698fbb7ecf9973035bcd70c70c61d30ca71402c71f49
+M0 scores:            d7f82d80810d83323f5c9a79ab53742a0309eb6f9b2c3bd46f4d40bbf11b81e9
+External predictions: 4dd51b4ad0c42f59eabdf5520482f777dfdccefe3304f1f80a9ed987deb279da
+External scores:      ada1ad925c6f0d077c9ab8ce585525fdfe64a940ece00d36395374d9ab39420e
+Comparison:           87ef35d9cf8c860d72c9de0e4ddb36dd5ce19565cb0ddb2451d0a546b48211dc
+```
+
+## 10. 行尾诊断与 A3.1 边界
+
+本次所有通过 strict diff parser 的 56 个 raw completion 都没有以 LF 结尾。只用于诊断地给 raw completion 追加一个 `\n` 后，M0 的 2/2 和 External 的 13/50 apply failure 可通过 `git apply --recount --check`；External 其余 37 条仍因内容或上下文不匹配失败。该探针不属于冻结评分，没有覆盖 artifact，也没有重计 Pass；A3.0 的正式结果仍是两组 0/70。
+
+A3.1 在训练前必须显式选择并版本化以下一种语义：要求模型输出终止 LF，或在评分入口做固定、可审计的单个终止 LF 规范化。决定前不得静默改变 `a3-baseline-v1`、回填本次结果或据此启动正式质量比较。

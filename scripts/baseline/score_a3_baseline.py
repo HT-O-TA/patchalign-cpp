@@ -182,6 +182,7 @@ def score_prediction(
             stages["apply"] = {
                 **normalized_command(check),
                 "reason": "git_apply_check_failed",
+                "error_tail": check["stderr"][-2000:],
             }
             record.update(terminal_classification="apply_failed", success=False)
             return record

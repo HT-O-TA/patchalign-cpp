@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 rootless 安全执行与 70 条真实评分闭环已完成，下一步是 Base/外部强基线推理。
+> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 rootless 安全执行与 70 条真实评分闭环、A3.0 双基线 executable pilot 已完成，下一步是终止 LF 协议冻结与 A3 训练 pilot。
 
 ## 1. 祝融当前结构
 
@@ -17,7 +17,9 @@
 │   ├── THIRD_PARTY_NOTICES.md              # 模型、依赖和未来数据来源的审计清单
 │   ├── README.md
 │   ├── configs/
-│   │   ├── evaluation/quality_gates_v1.json # SFT/DPO/pilot 机器门禁
+│   │   ├── evaluation/
+│   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
+│   │   │   └── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
 │   │   └── model/
 │   ├── docs/
 │   ├── schemas/                            # A0 Schema 与 A2 execution Draft Schema
@@ -39,16 +41,25 @@
 │   │   │   └── summarize_a2_results.py      # A2 汇总与验收门禁
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
+│   │   ├── baseline/                        # A3 预检、推理、评分和比较脚本
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
 │   │   ├── a2_holdout.sbatch               # CPU-only A2a
 │   │   ├── a2_sandbox.sbatch               # CPU-only A2b
+│   │   ├── a3_preflight.sbatch              # CPU-only A3.0 预检
+│   │   ├── a3_baseline.sbatch               # 单 GPU 基线推理，2 小时时限
+│   │   ├── a3_score.sbatch                  # CPU-only rootless 评分
+│   │   ├── a3_compare.sbatch                # CPU-only 双基线比较
 │   │   └── g0_smoke.sbatch                 # 适配祝融和当前显式 prefix 的 G0 作业脚本
 │   ├── pyproject.toml
 │   └── artifacts/                          # 集群本地化产物；被 Git 忽略
 │       ├── a2-diagnostics/                 # A2 环境探测和沙箱自检证据
 │       │   └── selftest-code-v1/           # Job 93621、93628 使用的自检代码副本
+│       ├── a3/                              # A3.0 预测、评分、比较与 Slurm 日志
+│       │   ├── baseline/{m0_base,external}/ # Job 93717、93718 及其评分
+│       │   ├── comparison/93721/            # 双基线可比性与汇总
+│       │   └── logs/                        # Job 93715、93717～93721 日志
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -387,3 +398,13 @@ patchalign-cpp/
 - 共执行 4,470 个 regression、518 个 public、1,931 个 hidden 测试，超时和输出截断均为 0；
 - 新增资格/最终回放精确稳定性检查器，70/70 的状态、匹配结果、输出长度和 SHA256 一致；
 - A2 安全执行与真实评分 pilot 已关闭；正式 500 条评测集、模型质量和训练仍未开始。
+
+### 2026-09-03：完成 A3.0 双基线 executable pilot
+
+- 新增 `configs/evaluation/a3_baseline_v1.json`、`scripts/baseline`、四个 `slurm/a3_*.sbatch` 和 `docs/a3_baseline.md`；
+- 集群 `artifacts/a3` 新增 M0 Job `93717`、External Job `93718`、CPU 评分 Job `93719`/`93720` 和比较 Job `93721`；
+- 两个推理作业各使用 1 张 GPU，在 `gpu14` 串行完成；其余 A3.0 作业均未申请 GPU；
+- 完整预测、逐案例评分和日志只留在集群并被 Git 忽略，Git 只跟踪协议、代码、测试和摘要；
+- 两组 70 条生成均无 failure/OOM/timeout，确定性 probe 全部稳定；严格原样评分均为 0/70；
+- 发现 strict parse 成功的 raw completion 均缺少终止 LF，作为 A3.1 协议问题记录，未修改或回填 A3.0 artifact；
+- A3.0 已关闭；正式 500 条评测集、SFT/DPO 训练和质量结论仍未开始。

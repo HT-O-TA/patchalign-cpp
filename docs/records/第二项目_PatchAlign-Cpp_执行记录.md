@@ -717,3 +717,36 @@ Git diff: 388 insertions, 1501 deletions
 - summary：`f96c6d3730c2403e0ebacd9819737ecc2a6524bdc28f1b2b60b7cb3f54798b4b`。
 
 结论：A2 rootless 安全执行与 70 条真实评分 pilot 已关闭。该结论不覆盖正式 500 条内部评测集、Base/SFT/DPO 模型质量、训练或 RunBugRun/CodeNet 发布许可审计；下一步进入 Base 与外部强基线 GPU 推理准备。
+
+## 18. A3.0 双基线生成与安全评分闭环
+
+2026-09-03 在 A2 冻结 70 条 holdout 上完成 M0 `Qwen2.5-Coder-7B` Base 与 External `Qwen3-8B` 的 Pass@1 executable pilot。生成参数固定为 greedy、seed `20260830`、输入上限 4,096、输出上限 512；M0 使用 raw completion，External 使用官方 chat template 且关闭 thinking。两模型使用完全相同的 canonical prompt、案例顺序、生成预算和评分入口。
+
+预检 Job `93715` 完成全量 `111 passed`、九项 Bubblewrap 自检、gold patch 真实评分以及两个 tokenizer 的 70 条长度门禁。最大 prompt 长度为 M0 1,984、External 1,996 tokens；配置 SHA256 为 `d1747f8ad4ddaa904a2ab618e6648cf0a40a4da05e51e2543c6609b6ec9730dc`。
+
+作业与资源：
+
+- M0 推理 `93717`：`COMPLETED 0:0`，`gpu14`，`00:16:29`，1 GPU，MaxRSS `16578320K`；
+- External 推理 `93718`：`COMPLETED 0:0`，`gpu14`，`00:14:54`，1 GPU，MaxRSS `16504228K`；
+- M0/External CPU 评分 `93719`/`93720`：均成功，无 GPU；
+- CPU 比较 `93721`：成功，无 GPU；
+- 提交时课题组 GPU 配额 20/20 已占用，两个推理作业曾因 `AssocGrpGRES` 排队；未干预他人作业，仅将本项目时限收紧为 2 小时，最终两作业在同一 GPU 上串行执行。
+
+生成阶段两模型均完成 70/70，generation failure、OOM 和 timeout 均为 0，前 3 条逐字节重放均稳定。M0 strict diff parse `2/70`，External `54/70`；冻结的原样评分下，两组 apply、compile、success 均为 `0/70`。M0 终态为 68 parse failure + 2 apply failure；External 为 16 parse failure + 4 policy violation + 50 apply failure。function 与 file-window 成功数均为 0，不能据此形成模型优劣或训练收益结论。
+
+关键 artifact 与 SHA256：
+
+```text
+M0: /mingli01/project/ht/patchalign-cpp/artifacts/a3/baseline/m0_base/93717
+  predictions 681ba6bdb080dcef5992698fbb7ecf9973035bcd70c70c61d30ca71402c71f49
+  scores      d7f82d80810d83323f5c9a79ab53742a0309eb6f9b2c3bd46f4d40bbf11b81e9
+External: /mingli01/project/ht/patchalign-cpp/artifacts/a3/baseline/external/93718
+  predictions 4dd51b4ad0c42f59eabdf5520482f777dfdccefe3304f1f80a9ed987deb279da
+  scores      ada1ad925c6f0d077c9ab8ce585525fdfe64a940ece00d36395374d9ab39420e
+Comparison: /mingli01/project/ht/patchalign-cpp/artifacts/a3/comparison/93721/comparison.json
+  sha256      87ef35d9cf8c860d72c9de0e4ddb36dd5ce19565cb0ddb2451d0a546b48211dc
+```
+
+比较器确认两组 Git commit、配置、数据 manifest、seed、案例顺序和 canonical prompt 完全一致。额外诊断发现全部 56 个成功解析的 raw completion 均缺少终止 LF；仅追加一个 LF 后，M0 2/2 与 External 13/50 的原 apply failure 可通过 `git apply --recount --check`，其余仍是内容/上下文错误。该诊断未覆盖原始 artifact、未重评分，正式结果保持 0/70。A3.1 必须先版本化终止 LF 的输出/评分入口语义，再启动训练 pilot。
+
+结论：A3.0 双基线的真实模型生成、确定性重放、rootless CPU 安全评分、可比性检查和 artifact 留存均已闭环；这是 executable pilot，不是正式 500 条质量评测。
