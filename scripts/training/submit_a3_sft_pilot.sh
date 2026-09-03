@@ -12,7 +12,7 @@ bf16_train=$(sbatch --parsable \
   --export=ALL,PILOT_MODE=bf16_lora \
   slurm/a3_2_train.sbatch)
 nf4_train=$(sbatch --parsable \
-  --dependency="afterany:${bf16_train}" \
+  --dependency="afterok:${preflight},afterany:${bf16_train}" \
   --export=ALL,PILOT_MODE=nf4_qlora \
   slurm/a3_2_train.sbatch)
 bf16_score=$(sbatch --parsable \
