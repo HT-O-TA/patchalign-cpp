@@ -111,6 +111,7 @@
 ├── formal-holdout-candidates-v1/           # 900/250 待资格回放候选
 ├── formal-holdout-v1/                      # 冻结 400 function + 100 file-window
 └── formal-sft-v1/                          # 冻结 5,000 train + 500 validation 与哈希锁
+
 /mingli01/models/
 └── Qwen2.5-Coder-7B/                       # 主训练 Base 模型，只读使用
 

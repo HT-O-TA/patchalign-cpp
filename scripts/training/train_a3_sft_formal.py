@@ -227,7 +227,7 @@ def main() -> None:
         scheduler.load_state_dict(loaded["scheduler"])
         random.setstate(loaded["python_random_state"])
         torch.set_rng_state(loaded["torch_random_state"].cpu())
-        torch.cuda.set_rng_state_all(loaded["cuda_random_state"])
+        torch.cuda.set_rng_state_all([value.cpu() for value in loaded["cuda_random_state"]])
         state = {
             key: value
             for key, value in loaded.items()
