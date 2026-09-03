@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0、A0、A1、A2、A3.0、A3.1 均已完成；A3.2 LoRA/QLoRA SFT 小规模训练 pilot 已进入实现与预检。
+> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.2 已选择 NF4 QLoRA，正式 SFT 尚未启动。
 
 ## 1. 祝融当前结构
 
@@ -71,7 +71,9 @@
 │       │   │   └── scoring-v2/{93822,93823}/# A3.1 两组独立重评分 artifact
 │       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
 │       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
-│       │   └── logs/                        # A3.0 与 Job 93822～93824、93828 日志
+│       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
+│       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
+│       │   └── logs/                        # A3.0～A3.2 Slurm 原始日志
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -429,9 +431,15 @@ patchalign-cpp/
 - 原 A3.0 prediction 与 strict-v1 评分保持不变；v2 artifact 单独落盘并记录 raw/evaluated SHA256；
 - scoring v2 令 M0 apply/compile 从 0 增至 2，External 从 0 增至 13，但两组 Pass 仍为 0；
 - A3.1 已关闭；下一步进入 LoRA/QLoRA 小规模训练 pilot。
-### 2026-09-03：进入 A3.2 SFT 训练 pilot
+
+### 2026-09-03：完成 A3.2 SFT 训练 pilot
 
 - 新增 `configs/training/a3_sft_pilot_v1.json` 与 `docs/a3_2_sft_pilot.md`；
 - 新增 `scripts/training`，承载 fail-closed 预检、BF16/NF4 训练、adapter 重载生成、比较与提交入口；
 - 新增四个 `slurm/a3_2_*.sbatch`，训练链以依赖方式串行，最多同时使用一张 GPU；
-- A3.2 当前处于实现和 CPU 预检阶段，正式 SFT 尚未开始。
+- 预检发现旧 A1 的 26 个跨 split family 重叠，Job `93938` 重建 `pilot-v2-isolated`，旧 v1 保留审计但禁止训练；
+- 最终预检 Job `93946` 完成 129 项测试及数据、token、prompt、Bubblewrap 和 gold patch 闭环；
+- GPU Job `93951`/`93952` 在 `gpu19` 严格串行完成 BF16 LoRA 与 NF4 QLoRA 训练、adapter 重载和 70 条生成；
+- CPU Job `93953`/`93954`/`93955` 完成 scoring v2 与可比性选择；新增两组 `sft-pilot` 和一个 `comparison-a32` artifact 目录；
+- BF16/NF4 的 parse/apply/compile/Pass 分别为 70/42/38/1 与 70/39/36/1；成功数相同，按资源 tie-break 选择 NF4；
+- A3.2 已关闭，正式 SFT 尚未启动。

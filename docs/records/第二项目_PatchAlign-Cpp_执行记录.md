@@ -795,3 +795,54 @@ Comparison: artifacts/a3/comparison-a31/93828/comparison.json
 ```
 
 比较器确认原始 prediction SHA256 分别仍为 `681ba6bdb080dcef5992698fbb7ecf9973035bcd70c70c61d30ca71402c71f49` 和 `4dd51b4ad0c42f59eabdf5520482f777dfdccefe3304f1f80a9ed987deb279da`，且 70 条顺序、prompt、数据 manifest、seed、source inference config/commit、evaluator commit 与 scoring config 全部一致。A3.1 已关闭；后续 Base/SFT/DPO/External 必须使用同一个 `a3-scoring-v2`，下一步可进入 LoRA/QLoRA 小规模训练 pilot。
+
+## 20. A3.2 LoRA/QLoRA SFT 小规模训练 Pilot
+
+2026-09-03 完成 A3.2。协议 `a3-sft-pilot-v1` 在相同 Qwen2.5-Coder-7B Base、A1 isolated-v2 数据、seed、LoRA 结构、优化参数、A2 holdout、canonical prompt 和 scoring v2 下，串行比较 BF16 LoRA 与 NF4 QLoRA；唯一允许的实验差异为 Base 权重加载模式。主要实现提交依次为 `6c15382`、`dc7025a`、`7e6b450`、`ec01a6e`、`0e981f1` 和 `bd0bd72`。
+
+预检与数据修复：
+
+- Job `93921` 因最初 8 GiB CPU 预检请求触发 `QOSMaxMemoryPerUser`，未获得节点即取消；
+- Job `93927` 为 `FAILED 1:0`，原因是新训练测试误用 `gold_patch=null` 的通用 fixture，并非环境或训练失败；
+- Job `93929` 为 `FAILED 1:0`，在测试和安全检查通过后正确检出旧 A1 数据的 26 个跨 split repository family 重叠；其中 20 条 CommitPackFT validation payload 与 train 重复，另有 6 个 RunBugRun problem family 重叠；
+- 构建器改为全局 family 去重、拒绝覆盖和真实 split 报告；CPU-only Job `93938` 在 `00:00:44` 内生成 300 train + 50 validation 的 `pilot-v2-isolated`，五类隔离键均零重叠；
+- 最终 CPU-only 预检 Job `93946` 为 `COMPLETED 0:0`，`00:01:05`、MaxRSS `359212K`，完成 `129 passed`、九项 Bubblewrap 自检、gold patch、350 条 Schema/diff/policy、A2 identity 和 token 上限闭环；
+- isolated-v2 train SHA256 为 `af549373d147ff294e138d8aeaa01a6d512cc3cc61b031f10be10781bd1c5d98`，validation SHA256 为 `8b1f168befe506c221380b02b1263ea006917fddbe10fb15a2e8c988236bd0bd`。
+
+GPU 与 CPU 作业：
+
+- BF16 Job `93951`：`COMPLETED 0:0`，`gpu19`，1 A800、8 CPU、48 GiB，`00:13:43`，MaxRSS `17147436K`；
+- NF4 Job `93952`：`COMPLETED 0:0`，同一 `gpu19` 串行执行，1 A800、8 CPU、48 GiB，`00:12:13`，MaxRSS `2216040K`；
+- BF16/NF4 CPU 评分 Job `93953`/`93954`：均 `COMPLETED 0:0`，分别用时 `00:01:00`/`00:00:53`；
+- CPU 比较 Job `93955`：`COMPLETED 0:0`，`00:00:02`；
+- 评分作业从过量的 16 GiB 调整为 4 GiB 后解除 `QOSMaxMemoryPerUser`，实测 MaxRSS 分别为 `29956K` 和 `163484K`；脚本默认资源同步修正；
+- 两个训练作业严格串行，本阶段任意时刻最多占用一张 GPU。
+
+结果：
+
+| 模式 | train/validation loss | 峰值 GPU | 生成 | parse/apply/compile/Pass |
+|---|---:|---:|---:|---:|
+| BF16 LoRA | 0.189773 / 0.158027 | 19505035776 bytes | 70/70，3/3 重放稳定 | 70/42/38/1 |
+| NF4 QLoRA | 0.190269 / 0.159412 | 12849229312 bytes | 70/70，3/3 重放稳定 | 70/39/36/1 |
+| M0 Base v2 | — | — | 70/70 | 2/2/2/0 |
+
+两种模式均保存并由独立进程重载 adapter，无 generation failure、OOM 或 timeout。BF16 与 NF4 的成功数均为 1，差值不足 2；比较器因此不声称质量差异，并按 ADR-0004 的资源 tie-break 选择峰值显存更低的 `nf4_qlora`。选择 decision SHA256 为 `c2f103c6250848ff3cfa96a901a73df11ca7efa2c327a95afa0e699c8aea358b`。
+
+BF16 反向传播日志包含 Flash Attention 非严格确定性警告，因此本次不声称训练权重逐 bit 可复现；固定样本顺序哈希在两组完全相同，且两组 greedy 推理的 3 条重复生成均逐字节一致。NF4 的 bitsandbytes/PyTorch 日志另有未来 API 警告，不影响完成状态。
+
+关键 artifact：
+
+```text
+artifacts/a3/sft-pilot/bf16_lora/93951
+  adapter      5eb7b3d939c02fbe7cacc7090dba9c7cc564eccd21ca8df622d7c127a713d8cd
+  predictions  fc82d84191aab8a05134a7ad05ec88b4adae7b1c9a0e24526725c1f064a14cf0
+  scores       7252e410c73b6a24b1ceaa03dc42f04291afa8b814e7a3e91b012489aa288654
+artifacts/a3/sft-pilot/nf4_qlora/93952
+  adapter      0187f53a7c4238e998ca875e38eae81aad0eea2356099a6d8b47ea937d5a7cee
+  predictions  59086945de1d9f02fbdb1510ec79da057b18122e127218ea5f35173ad1129943
+  scores       efbc99217df54e037d9ff97fced18f27ead079c727992ddd4dab458013581e9e
+artifacts/a3/comparison-a32/93955/comparison.json
+  sha256       4e9a436893984bebeb180641e34ee5882854ab527262f52c006f06c948105e56
+```
+
+结论：A3.2 已关闭，NF4 QLoRA 只被选为后续正式 SFT 的候选加载方案；70 条 pilot 不应用正式 400 条门禁，不构成正式 SFT 质量结论，正式训练尚未启动。
