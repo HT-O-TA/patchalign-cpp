@@ -23,6 +23,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [决策记录](docs/decisions/)
 - [A0 自动验收证据](docs/evidence/a0-validation.md)
 - [A2 沙箱与真实执行入口](docs/a2_sandbox.md)
+- [A3.0 冻结基线协议](docs/a3_baseline.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
