@@ -7,7 +7,9 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
+
 from scripts.baseline.score_a3_baseline import (
     A31_SCORING_PROTOCOL,
     prepare_patch_text,
@@ -180,7 +182,16 @@ def main() -> None:
     args = parser.parse_args()
     if args.output.exists():
         raise SystemExit(f"refusing to overwrite comparison: {args.output}")
+    repo = Path(__file__).resolve().parents[2]
+    comparison_git_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repo, text=True
+    ).strip()
+    if subprocess.check_output(
+        ["git", "status", "--porcelain"], cwd=repo, text=True
+    ).strip():
+        raise SystemExit("comparison worktree is dirty")
     result = build_comparison(args.m0_score_dir, args.external_score_dir)
+    result["comparison_git_commit"] = comparison_git_commit
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
