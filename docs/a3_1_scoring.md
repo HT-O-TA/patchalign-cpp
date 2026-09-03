@@ -1,6 +1,6 @@
 # A3.1 评分协议修订与基线重评分
 
-状态：执行中
+状态：已完成
 
 协议：`a3-scoring-v2`
 
@@ -60,3 +60,45 @@ artifacts/a3/comparison-a31/<comparison-job-id>/comparison.json
 7. 本机、GitHub、集群同步到同一干净提交。
 
 在上述条件关闭前，不提交 LoRA/QLoRA 训练作业。
+
+## 6. 实际执行
+
+所有 A3.1 作业均为 CPU-only，未申请或占用 GPU：
+
+- M0 重评分 Job `93822`：`COMPLETED 0:0`，4 CPU、16 GiB，耗时 `00:00:06`，MaxRSS `10080K`；
+- External 重评分 Job `93823`：`COMPLETED 0:0`，4 CPU、16 GiB，耗时 `00:00:20`，MaxRSS `6768K`；
+- 首次比较 Job `93824`：因比较脚本把 JSON 展示字段 `run_dir` 当作 `Path` 使用而失败，未修改两组评分 artifact；
+- 修复后的比较 Job `93828`：`COMPLETED 0:0`，2 CPU、2 GiB，耗时 `00:00:01`，MaxRSS `504K`。
+
+集群专属环境最终全量测试为 `121 passed in 10.24s`。
+
+## 7. 重评分结果
+
+| 基线 | parse v1→v2 | apply v1→v2 | compile v1→v2 | Pass v1→v2 |
+|---|---:|---:|---:|---:|
+| M0 Base | 2→2 | 0→2 | 0→2 | 0→0 |
+| External | 54→54 | 0→13 | 0→13 | 0→0 |
+
+M0 有 67/70 条、External 有 69/70 条原始输出被追加恰好一个终止 LF。该计数覆盖全部 raw output，不等于可解析补丁数。所有因该修订恢复 apply/compile 的补丁最终均未通过 public tests，hidden 与 regression 因而没有进入执行。
+
+关键输出：
+
+```text
+M0 scoring-v2:
+  artifacts/a3/baseline/m0_base/93717/scoring-v2/93822
+  scores.jsonl sha256 ef309d81db6c695cfa457c8b628e7e1562e2cb9e5843290036697fb9d93f8936
+  summary.json  sha256 e4d2d82af00c965db5bacdc944600f716adbf9022bebd1f6bb7ef7529944db44
+  manifest.json sha256 60626dc8c34e81d1912eb4c9cf5cf80ee02709fad72c078940a4c091ddf4f345
+
+External scoring-v2:
+  artifacts/a3/baseline/external/93718/scoring-v2/93823
+  scores.jsonl sha256 3be9eb8ba53d00f2a7940bd64678e6598e87dc2ff6eba1611f066ecc7739f854
+  summary.json  sha256 00544a9fab8ec0ee316bce647dc93890403fe52f22855138fc76d0b1833560de
+  manifest.json sha256 ae65e4f5f5814a44a92570c35b3ceaf647630240a3cda09cc393301291e093e5
+
+Comparison:
+  artifacts/a3/comparison-a31/93828/comparison.json
+  sha256 75d4c5561f6eafef25027f8753240bdaf509885342b9db608fb36b63cdc87112
+```
+
+比较器确认：原始 prediction SHA256 未变，70 条顺序、canonical prompt、数据 manifest、seed、source inference 配置与 commit、evaluator commit 和 scoring config 均可比。结论仅是评分传输协议修正，不能表述为模型质量或训练收益；后续 Base/SFT/DPO/External 必须统一使用 `a3-scoring-v2`。

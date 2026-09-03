@@ -750,3 +750,48 @@ Comparison: /mingli01/project/ht/patchalign-cpp/artifacts/a3/comparison/93721/co
 比较器确认两组 Git commit、配置、数据 manifest、seed、案例顺序和 canonical prompt 完全一致。额外诊断发现 56 个成功解析的 raw completion 中有 55 个缺少终止 LF（M0 2/2、External 53/54）；External 唯一带 LF 的样本仍为 apply failure。仅追加一个 LF 的诊断中，M0 2/2 与 External 13/50 的原 apply failure 可通过 `git apply --recount --check`，其余仍是内容/上下文错误。该诊断未覆盖原始 artifact、未重评分，正式结果保持 0/70。A3.1 必须先版本化终止 LF 的输出/评分入口语义，再启动训练 pilot。
 
 结论：A3.0 双基线的真实模型生成、确定性重放、rootless CPU 安全评分、可比性检查和 artifact 留存均已闭环；这是 executable pilot，不是正式 500 条质量评测。
+
+## 19. A3.1 终止 LF scoring v2 与不可变基线重评分
+
+2026-09-03 完成 A3.1。评分器读取不可变 prediction 的原始 `raw_text`，仅在非空且末字符不是 LF 时追加恰好一个 `\n`；不剥离 Markdown/解释、不 trim 空白、不修复 hunk/路径/上下文、不恢复截断 diff，也不选择或重试候选。strict parser、单一 `main.cpp`、`git apply --recount`、Bubblewrap、C++17 编译及 public/hidden/regression 语义均保持不变。A3.0 strict-v1 产物和哈希未被修改，v2 结果独立落盘。
+
+实现与验证：
+
+- 新增 `configs/evaluation/a3_scoring_v2.json`、ADR-0005、`docs/a3_1_scoring.md`、两个 CPU-only Slurm 入口和逐条可比性审计器；
+- run manifest v0.2 记录 source inference commit/config 与 evaluator commit/scoring config，并逐条保存 raw/evaluated SHA256 和规范化元数据；
+- 主要实现提交为 `faa236e`，测试位置修复为 `fd74eda`，比较器路径修复为 `71f0f75`，比较 revision 记录为 `fffc02f`；
+- 首次集群全量测试为 `115 passed, 1 failed`，原因是新增 LF parser 测试误放进已有三引号 fixture；移动测试后以及最终同步前两次全量测试均为 `121 passed`，最后一次耗时 `10.24s`；
+- scoring config SHA256 为 `b8d9507ec7fc97c370e52230759e0b2b84591d6fb4200a50944add19ebe859e8`。
+
+作业与资源：
+
+- M0 重评分 Job `93822`：`COMPLETED 0:0`，节点 `gpu16`，4 CPU、16 GiB、0 GPU，`00:00:06`，MaxRSS `10080K`；
+- External 重评分 Job `93823`：`COMPLETED 0:0`，节点 `gpu16`，4 CPU、16 GiB、0 GPU，`00:00:20`，MaxRSS `6768K`；
+- 首次比较 Job `93824`：`FAILED 1:0`，节点 `gpu16`，2 CPU、2 GiB、0 GPU，`00:00:02`；原因是脚本将用于 JSON 的字符串 `run_dir` 继续当作 `Path` 使用，评分 artifact 不受影响；
+- 修复后的比较 Job `93828`：`COMPLETED 0:0`，节点 `gpu16`，2 CPU、2 GiB、0 GPU，`00:00:01`，MaxRSS `504K`。
+
+结果：
+
+| 基线 | parse v1→v2 | apply v1→v2 | compile v1→v2 | public/Pass v1→v2 |
+|---|---:|---:|---:|---:|
+| M0 Base | 2→2 | 0→2 | 0→2 | 0→0 |
+| External | 54→54 | 0→13 | 0→13 | 0→0 |
+
+M0 67/70、External 69/70 的 raw output 被追加一个终止 LF。M0 的两个可解析补丁均恢复 apply/compile；External 有 13 个补丁恢复 apply/compile。它们全部在 public tests 失败，所以 hidden 和 regression 未执行，成功数仍为 0/70。该变化是传输/评分协议修正，不是模型质量或训练收益。
+
+关键 artifact 与 SHA256：
+
+```text
+M0: artifacts/a3/baseline/m0_base/93717/scoring-v2/93822
+  scores    ef309d81db6c695cfa457c8b628e7e1562e2cb9e5843290036697fb9d93f8936
+  summary   e4d2d82af00c965db5bacdc944600f716adbf9022bebd1f6bb7ef7529944db44
+  manifest  60626dc8c34e81d1912eb4c9cf5cf80ee02709fad72c078940a4c091ddf4f345
+External: artifacts/a3/baseline/external/93718/scoring-v2/93823
+  scores    3be9eb8ba53d00f2a7940bd64678e6598e87dc2ff6eba1611f066ecc7739f854
+  summary   00544a9fab8ec0ee316bce647dc93890403fe52f22855138fc76d0b1833560de
+  manifest  ae65e4f5f5814a44a92570c35b3ceaf647630240a3cda09cc393301291e093e5
+Comparison: artifacts/a3/comparison-a31/93828/comparison.json
+  sha256    75d4c5561f6eafef25027f8753240bdaf509885342b9db608fb36b63cdc87112
+```
+
+比较器确认原始 prediction SHA256 分别仍为 `681ba6bdb080dcef5992698fbb7ecf9973035bcd70c70c61d30ca71402c71f49` 和 `4dd51b4ad0c42f59eabdf5520482f777dfdccefe3304f1f80a9ed987deb279da`，且 70 条顺序、prompt、数据 manifest、seed、source inference config/commit、evaluator commit 与 scoring config 全部一致。A3.1 已关闭；后续 Base/SFT/DPO/External 必须使用同一个 `a3-scoring-v2`，下一步可进入 LoRA/QLoRA 小规模训练 pilot。

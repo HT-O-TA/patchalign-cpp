@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0 与 A0 已完成，A1 pilot 已生成；A2 rootless 安全执行与 70 条真实评分闭环、A3.0 双基线 executable pilot 已完成，下一步是终止 LF 协议冻结与 A3 训练 pilot。
+> 当前状态：G0 与 A0、A1 pilot、A2 rootless 安全执行与 70 条真实评分闭环、A3.0 双基线 executable pilot、A3.1 scoring v2 重评分均已完成；下一步是 LoRA/QLoRA 小规模训练 pilot。
 
 ## 1. 祝融当前结构
 
@@ -19,10 +19,11 @@
 │   ├── configs/
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
-│   │   │   └── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
+│   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
+│   │   │   └── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
 │   │   └── model/
 │   ├── docs/
-│   ├── schemas/                            # A0 Schema 与 A2 execution Draft Schema
+│   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
@@ -41,7 +42,7 @@
 │   │   │   └── summarize_a2_results.py      # A2 汇总与验收门禁
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
-│   │   ├── baseline/                        # A3 预检、推理、评分和比较脚本
+│   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -50,16 +51,20 @@
 │   │   ├── a3_preflight.sbatch              # CPU-only A3.0 预检
 │   │   ├── a3_baseline.sbatch               # 单 GPU 基线推理，2 小时时限
 │   │   ├── a3_score.sbatch                  # CPU-only rootless 评分
-│   │   ├── a3_compare.sbatch                # CPU-only 双基线比较
+│   │   ├── a3_compare.sbatch                # CPU-only A3.0 双基线比较
+│   │   ├── a3_1_rescore.sbatch              # CPU-only scoring v2 重评分
+│   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   └── g0_smoke.sbatch                 # 适配祝融和当前显式 prefix 的 G0 作业脚本
 │   ├── pyproject.toml
 │   └── artifacts/                          # 集群本地化产物；被 Git 忽略
 │       ├── a2-diagnostics/                 # A2 环境探测和沙箱自检证据
 │       │   └── selftest-code-v1/           # Job 93621、93628 使用的自检代码副本
-│       ├── a3/                              # A3.0 预测、评分、比较与 Slurm 日志
-│       │   ├── baseline/{m0_base,external}/ # Job 93717、93718 及其评分
-│       │   ├── comparison/93721/            # 双基线可比性与汇总
-│       │   └── logs/                        # Job 93715、93717～93721 日志
+│       ├── a3/                              # A3 预测、版本化评分、比较与 Slurm 日志
+│       │   ├── baseline/{m0_base,external}/ # Job 93717、93718 预测与 strict-v1 评分
+│       │   │   └── scoring-v2/{93822,93823}/# A3.1 两组独立重评分 artifact
+│       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
+│       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
+│       │   └── logs/                        # A3.0 与 Job 93822～93824、93828 日志
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -408,3 +413,12 @@ patchalign-cpp/
 - 两组 70 条生成均无 failure/OOM/timeout，确定性 probe 全部稳定；严格原样评分均为 0/70；
 - 发现 56 个 strict parse 成功的 raw completion 中有 55 个缺少终止 LF，作为 A3.1 协议问题记录，未修改或回填 A3.0 artifact；
 - A3.0 已关闭；正式 500 条评测集、SFT/DPO 训练和质量结论仍未开始。
+
+### 2026-09-03：完成 A3.1 scoring v2 重评分
+
+- 新增 `a3_scoring_v2.json`、ADR-0005、A3.1 文档、版本化评分入口和比较器；
+- 新增 CPU-only `a3_1_rescore.sbatch` 与 `a3_1_compare.sbatch`，所有 A3.1 作业均未申请 GPU；
+- 集群保留 M0 Job `93822`、External Job `93823` 的独立 `scoring-v2` 目录，以及成功比较 Job `93828`；
+- 原 A3.0 prediction 与 strict-v1 评分保持不变；v2 artifact 单独落盘并记录 raw/evaluated SHA256；
+- scoring v2 令 M0 apply/compile 从 0 增至 2，External 从 0 增至 13，但两组 Pass 仍为 0；
+- A3.1 已关闭；下一步进入 LoRA/QLoRA 小规模训练 pilot。
