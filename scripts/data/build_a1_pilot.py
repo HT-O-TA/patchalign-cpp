@@ -134,6 +134,54 @@ def make_sample(item: dict[str, Any], split: str, ordinal: int) -> dict[str, Any
     sample["provenance_hash"] = digest({"source_shard": record["_shard"], "source_id": bug_id, "sample": sample})
     return sample
 
+def select_isolated(
+    pools: dict[str, list[dict[str, Any]]],
+    wanted: dict[str, dict[str, int]],
+) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    used_families: set[str] = set()
+    for split in ("train", "validation"):
+        for source in ("commitpackft", "runbugrun"):
+            source_target = wanted[split][source]
+            function_target = round(source_target * 0.85)
+            level_targets = {
+                "function": function_target,
+                "file_window": source_target - function_target,
+            }
+            pool = sorted(
+                pools[source],
+                key=lambda item: hashlib.sha256(
+                    f"{item['info']['family']}:"
+                    f"{item['record'].get('id', item['record'].get('commit'))}".encode()
+                ).hexdigest(),
+            )
+            for level, level_target in level_targets.items():
+                if level_target == 0:
+                    continue
+                count = 0
+                for item in pool:
+                    family = item["info"]["family"]
+                    if (
+                        item["info"]["level"] != level
+                        or family in used_families
+                        or (
+                            source == "runbugrun"
+                            and item["record"]["_upstream_split"] != split
+                        )
+                    ):
+                        continue
+                    selected.append({**item, "_split": split})
+                    used_families.add(family)
+                    count += 1
+                    if count == level_target:
+                        break
+                if count != level_target:
+                    raise RuntimeError(
+                        f"cannot fill {split}/{source}/{level}: "
+                        f"requested {level_target}, got {count}"
+                    )
+    return selected
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -150,22 +198,17 @@ def main() -> None:
             seen[source] += 1; ok, reason, info = eligible(record)
             if ok: pools[source].append({"record": record, "info": info})
             else: rejects[f"{source}:{reason}"] += 1
-    selected: list[dict[str, Any]] = []; used: dict[str, set[str]] = {"train": set(), "validation": set()}
-    for split in ("train", "validation"):
-        for source in ("commitpackft", "runbugrun"):
-            source_target = wanted[split][source]
-            level_targets = {"function": round(source_target * 0.85), "file_window": source_target - round(source_target * 0.85)}
-            pool = sorted(pools[source], key=lambda item: hashlib.sha256(f"{item['info']['family']}:{item['record'].get('id', item['record'].get('commit'))}".encode()).hexdigest())
-            for level, level_target in level_targets.items():
-                count = 0
-                for item in pool:
-                    family = item["info"]["family"]
-                    if item["info"]["level"] != level or family in used[split] or (source == "runbugrun" and item["record"]["_upstream_split"] != split): continue
-                    selected.append({**item, "_split": split}); used[split].add(family); count += 1
-                    if count == level_target: break
-                if count != level_target: raise RuntimeError(f"cannot fill {split}/{source}/{level}: requested {level_target}, got {count}")
+    selected = select_isolated(pools, wanted)
     samples = [make_sample(item, item["_split"], index) for index, item in enumerate(selected)]
-    output = args.output_dir.resolve(); output.mkdir(parents=True, exist_ok=True)
+    families = {
+        split: {sample["repo_family"] for sample in samples if sample["split"] == split}
+        for split in ("train", "validation")
+    }
+    overlap = sorted(families["train"] & families["validation"])
+    if overlap: raise RuntimeError(f"repository-family split overlap: {overlap}")
+    output = args.output_dir.resolve()
+    if output.exists(): raise RuntimeError(f"refusing to overwrite output: {output}")
+    output.mkdir(parents=True)
     for split in ("train", "validation"):
         with (output / f"{split}.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
             for sample in samples:
@@ -175,8 +218,31 @@ def main() -> None:
     report = {"raw_records_seen": dict(seen), "usable_candidates": {k: len(v) for k, v in pools.items()}, "reject_counts": dict(sorted(rejects.items())), "source_counts": {"train": {"CommitPackFT": args.train_commitpack, "RunBugRun": args.train - args.train_commitpack}, "validation": {"CommitPackFT": args.validation_commitpack, "RunBugRun": args.validation - args.validation_commitpack}}, "task_level_counts": {f"{split}:{level}": sum(s["split"] == split and s["task_level"] == level for s in samples) for split in ("train", "validation") for level in ("function", "file_window")}, "executable_status": "not_executable_until_A2_wrapper_and_sandbox", "limitations": ["RunBugRun standalone CodeNet submissions lack Git commits and natural-language problem statements.", "CommitPackFT repository checkout/build/test replay remains an A2 task.", "Public/hidden/regression commands are null in A1 pilot."]}
     (output / "filter-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (output / "dataset-manifest.json").write_text(json.dumps({"schema_version": "0.2.0", "samples": [{"sample_id": s["sample_id"], "source_dataset": s["source_dataset"], "split": s["split"], "provenance_hash": s["provenance_hash"]} for s in samples]}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    (output / "split-report.json").write_text(json.dumps({"upstream_split_preserved_for_runbugrun": True, "repository_family_isolation": True, "requested": wanted}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    split_report = {
+        "upstream_split_preserved_for_runbugrun": True,
+        "repository_family_isolation": True,
+        "repository_family_overlap_count": len(overlap),
+        "repository_family_overlap": overlap,
+        "actual_unique_repository_families": {
+            split: len(families[split]) for split in ("train", "validation")
+        },
+        "requested": wanted,
+    }
+    (output / "split-report.json").write_text(json.dumps(split_report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (output / "schema-validation-report.json").write_text(json.dumps({"schema": "schemas/sample-v0.2.schema.json", "sample_count": len(samples), "valid_count": len(samples) - len(errors), "invalid_count": len(errors), "errors": errors}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    artifact_names = (
+        "dataset-manifest.json",
+        "filter-report.json",
+        "schema-validation-report.json",
+        "split-report.json",
+        "train.jsonl",
+        "validation.jsonl",
+    )
+    checksum_lines = [
+        f"{hashlib.sha256((output / name).read_bytes()).hexdigest()}  {name}"
+        for name in artifact_names
+    ]
+    (output / "sha256sums.txt").write_text("\n".join(checksum_lines) + "\n", encoding="utf-8")
     if errors: raise RuntimeError(f"schema validation failed: {len(errors)} errors")
     print(json.dumps({"output_dir": str(output), "samples": len(samples), "report": report}, ensure_ascii=False, sort_keys=True))
 

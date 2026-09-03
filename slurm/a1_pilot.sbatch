@@ -1,24 +1,21 @@
 #!/bin/bash
+#SBATCH --job-name=patchalign-a1-isolated-v2
 #SBATCH --partition=gre
 #SBATCH --nodes=1
-# A1 parsing and sampling is CPU-only; do not reserve an A800 for this job.
-# Keep the request small to avoid unnecessary QOS per-user memory pressure.
-#SBATCH --mem=16G
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=4G
 #SBATCH --time=02:00:00
-#SBATCH --cpus-per-task=4
-#SBATCH --output=slurm-%j.out
+#SBATCH --cpus-per-task=2
+#SBATCH --output=/mingli01/project/ht/patchalign-cpp/artifacts/a3/logs/a1-isolated-v2-%j.out
 
 set -euo pipefail
-
-module load conda/3
-module load cuda/13.0
-source /persist_data/apps/miniconda3/etc/profile.d/conda.sh
+trap 'rc=$?; echo "A1 isolated rebuild failed: line=${LINENO} exit=${rc} command=${BASH_COMMAND}" >&2; exit ${rc}' ERR
 
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 REPO=/mingli01/project/ht/patchalign-cpp
 RAW_COMMITPACK=/mingli01/data/patchalign-cpp/a1/raw/commitpackft
 RAW_RUNBUGRUN=/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data
-OUTPUT=/mingli01/data/patchalign-cpp/a1/processed/pilot-v1-stratified
+OUTPUT=/mingli01/data/patchalign-cpp/a1/processed/pilot-v2-isolated
 
 export PATH="${ENV_PREFIX}/bin:${PATH}"
 export PYTHONNOUSERSITE=1
@@ -53,4 +50,6 @@ print(json.dumps({"schema_report": report}, sort_keys=True))
 PY
 
 echo "git_commit=${EXPECTED_COMMIT}"
+sha256sum "${OUTPUT}"/*.json "${OUTPUT}"/*.jsonl "${OUTPUT}/sha256sums.txt"
+
 echo "output=${OUTPUT}"
