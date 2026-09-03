@@ -49,10 +49,14 @@ def save_checkpoint(
     scheduler: Any,
     torch: Any,
     state: dict[str, Any],
+    tag: str | None = None,
 ) -> Path:
     checkpoints = output / "checkpoints"
     checkpoints.mkdir(parents=True, exist_ok=True)
-    destination = checkpoints / f"checkpoint-step-{state['completed_steps']:06d}"
+    name = f"checkpoint-step-{state['completed_steps']:06d}"
+    if tag is not None:
+        name += f"-{tag}"
+    destination = checkpoints / name
     require(not destination.exists(), f"checkpoint already exists: {destination}")
     temporary = Path(tempfile.mkdtemp(prefix=".building-", dir=checkpoints))
     try:
@@ -311,7 +315,7 @@ def main() -> None:
         ):
             state["best"] = candidate
         last_checkpoint = save_checkpoint(
-            args.output_dir, model, optimizer, scheduler, torch, state
+            args.output_dir, model, optimizer, scheduler, torch, state, tag=f"epoch-{epoch_index + 1}"
         )
         if state["best"]["optimizer_step"] == state["completed_steps"]:
             state["best"]["checkpoint"] = str(last_checkpoint.relative_to(args.output_dir))
