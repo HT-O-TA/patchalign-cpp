@@ -13,13 +13,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def config() -> dict:
-    return json.loads((ROOT / "configs/data/a3_confirmation_qualification_v1.json").read_text(encoding="utf-8"))
+    return json.loads((ROOT / "configs/data/a3_confirmation_qualification_v1_1.json").read_text(encoding="utf-8"))
 
 
 def test_confirmation_qualification_is_bound() -> None:
     value = config()
     validate_config(value)
-    assert value["required_counts"] == {"function": 100, "file_window": 25}
+    assert value["required_counts"] == {"function": 100, "file_window": 24}
     assert value["qualification"]["sandbox_policy_version"] == "bubblewrap-rootless-v1"
 
 

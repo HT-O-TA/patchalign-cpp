@@ -1,0 +1,45 @@
+{
+  "version": "a3-confirmation-qualification-v1.1",
+  "candidate": {
+    "directory": "/mingli01/data/patchalign-cpp/a3/confirmation-candidates-v1",
+    "manifest_sha256": "sha256:bbfc24aae8619cce743cfc37c3ec9ccdbabfe75d528bf551ecc5eb5bbf2b9fe0",
+    "source_config_sha256": "sha256:61517afa3643ffeb2f4ed5ae1023220ecdfd31766f63d81e21a81d17f9fb49b3",
+    "task_level_counts": {
+      "function": 218,
+      "file_window": 53
+    },
+    "original_required_counts": {
+      "function": 100,
+      "file_window": 25
+    }
+  },
+  "required_counts": {
+    "function": 100,
+    "file_window": 24
+  },
+  "capacity_amendment": {
+    "reason": "all 53 isolated file_window candidates evaluated; only 24 passed unchanged qualification",
+    "failed_job_id": "94585",
+    "model_inference_started": false
+  },
+  "source_progress": {
+    "directory": "/mingli01/data/patchalign-cpp/a3/confirmation-qualification-v1",
+    "manifest_sha256": "sha256:94ae6d8533df28583566427d0bce0e51ceca158195b3d05fbf499fce32a5bf10",
+    "evaluation_count": 245
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "qualification": {
+    "double_replay_required": true,
+    "max_input_tokens": 4096,
+    "allowed_path": "main.cpp",
+    "sandbox_policy_version": "bubblewrap-rootless-v1",
+    "output_matcher_version": "runbugrun-legacy-5c023d62"
+  },
+  "progress_directory": "/mingli01/data/patchalign-cpp/a3/confirmation-qualification-v1-1",
+  "output_directory": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1"
+}

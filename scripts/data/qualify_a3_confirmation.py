@@ -28,8 +28,8 @@ from scripts.data.qualify_a3_formal_holdout import (
 )
 
 
-VERSION = "a3-confirmation-v1"
-CONFIG_VERSION = "a3-confirmation-qualification-v1"
+VERSION = "a3-confirmation-v1.1"
+CONFIG_VERSION = "a3-confirmation-qualification-v1.1"
 CANDIDATE_VERSION = "a3-confirmation-candidate-v1"
 EXPECTED_CANDIDATE_SHA256 = "bbfc24aae8619cce743cfc37c3ec9ccdbabfe75d528bf551ecc5eb5bbf2b9fe0"
 EXPECTED_SOURCE_CONFIG_SHA256 = "61517afa3643ffeb2f4ed5ae1023220ecdfd31766f63d81e21a81d17f9fb49b3"
@@ -50,7 +50,21 @@ def validate_config(config: dict[str, Any]) -> None:
         raise RuntimeError("confirmation source config changed")
     if candidate["task_level_counts"] != {"function": 218, "file_window": 53}:
         raise RuntimeError("confirmation candidate counts changed")
-    if config["required_counts"] != {"function": 100, "file_window": 25}:
+    if candidate["original_required_counts"] != {"function": 100, "file_window": 25}:
+        raise RuntimeError("original confirmation quota identity changed")
+    if config["capacity_amendment"] != {
+        "reason": "all 53 isolated file_window candidates evaluated; only 24 passed unchanged qualification",
+        "failed_job_id": "94585",
+        "model_inference_started": False,
+    }:
+        raise RuntimeError("confirmation capacity amendment changed")
+    if config["source_progress"] != {
+        "directory": "/mingli01/data/patchalign-cpp/a3/confirmation-qualification-v1",
+        "manifest_sha256": "sha256:94ae6d8533df28583566427d0bce0e51ceca158195b3d05fbf499fce32a5bf10",
+        "evaluation_count": 245,
+    }:
+        raise RuntimeError("confirmation source progress changed")
+    if config["required_counts"] != {"function": 100, "file_window": 24}:
         raise RuntimeError("confirmation denominator changed")
     model = config["model"]
     if model["model_id"] != "Qwen/Qwen2.5-Coder-7B" or model["revision"] != "0396a76181e127dfc13e5c5ec48a8cee09938b02":
@@ -107,7 +121,7 @@ def main() -> None:
         raise RuntimeError("wrong confirmation candidate version")
     if candidate_manifest["candidate_task_levels"] != config["candidate"]["task_level_counts"]:
         raise RuntimeError("candidate composition mismatch")
-    if candidate_manifest["required_task_levels"] != config["required_counts"]:
+    if candidate_manifest["required_task_levels"] != config["candidate"]["original_required_counts"]:
         raise RuntimeError("candidate quota mismatch")
     if candidate_manifest["config_sha256"] != config["candidate"]["source_config_sha256"]:
         raise RuntimeError("candidate source config mismatch")
@@ -131,6 +145,17 @@ def main() -> None:
         write_json_atomic(progress_manifest, identity)
 
     evaluations = load_cached_evaluations(progress_dir, items_by_order)
+    source_progress = Path(config["source_progress"]["directory"])
+    source_manifest = source_progress / "progress-manifest.json"
+    if "sha256:" + sha256_file(source_manifest) != config["source_progress"]["manifest_sha256"]:
+        raise RuntimeError("source progress manifest hash mismatch")
+    source_evaluations = load_cached_evaluations(source_progress, items_by_order)
+    if len(source_evaluations) != config["source_progress"]["evaluation_count"]:
+        raise RuntimeError("source progress evaluation count mismatch")
+    for order, evaluation in source_evaluations.items():
+        if order in evaluations and evaluations[order] != evaluation:
+            raise RuntimeError(f"conflicting cached evaluation: {order}")
+        evaluations.setdefault(order, evaluation)
     tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True, trust_remote_code=False, use_fast=True)
     prompt_tokens = {
         order: prompt_token_count(candidate_dir, evaluation, tokenizer, config["qualification"]["allowed_path"])
