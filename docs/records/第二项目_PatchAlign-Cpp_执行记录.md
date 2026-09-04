@@ -868,3 +868,17 @@ artifacts/a3/comparison-a32/93955/comparison.json
 ```
 
 结论：A3.2 已关闭，NF4 QLoRA 只被选为后续正式 SFT 的候选加载方案；70 条 pilot 不应用正式 400 条门禁，不构成正式 SFT 质量结论，正式训练尚未启动。
+
+## 22. A3.3 Job 94111 超时与恢复实现
+
+Job 94111 实际运行 06:00:29 后以 TIMEOUT 结束，sacct 记录 MaxRSS 98766828K。它已通过 133 项测试和 Bubblewrap 自检，并成功生成 900 function + 250 file-window 候选池；候选 manifest SHA-256 为 2012f92c9a042c2f358e6984ae1abd7ffd095e7b88ffbce283e16ced0a5e1b52。正式 holdout、SFT、哈希锁和 preflight 均未生成。
+
+调查确认 1,150 个候选合计含 109,024 个测试实例，其中 933 个候选至少含 100 个测试。旧实现一次性提交全部候选，逐候选执行 buggy/fixed 回放，并对初次合格项再次回放；全部完成后才选取 400/100 和写盘。因此失败的直接原因是 6 小时时限耗尽，代码的全量先算、末尾写盘策略使本轮计算无法恢复；没有证据表明 Slurm 语法或 C++ 编译入口错误。
+
+依赖 Job 94118～94123 均未实际执行，确认后已取消，不消耗 GPU 计算。
+
+提交 b8063ecc89549811ef6d72f364ad6dcb8a62d384 将资格筛选改为确定性任务层顺序、16 候选一批、完成一项即原子写入检查点、达到 400/100 即停止。恢复时核验候选 manifest SHA-256、候选版本、任务配额、沙箱策略与输出匹配器，不匹配则拒绝复用。新增独立 qualification/finalization Slurm 作业和完整依赖链提交入口，并修正冻结顺序为先写 formal data lock、再执行 preflight。
+
+本机 Python 编译、Shell 语法和 diff 检查通过；集群冻结环境在设置 PYTHONNOUSERSITE=1 后通过 A3.3 相关 6 passed 与全量 135 passed。直接测试时曾遗漏该环境变量，用户目录残缺 boto3 因缺少 jmespath 导致 collection error；正式 Slurm 脚本始终设置该变量，因此这不是项目依赖缺失，也未修改环境。
+
+替代流水线尚未提交；最终 Job ID、资格检查点数量、正式数据哈希和训练结果待后续回填。

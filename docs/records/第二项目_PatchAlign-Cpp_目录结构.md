@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 Job 94111 正在冻结正式数据，GPU/CPU 正式评测链 94118～94123 已按依赖排队。
+> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 首次数据 Job 94111 超时，下游 94118～94123 已取消，可恢复替代实现已验证待提交。
 
 ## 1. 祝融当前结构
 
@@ -59,6 +59,8 @@
 │   │   ├── a3_compare.sbatch                # CPU-only A3.0 双基线比较
 │   │   ├── a3_1_rescore.sbatch              # CPU-only scoring v2 重评分
 │   │   ├── a3_3_data.sbatch                # CPU 正式数据构建、资格回放、哈希锁与 preflight
+│   │   ├── a3_3_qualify.sbatch             # CPU 可恢复资格筛选与正式 holdout 冻结
+│   │   ├── a3_3_finalize.sbatch            # CPU SFT 构建、哈希锁与正式 preflight
 │   │   ├── a3_3_infer.sbatch               # 单 GPU、可恢复的 M0/M1 正式推理
 │   │   ├── a3_3_train.sbatch               # 单 GPU、checkpoint 可恢复的正式 NF4 QLoRA
 │   │   ├── a3_3_score.sbatch               # CPU-only 正式 scoring v2
@@ -109,6 +111,7 @@
 ```text
 /mingli01/data/patchalign-cpp/a3/
 ├── formal-holdout-candidates-v1/           # 900/250 待资格回放候选
+├── formal-holdout-qualification-v1/        # 候选级原子 JSON 检查点，可跨作业恢复
 ├── formal-holdout-v1/                      # 冻结 400 function + 100 file-window
 └── formal-sft-v1/                          # 冻结 5,000 train + 500 validation 与哈希锁
 
@@ -456,3 +459,13 @@ patchalign-cpp/
 - CPU Job `93953`/`93954`/`93955` 完成 scoring v2 与可比性选择；新增两组 `sft-pilot` 和一个 `comparison-a32` artifact 目录；
 - BF16/NF4 的 parse/apply/compile/Pass 分别为 70/42/38/1 与 70/39/36/1；成功数相同，按资源 tie-break 选择 NF4；
 - A3.2 已关闭，正式 SFT 尚未启动。
+
+### 2026-09-04：A3.3 资格筛选拆分与恢复目录
+
+- 保留 Job 94111 构建的 formal-holdout-candidates-v1/，不重建、不覆盖；
+- 新增集群数据目录 formal-holdout-qualification-v1/，其中 manifest 锁定候选与执行策略，每个候选结果使用独立原子 JSON；
+- 新增 a3_3_qualify.sbatch 与 a3_3_finalize.sbatch，把长时间资格回放和较短的数据冻结/preflight 解耦；
+- 新增 submit_a3_3_pipeline.sh，一次提交 CPU 前置与单 GPU 正式训练/评测依赖链；
+- a3_3_data.sbatch 保留为从候选构建开始的一体化兼容入口，同样支持 progress 恢复并修正为“先冻结锁、后 preflight”；
+- 集群冻结环境验证 6 项相关测试与 135 项全量测试均通过；
+- 此次结构更新提交为 b8063ecc89549811ef6d72f364ad6dcb8a62d384。
