@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-04 20:34:24 CST（2026-09-04T12:34:24Z）
+最后核验：2026-09-04 20:48:37 CST（2026-09-04T12:48:37Z）
 
-项目状态：**A3.4 CPU 准备进行中**。SFT-R2 契约和安全子集已冻结；训练/推理入口与 preflight 尚待实现，未申请 GPU。
+项目状态：**A3.4 SFT-R2 GPU 训练中**。CPU 数据冻结与 fail-closed preflight 已通过；Job `94524` 使用 1 张 GPU 运行。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | CPU 准备 | Job `94521` 完成 1,200/117 安全子集冻结；训练入口和 preflight 待实现 |
+| A3.4 | GPU 训练中 | 数据 Job `94521`、preflight Job `94523` 已完成；训练 Job `94524` 在 `gpu10` 运行 |
 
 ## A3.3 当前有效链
 
@@ -58,13 +58,14 @@
 - `sacct` 未发现恢复后的 PatchAlign 排队或运行作业；管理节点直接 `squeue` 返回权限拒绝，因此当前结论以用户 accounting 记录和无新 Job ID 为依据。
 - 修正轮次正式命名为 `A3.4 / SFT-R2`，候选为 `M1-R2`；机器配置和方法见 [A3.4 协议](a3_4_sft_r2.md)。
 - 静态选择器只消费冻结 A3.3 SFT train/validation；CPU-only Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项测试和 1,200/117 集群重建。train/validation SHA256 为 `6eeab690...678cc`、`878abb76...4b73`，selection manifest 为 `7492a373...30ac`。
-- A4 executable preference data 未启动；Job `94521` 已结束，当前没有 A3.4 运行或排队作业，也未申请 GPU。
+- preflight Job `94523` 以 `COMPLETED 0:0` 在 28 秒内完成 `145 passed`、数据/adapter/token/holdout 身份校验；报告 SHA256 为 `9da6ed41...ce3b`。
+- 单 GPU 训练 Job `94524` 已在 `gpu10` 启动，运行代码提交为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`；未预提交推理作业。A4 仍未启动。
 
 ## 后续执行清单
 
 1. **已完成**：集群 CPU-only 重建 R2 数据并核对计数、标签分布、输出 SHA256 和 selection manifest（Job `94521`）。
-2. 实现版本化 R2 训练/恢复入口与 fail-closed preflight，并在本地、集群运行测试。
-3. 预检通过后串行提交单 GPU SFT-R2 与单 GPU 固定 500 条推理。
+2. **已完成**：实现版本化 R2 训练/恢复入口与 fail-closed preflight；集群全量测试 `145 passed`，preflight Job `94523` 通过。
+3. **进行中**：单 GPU SFT-R2 Job `94524` 已运行；训练成功后才提交单 GPU 固定 500 条推理。
 4. CPU-only 运行 scoring v2，并分别对 M0 promotion baseline 和 M1 diagnostic baseline 比较；不得修改固定分母或阈值。
 5. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
 6. 建立并冻结不少于 150 条的 Defects4C 外部评测集。

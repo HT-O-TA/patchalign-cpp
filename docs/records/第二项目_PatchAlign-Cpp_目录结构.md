@@ -53,7 +53,7 @@
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
-│   │   ├── training/                        # A3.2 pilot 与 A3.3 可恢复训练、推理、冻结和比较
+│   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、可恢复训练与验证
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -72,6 +72,8 @@
 │   │   ├── a3_3_score.sbatch               # CPU-only 正式 scoring v2
 │   │   ├── a3_3_compare.sbatch             # CPU-only 冻结质量门比较
 │   │   ├── a3_4_data.sbatch                # A3.4 CPU-only 安全子集冻结
+│   │   ├── a3_4_preflight.sbatch           # A3.4 CPU-only 全量 fail-closed 预检
+│   │   ├── a3_4_train.sbatch               # A3.4 单 GPU 可恢复 adapter continuation
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -88,6 +90,7 @@
 │       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
 │       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
 │       │   ├── formal/                      # A3.3 preflight、M0/M1、checkpoint、评分和比较
+│       │   ├── sft-r2/                    # A3.4 preflight、训练 checkpoint 与后续评测
 │       │   │   └── history/                 # 不完整 M0 等失败正式产物，只读归档
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择

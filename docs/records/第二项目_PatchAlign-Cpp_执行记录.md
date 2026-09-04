@@ -925,4 +925,6 @@ preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 50
 
 训练协议从 A3.3 最佳 epoch 2 / step 1,250 adapter（SHA256 `807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f`）继续，重置 optimizer/scheduler，以 `2e-5` 学习率对安全子集训练 1 epoch、150 optimizer steps。原 500 条 holdout、raw completion、greedy Pass@1、512 输出 token、scoring v2、固定分母和 ADR-0004 阈值保持不变；不增加候选过滤、拒绝或重排。
 
-CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向测试和集群重建；train/validation SHA256 与冻结配置一致，selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。该作业申请 2 CPU、4 GiB、0 GPU。下一步是实现独立 preflight 与训练恢复入口，通过后才提交单 GPU 训练和推理。
+CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向测试和集群重建；train/validation SHA256 与冻结配置一致，selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。该作业申请 2 CPU、4 GiB、0 GPU。
+
+提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c` 新增 R2 配置验证、数据与 adapter 身份验证、CPU preflight、可恢复 adapter-continuation 训练器及对应 Slurm 入口。集群全量测试为 `145 passed`。CPU-only preflight Job `94523` 以 `COMPLETED 0:0` 在 28 秒内验证 1,200/117 子集、M1 adapter、原 500 validation 和 400/100 holdout token 身份；报告 SHA256 为 `9da6ed4148026d2f0b472ce97577da60f746444b84cde491951fb7b1d885ce3b`。单 GPU 训练 Job `94524` 随后在 `gpu10` 启动，未预提交推理作业。
