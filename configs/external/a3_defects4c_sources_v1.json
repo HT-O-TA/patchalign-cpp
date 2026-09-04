@@ -1,0 +1,20 @@
+{
+  "version": "a3-defects4c-sources-v1",
+  "official_source": {
+    "directory": "/mingli01/data/patchalign-cpp/external/defects4c/source",
+    "git_commit": "aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39"
+  },
+  "selection": {
+    "exclude_project_prefixes": ["llvm___llvm"],
+    "expected_projects": 43,
+    "expected_unique_pairs": 217,
+    "expected_checkout_targets": 217
+  },
+  "download": {
+    "output_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",
+    "progress_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/source-progress-v1",
+    "workers": 4,
+    "fetch_timeout_seconds": 1200,
+    "submodule_timeout_seconds": 1800
+  }
+}
