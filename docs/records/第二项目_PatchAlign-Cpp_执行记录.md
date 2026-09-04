@@ -943,4 +943,4 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向�
 
 集群全量测试为 `154 passed`。CPU-only Job `94537` 以 `COMPLETED 0:0` 结束，用时 21 秒、0 GPU；报告确认 holdout 500 条、function/file-window 为 400/100、输入 token 170～3,589，重建 prompts SHA256 为 `1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f`，与 A3.3 M0/M1 prompt artifact 逐字节一致。preflight 报告 SHA256 为 `8eb0350779242ee62dd5c734a0e8f44cdcf70fb00a15c70131cdde84f120f88c`。
 
-单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，申请 1 GPU、8 CPU、32 GiB、8 小时。作业越过身份检查和模型加载后开始按样本原子追加预测；支持在 segment 中断后使用相同 state、preflight 和 commit 恢复。评分作业尚未提交。
+单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，申请 1 GPU、8 CPU、32 GiB、8 小时。作业越过身份检查和模型加载后按样本原子追加预测，并以 `COMPLETED 0:0` 在 1 小时 13 分 49 秒结束。500 条记录全部为 `ok`，499 条 strict diff，3 条确定性重放全部稳定；无 generation failure 或 OOM。predictions/run manifest SHA256 为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a` 和 `88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878`。本结果仅证明生成闭环与格式遵循，补丁正确率和三例 timeout 是否消失仍等待 scoring v2；评分作业尚未提交。
