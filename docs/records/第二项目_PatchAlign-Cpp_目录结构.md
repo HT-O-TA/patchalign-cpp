@@ -3,7 +3,7 @@
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
 > 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
 > 首次建立：2026-08-30
-> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 可恢复替代链 94174～94181 已提交，CPU 资格筛选 94174 运行中。
+> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 正式数据与 preflight 已冻结，M0 Job 94338 正在单 GPU 运行。
 
 ## 1. 祝融当前结构
 
@@ -81,6 +81,7 @@
 │       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
 │       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
 │       │   ├── formal/                      # A3.3 preflight、M0/M1、checkpoint、评分和比较
+│       │   │   └── history/                 # 不完整 M0 等失败正式产物，只读归档
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3.0～A3.2 Slurm 原始日志
@@ -112,8 +113,13 @@
 /mingli01/data/patchalign-cpp/a3/
 ├── formal-holdout-candidates-v1/           # 900/250 待资格回放候选
 ├── formal-holdout-qualification-v1/        # 候选级原子 JSON 检查点，可跨作业恢复
-├── formal-holdout-v1/                      # 冻结 400 function + 100 file-window
-└── formal-sft-v1/                          # 冻结 5,000 train + 500 validation 与哈希锁
+├── formal-holdout-v1/                      # token 门禁后的冻结 400 function + 100 file-window
+├── formal-sft-v1/                          # 当前有效 5,000 train + 500 validation 与哈希锁
+└── history/                                # 被后续门禁替代、未通过 preflight 的冻结产物
+    ├── formal-holdout-v1-pre-prompt-token-gate-94174/
+    ├── formal-sft-v1-pre-prompt-token-gate-94304/
+    ├── formal-sft-v1-preflight-config-drift-94320/
+    └── formal-sft-v1-preflight-input-mode-94328/
 
 /mingli01/models/
 └── Qwen2.5-Coder-7B/                       # 主训练 Base 模型，只读使用
@@ -130,7 +136,7 @@
 │   │   ├── a0/                            # 索引、核心协议、Schema、实验、治理
 │   │   ├── decisions/
 │   │   ├── development/
-│   │   ├── evidence/                      # A0 合并证据与 G0 作业证据
+│   │   ├── evidence/                      # A0/G0 证据与 A3.3 论文问题材料
 │   │   └── records/                       # 执行记录与独立目录台账
 │   ├── schemas/
 │   ├── scripts/smoke/
@@ -469,3 +475,10 @@ patchalign-cpp/
 - a3_3_data.sbatch 保留为从候选构建开始的一体化兼容入口，同样支持 progress 恢复并修正为“先冻结锁、后 preflight”；
 - 集群冻结环境验证 6 项相关测试与 135 项全量测试均通过；
 - 此次结构更新提交为 b8063ecc89549811ef6d72f364ad6dcb8a62d384。
+
+### 2026-09-04：A3.3 prompt 门禁与正式历史归档
+
+- formal-holdout-v1 绑定 Qwen2.5-Coder-7B tokenizer、raw_completion 模式和 4,096-token 上限；Job 94312 复用执行缓存完成替换。
+- 新增数据 history/，保存旧 holdout、旧 SFT 及两次未通过 preflight 的 SFT；artifacts/a3/formal/history/ 保存 Job 94305 不完整 M0。
+- 新增 docs/evidence/a3_3_pipeline_findings.md，按“证据—根因—修正—论文意义”累计正式实验问题。
+- Job 94337 完成有效数据锁与 preflight；集群仓库在正式 GPU 链期间固定为 b9aa00248d4264eca0f75c378b004f462ddea9a6。

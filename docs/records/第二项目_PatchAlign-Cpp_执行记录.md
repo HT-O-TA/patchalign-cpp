@@ -882,3 +882,26 @@ Job 94111 实际运行 06:00:29 后以 TIMEOUT 结束，sacct 记录 MaxRSS 9876
 本机 Python 编译、Shell 语法和 diff 检查通过；集群冻结环境在设置 PYTHONNOUSERSITE=1 后通过 A3.3 相关 6 passed 与全量 135 passed。直接测试时曾遗漏该环境变量，用户目录残缺 boto3 因缺少 jmespath 导致 collection error；正式 Slurm 脚本始终设置该变量，因此这不是项目依赖缺失，也未修改环境。
 
 可恢复替代链已提交：CPU qualification 94174 → CPU finalization/preflight 94175 → M0 GPU 推理 94176；M0 CPU 评分 94177 与 GPU 正式 SFT 94178 均依赖 M0 推理，M1 GPU 推理 94179、CPU 评分 94180、最终 CPU 比较 94181 继续使用 afterok 串联。三个 GPU 作业各申请 1 张并严格串行。94174 已在 gpu16 启动但未申请 GPU，初始日志通过 6 项测试与 Bubblewrap 自检，progress manifest 已写入且首批候选检查点开始落盘。最终检查点数量、正式数据哈希和训练结果待后续回填。
+
+## 23. A3.3 正式数据门禁修订与有效 GPU 链
+
+Job 94174 完成 800 个候选的可恢复执行资格回放，共有 401 function 与 106 file-window 合格。旧 holdout 的 500 条实际推理提示中有 1 条达到 9,876 tokens，超过冻结的 4,096 上限；M0 Job 94305 在模型加载前 fail closed，未生成 predictions，不计为基线结果。
+
+提交 `87dd746` 将 Qwen2.5-Coder-7B tokenizer、raw-completion 正式模板和 public test 纳入 holdout 选择门禁，并在正式 preflight 对 500 条提示再次独立验证。Job 94312 复用既有 800 条执行检查点，在 `00:01:00` 内完成，不重新运行 C++ 测试；最终选中 400 function + 100 file-window，提示长度 170～3,589。holdout manifest SHA256 为 `5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386`，qualification results 为 `4fcee2470087d2a5f525555682caf6729a039a8e10afe0241b29f7d51364a08d`。
+
+新 holdout 多排除了一个 RunBugRun problem family，Job 94313 因此确认 train/runbugrun/function 容量由 2,930 降至 2,929。提交 `ed48bda` 将唯一 1 条差额移至 CommitPackFT/file-window；正式 train 来源冻结为 2,044/2,956，任务层冻结为 4,213/787，validation 保持 200/300 与 425/75，总量、Schema、token、去重和隔离门禁均不变。
+
+Job 94320 与 94328 分别被独立验证器旧配额常量、未显式配置的 input_mode 拒绝。两次都在 CPU preflight 阶段停止，下游 Job 94321～94326 与 94329～94334 均为 0 秒未执行后取消。提交 `4d1cf28` 增加构建器/JSON/验证器的跨组件一致性回归测试；提交 `b9aa002` 把 `raw_completion` 显式冻结为 `evaluation.input_mode`，由配置验证器、preflight 和正式推理共同读取。
+
+Job 94337 在 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上以 `00:01:49`、MaxRSS `745896K` 完成 135 项测试、SFT 重建、哈希锁和正式 preflight。有效产物如下：
+
+```text
+dataset manifest  50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02
+formal data lock  f37eef03ce0a96ad1fa14622b8b7ef6f30c3f6bcc8dad85addbb1e4c53d12a12
+preflight report  c398dfc3a1539ec65c23b38865f26b73745dc8e6db280a0ac8d9cbfdde067922
+config            358894a6e8e3b54a1b71ea1884848296c8af6381063cb44fb1a0f70483f4abb4
+```
+
+preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 500 条提示最大 3,589。当前有效依赖链为 M0 GPU 94338 → M0 CPU 评分 94339 与正式 SFT GPU 94340 → M1 GPU 94341 → M1 CPU 评分 94342 → CPU 比较 94343；GPU 阶段严格串行且各申请 1 张。94338 已在 gpu28 启动并进入四分片模型加载，已越过此前的超长提示失败点。
+
+上述数据容量、后置 Schema、真实 prompt token、holdout/SFT 联合隔离和配置漂移问题统一记录在 `docs/evidence/a3_3_pipeline_findings.md`，作为论文实验设置、工程约束和局限性分析材料。失败冻结产物只读移入数据 history，Job 94305 的不完整 M0 移入 artifact history；均未覆盖或删除。

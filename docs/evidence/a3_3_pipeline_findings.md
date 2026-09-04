@@ -66,17 +66,21 @@
 - 保留 Sample Schema v0.2、Bubblewrap、buggy/fixed 双重稳定回放及输出匹配规则。
 - 不把 Job 94305 计为 M0 结果，不把数据管线修正计为模型提升。
 
-## 当前有效数据证据
+## 当前正式数据证据
 
-Job 94304 完成的旧 holdout 绑定版本在发现超长提示后停止用于正式 GPU 实验，相关产物将只读归档。其 SFT 构成为：
+Job 94337 在 Git 提交 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上完成最终冻结与 preflight：
 
-- train：5,000；CommitPackFT 2,043、RunBugRun 2,957；function 4,214、file_window 786；
+- holdout manifest：`5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386`；
+- qualification results：`4fcee2470087d2a5f525555682caf6729a039a8e10afe0241b29f7d51364a08d`；
+- SFT dataset manifest：`50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02`；
+- formal data lock：`f37eef03ce0a96ad1fa14622b8b7ef6f30c3f6bcc8dad85addbb1e4c53d12a12`；
+- preflight report：`c398dfc3a1539ec65c23b38865f26b73745dc8e6db280a0ac8d9cbfdde067922`；
+- train：5,000；CommitPackFT 2,044、RunBugRun 2,956；function 4,213、file_window 787；
 - validation：500；CommitPackFT 200、RunBugRun 300；function 425、file_window 75；
-- train 修改类型：single_line 2,703、multi_line 2,150、add_helper 64、refactor 83；
-- validation 修改类型：single_line 255、multi_line 235、add_helper 6、refactor 4；
-- 构建阶段额外拒绝 3 条 Schema 不合格样本。
+- train/validation 最大编码长度分别为 3,461/2,198；holdout 500 条实际 prompt 为 170～3,589；
+- 修改类型仍为 train 2,703/2,150/64/83、validation 255/235/6/4（single/multi/add-helper/refactor）。
 
-因为替换 holdout 会改变 family 排除集合，正式 SFT、数据锁和 preflight 必须一起重建；不能只替换评测样本后继续使用旧训练集。
+Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 SFT 和 Job 94305 不完整 M0 均保留在 history，不进入正式结果。当前有效链为 M0 94338、M0 评分 94339、SFT 94340、M1 94341、M1 评分 94342、比较 94343。
 
 ## 可用于论文的方法学表述草案
 
@@ -84,9 +88,7 @@ Job 94304 完成的旧 holdout 绑定版本在发现超长提示后停止用于�
 
 ## 待回填
 
-- 加入提示 token 门禁后的 holdout manifest、资格报告和 token 分布哈希；
-- 重建后的 SFT manifest、formal data lock 和 preflight 哈希；
-- 新作业链编号、各阶段用时、CPU/GPU/内存峰值；
+- 当前作业链各阶段最终用时、CPU/GPU/内存峰值；
 - M0、SFT、M1 的正式生成与评分结果；
 - 失败样本类型是否与源码长度、测试输入长度或任务层相关的后续统计；
 - 外部 Defects4C 门禁结果；完成前不得宣称完整 promotion gate 通过。
