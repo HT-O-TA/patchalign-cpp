@@ -1,0 +1,35 @@
+{
+  "version": "a3-defects4c-qualification-v1",
+  "source": {
+    "plan": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/source-progress-v1/source-plan.json",
+    "plan_sha256": "sha256:f07f76ad29c55a01374e12cde8507de623e587a54eac872d3e78f4b69ef12c7d",
+    "record_count": 203,
+    "official_directory": "/mingli01/data/patchalign-cpp/external/defects4c/source/defectsc_tpl",
+    "checkout_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out"
+  },
+  "runtime": {
+    "rootfs_directory": "/mingli01/data/patchalign-cpp/external/defects4c/rootfs-cb4efcac",
+    "rootfs_archive": "/mingli01/data/patchalign-cpp/external/defects4c/images/defects4c-rootfs-cb4efcac.tar.zst",
+    "rootfs_archive_sha256": "sha256:46d659c0f3dac1acb0849a17fd0cae2a18848f357847f3db2b61a5858f8f1bab",
+    "bash_sha256": "sha256:025cf78cd9d276019e916b97b0decd10cacb14902db8eb9f28233019babfb331",
+    "clang_sha256": "sha256:335b5d001032b1df06155f24e449108a78db000d57386bf93683e00138c6d513",
+    "cmake_sha256": "sha256:f9145454fdcbf2bb6518db2f93a1594fd778500b8c31cba9ecc66e4547e11f51",
+    "ninja_sha256": "sha256:f5b0c00c7cdc229f41d35d36770ff1fb38403cfcac41df481446537c36a02267",
+    "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+    "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
+    "conda_environment": "/mingli01/project/ht/.conda_envs/patchalign-cpp"
+  },
+  "qualification": {
+    "minimum_qualified": 150,
+    "cpu_count_per_case": 8,
+    "timeout_seconds": 5400,
+    "network": "unshared",
+    "rootfs": "read_only",
+    "official_source": "read_only",
+    "project_code": "read_only",
+    "checkout": "read_write",
+    "cleanup_build_directory": true
+  },
+  "progress_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/qualification-progress-v1",
+  "output_directory": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1"
+}
