@@ -5,10 +5,12 @@
     "git_commit": "aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39"
   },
   "selection": {
-    "exclude_project_prefixes": ["llvm___llvm"],
-    "expected_projects": 43,
-    "expected_unique_pairs": 217,
-    "expected_checkout_targets": 217
+    "prompt_file": "data/single_function_allinone.saved.jsonl",
+    "prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
+    "cpp_extensions": [".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"],
+    "expected_projects": 13,
+    "expected_unique_pairs": 206,
+    "expected_checkout_targets": 206
   },
   "download": {
     "output_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",

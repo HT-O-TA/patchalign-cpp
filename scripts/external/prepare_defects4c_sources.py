@@ -46,10 +46,12 @@ def validate_config(config: dict[str, Any]) -> None:
     if config["official_source"]["git_commit"] != SOURCE_COMMIT:
         raise RuntimeError("official source revision changed")
     if config["selection"] != {
-        "exclude_project_prefixes": ["llvm___llvm"],
-        "expected_projects": 43,
-        "expected_unique_pairs": 217,
-        "expected_checkout_targets": 217,
+        "prompt_file": "data/single_function_allinone.saved.jsonl",
+        "prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
+        "cpp_extensions": [".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"],
+        "expected_projects": 13,
+        "expected_unique_pairs": 206,
+        "expected_checkout_targets": 206,
     }:
         raise RuntimeError("Defects4C source selection changed")
     download = config["download"]
@@ -65,8 +67,6 @@ def discover(source: Path, config: dict[str, Any]) -> list[dict[str, Any]]:
         project_dir = project_path.parent
         project = json.loads(project_path.read_text(encoding="utf-8"))
         name = project["repo_name"]
-        if any(name.startswith(prefix) for prefix in config["selection"]["exclude_project_prefixes"]):
-            continue
         projects.add(name)
         bug_files = sorted(project_dir.glob("*bugs*.json"))
         if not bug_files:
@@ -81,7 +81,19 @@ def discover(source: Path, config: dict[str, Any]) -> list[dict[str, Any]]:
                         "commit_after": after,
                         "commit_before": before,
                     }
-    records = [pairs[key] for key in sorted(pairs)]
+    selection = config["selection"]
+    prompt_path = template / selection["prompt_file"]
+    if sha256_file(prompt_path) != selection["prompt_sha256"]:
+        raise RuntimeError("official Defects4C prompt file changed")
+    by_after = {record["commit_after"]: record for record in pairs.values()}
+    selected: dict[str, dict[str, Any]] = {}
+    for line in prompt_path.read_text(encoding="utf-8").splitlines():
+        prompt = json.loads(line)
+        sha, separator, filename = prompt["idx"].partition("___")
+        if separator and Path(filename).suffix.lower() in selection["cpp_extensions"] and sha in by_after:
+            selected[sha] = {**by_after[sha], "prompt_idx": prompt["idx"], "source_file": filename}
+    records = [selected[key] for key in sorted(selected)]
+    projects = {item["project"] for item in records}
     targets = {(item["project"], item["commit_after"]) for item in records}
     expected = config["selection"]
     observed = (len(projects), len(records), len(targets))
