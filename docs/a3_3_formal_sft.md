@@ -1,12 +1,12 @@
 # A3.3 正式 SFT 准备与冻结
 
-状态：静态契约与实现已冻结；首次 CPU 数据 Job 94111 超时；可恢复替代链 94174～94181 已提交，资格筛选 94174 正在 CPU 运行。
+状态：数据管线门禁修订中；新 holdout 已由 Job 94312 冻结，Job 94313 发现隔离后 RunBugRun/function 仅差 1 条，正在执行最小配额修订；正式 GPU 结果尚未产生。
 
 ## 冻结契约
 
 - 基座：`Qwen/Qwen2.5-Coder-7B`，revision `0396a76181e127dfc13e5c5ec48a8cee09938b02`。
-- 训练集/验证集：5,000/500；CommitPackFT 为 2,000/200，RunBugRun 为 3,000/300。
-- 任务级别：训练 4,250 function + 750 file_window；验证 425 + 75。
+- 训练集/验证集：5,000/500；正式训练联合配额为 CommitPackFT 2,044、RunBugRun 2,956，验证仍为 200/300。
+- 任务级别：训练 4,213 function + 787 file_window；验证 425 + 75。原始 85/15 是目标，正式值为真实容量约束下的最小修订。
 - 正式内部留出集：400 function + 100 file_window；与 SFT 数据按 problem/repository family 隔离。
 - A1 pilot-v2 的 300/50 原样嵌入；单个 repository/problem family 在单一 split 中最多 2 条。
 - 修改类型 35%/50%/10%/5% 是分布目标。受真实来源稀缺约束时记录实际值和偏差，不合成样本、不降低过滤条件。

@@ -37,6 +37,17 @@
 - 合成 fixture 不进入正式训练或评测配额；受控缺陷变异若未来进入训练，必须另立 ADR，且不得进入正式测试；
 - 各评测切片分别报告，不计算跨 RunBugRun、Defects4C 和 SWE-bench 的混合总分。
 
+### 2.1 A3.3 正式冻结修订（2026-09-04）
+
+A1 实测后，原始 2,000/3,000 来源目标与 85/15 任务层目标无法在全部隔离、Schema 和 token 条件下同时满足。正式训练集采用最小可行联合配额：
+
+| split | CommitPackFT function | CommitPackFT file_window | RunBugRun function | RunBugRun file_window | 合计 |
+|---|---:|---:|---:|---:|---:|
+| train | 1,284 | 760 | 2,929 | 27 | 5,000 |
+| validation | 129 | 71 | 296 | 4 | 500 |
+
+因此 train 来源为 CommitPackFT 2,044、RunBugRun 2,956，任务层为 function 4,213、file_window 787；validation 仍为 200/300 与 425/75。调整不改变总量，不放宽许可证、去重、family 隔离、Schema、4,096-token 或可执行 holdout 条件，也不使用合成样本补齐。完整失败证据与逐次修订见 `docs/evidence/a3_3_pipeline_findings.md`。
+
 ### 3. 构建阶段
 
 | 阶段 | 数量 | 目的 |

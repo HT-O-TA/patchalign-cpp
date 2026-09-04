@@ -12,11 +12,11 @@
     "freeze_lock": "formal-data-lock.json",
     "expected_counts": {"train": 5000, "validation": 500},
     "expected_task_levels": {
-      "train": {"function": 4214, "file_window": 786},
+      "train": {"function": 4213, "file_window": 787},
       "validation": {"function": 425, "file_window": 75}
     },
     "expected_sources": {
-      "train": {"CommitPackFT": 2043, "RunBugRun": 2957},
+      "train": {"CommitPackFT": 2044, "RunBugRun": 2956},
       "validation": {"CommitPackFT": 200, "RunBugRun": 300}
     }
   },

@@ -20,7 +20,7 @@
 
 - 证据：Job 94175 报告 RunBugRun/function 请求 2,973、最多得到 2,930；Job 94288 报告 CommitPackFT/function 请求 1,320、最多得到 1,284。
 - 根因：预设的来源比例、任务层比例和真实过滤后容量不能同时精确满足。
-- 修正：保持总量 5,000/500、验证集 200/300 来源构成、family 隔离、Schema 和 token 门禁不变；训练来源调整为 CommitPackFT 2,043、RunBugRun 2,957，训练任务层调整为 function 4,214、file_window 786。偏移量为 36 条，即总训练集的 0.72 个百分点。
+- 修正：保持总量 5,000/500、验证集 200/300 来源构成、family 隔离、Schema 和 token 门禁不变；首次调整后，加入 prompt-token 门禁的新 holdout 又排除了 1 个训练 family，最终训练来源冻结为 CommitPackFT 2,044、RunBugRun 2,956，训练任务层冻结为 function 4,213、file_window 787。相对原 85/15 任务层目标偏移 37 条，即总训练集的 0.74 个百分点。
 - 论文意义：数据组成应报告过滤后的实际联合分布，而不能只报告边际目标。本文将该调整作为真实数据容量约束下的预注册修订，不合成样本填配额，也不放宽隔离条件。
 
 ### 3. 候选满足来源过滤但不满足最终 Schema
@@ -36,6 +36,13 @@
 - 根因：原 preflight 校验了 SFT train/validation 编码长度和 holdout 数量，但未用正式推理模板、正式 tokenizer 和 public test 对全部 holdout 计算输入长度。
 - 修正：资格选择新增模型绑定的精确提示 token 门禁；执行资格缓存与 token 门禁解耦，因此可复用既有 800 条双重回放结果。正式 preflight 同样对 500 条 holdout 重新渲染并 fail closed，防止 GPU 作业再次承担数据验证。
 - 论文意义：源代码长度并不等于模型输入长度，测试输入、模板和 tokenizer 都会改变最终上下文长度。训练集和评测集必须使用各自真实消费路径进行长度验证。
+
+### 5. Holdout 修订会改变训练候选容量
+
+- 证据：新 holdout 通过 token 门禁后，Job 94313 报告 RunBugRun/function 请求 2,930、最多得到 2,929；与 Job 94304 使用的旧 holdout 相比恰好少 1 条。
+- 根因：替换评测样本不仅改变评测 manifest，也改变必须从 SFT 中排除的 problem family；该影响只能在新 holdout 上重新执行联合配额选择后观测。
+- 修正：将 1 条训练配额从 RunBugRun/function 转为 CommitPackFT/file_window；总量不变，来源和任务层边际各变化 1/5,000（0.02 个百分点）。Job 94314～94319 未运行即取消。
+- 论文意义：评测集与训练集的隔离约束会让两者的冻结过程产生依赖，不能把 holdout 替换视为局部、无副作用的数据操作。
 
 ## 已冻结且未放宽的条件
 

@@ -30,8 +30,8 @@ MAX_PER_FAMILY = 2
 TARGETS = {
     "train": {
         ("commitpackft", "function"): 1284,
-        ("commitpackft", "file_window"): 759,
-        ("runbugrun", "function"): 2930,
+        ("commitpackft", "file_window"): 760,
+        ("runbugrun", "function"): 2929,
         ("runbugrun", "file_window"): 27,
     },
     "validation": {
