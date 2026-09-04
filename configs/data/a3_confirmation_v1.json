@@ -1,0 +1,38 @@
+{
+  "version": "a3-confirmation-v1",
+  "seed": 20260830,
+  "source": {
+    "dataset": "RunBugRun",
+    "revision": "0.0.1",
+    "raw_directory": "/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data",
+    "source_record_sha256": "sha256:047305c1b01cbe4e00e700b5ad053cfcceed0df0fea6605c47aeaddb353940fa"
+  },
+  "exclusions": {
+    "pilot_directory": "/mingli01/data/patchalign-cpp/a1/processed/pilot-v2-isolated",
+    "pilot_manifest_sha256": "sha256:e078753bbfe69044641ef8e71c935340a7785886627993b8042956a72ba6b9a4",
+    "formal_sft_manifest": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/dataset-manifest.json",
+    "formal_sft_manifest_sha256": "sha256:50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02",
+    "formal_holdout_manifest": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1/a2-manifest.json",
+    "formal_holdout_manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386"
+  },
+  "candidate_counts": {
+    "function": 218,
+    "file_window": 53
+  },
+  "required_counts": {
+    "function": 100,
+    "file_window": 25
+  },
+  "qualification": {
+    "double_replay_required": true,
+    "problem_family_unique": true,
+    "max_input_tokens": 4096,
+    "allowed_path": "main.cpp",
+    "sandbox": "bubblewrap-0.12.0-rootless-no-network"
+  },
+  "paths": {
+    "candidate_directory": "/mingli01/data/patchalign-cpp/a3/confirmation-candidates-v1",
+    "progress_directory": "/mingli01/data/patchalign-cpp/a3/confirmation-qualification-v1",
+    "confirmation_directory": "/mingli01/data/patchalign-cpp/a3/confirmation-v1"
+  }
+}
