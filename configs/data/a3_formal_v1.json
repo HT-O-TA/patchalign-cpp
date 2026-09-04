@@ -44,8 +44,8 @@
     },
     "task_level_counts": {
       "train": {
-        "function": 4250,
-        "file_window": 750
+        "function": 4214,
+        "file_window": 786
       },
       "validation": {
         "function": 425,
@@ -55,8 +55,8 @@
     "source_task_cells": {
       "train": {
         "CommitPackFT": {
-          "function": 1320,
-          "file_window": 723
+          "function": 1284,
+          "file_window": 759
         },
         "RunBugRun": {
           "function": 2930,

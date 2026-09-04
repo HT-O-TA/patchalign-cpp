@@ -51,7 +51,7 @@ def validate_config(config: dict[str, Any]) -> None:
     require(
         config["data"]["expected_task_levels"]
         == {
-            "train": {"function": 4250, "file_window": 750},
+            "train": {"function": 4214, "file_window": 786},
             "validation": {"function": 425, "file_window": 75},
         },
         "wrong task-level counts",
