@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
@@ -157,6 +158,8 @@ def main() -> None:
     fixed_passed = fixed_status.lower().startswith("success")
     buggy_failed = buggy_status.lower().startswith("failed")
     qualified = not timed_out and returncode == 0 and fixed_passed and buggy_failed
+    build_path = repo / info["build_dir"]
+    shutil.rmtree(build_path, ignore_errors=True)
     result = {
         "version": "a3-defects4c-rootfs-case-v1",
         "project": args.project,
@@ -171,6 +174,7 @@ def main() -> None:
         "fixed_passed": fixed_passed,
         "buggy_failed": buggy_failed,
         "qualified": qualified,
+        "build_directory_removed": not build_path.exists(),
         "log_path": str(log_path),
     }
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
