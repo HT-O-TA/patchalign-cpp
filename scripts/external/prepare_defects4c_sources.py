@@ -163,7 +163,7 @@ def download_one(record: dict[str, Any], config: dict[str, Any]) -> dict[str, An
         run(command, target, 60)
         for commit in (record["commit_after"], record["commit_before"]):
             run_with_transient_retry(["git", "fetch", "--depth", "1", "origin", commit], target, download["fetch_timeout_seconds"])
-        run(["git", "checkout", "-f", "--detach", record["commit_after"]], target, 120)
+        run(["git", "checkout", "-f", "--detach", record["commit_after"]], target, 900)
         run(["git", "submodule", "sync", "--recursive"], target, 120)
         run_with_transient_retry(["git", "submodule", "update", "--init", "--recursive", "--jobs", "1"], target, download["submodule_timeout_seconds"])
         validate_checkout(target, record)
