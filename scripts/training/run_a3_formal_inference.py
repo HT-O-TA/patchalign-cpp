@@ -153,7 +153,9 @@ def main() -> None:
     require(len(cases) == 500, "formal holdout denominator mismatch")
     prepared = []
     for case in cases:
-        rendered = render_model_input(tokenizer, case["prompt"], "raw_completion")
+        rendered = render_model_input(
+            tokenizer, case["prompt"], evaluation["input_mode"]
+        )
         token_count = len(tokenizer(rendered, add_special_tokens=True)["input_ids"])
         require(token_count <= evaluation["generation"]["max_input_tokens"], f"prompt too long: {case['item']['case_id']}")
         prepared.append({**case, "rendered": rendered, "input_tokens": token_count})

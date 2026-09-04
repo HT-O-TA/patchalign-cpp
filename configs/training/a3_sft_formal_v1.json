@@ -49,6 +49,7 @@
     "holdout_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
     "required_task_levels": {"function": 400, "file_window": 100},
     "prompt_version": "a3-cpp-repair-v1",
+    "input_mode": "raw_completion",
     "allowed_path": "main.cpp",
     "scoring_protocol": "a3-scoring-v2",
     "generation": {

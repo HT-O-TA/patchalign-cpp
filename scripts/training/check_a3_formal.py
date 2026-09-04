@@ -81,7 +81,7 @@ def main() -> None:
                 render_model_input(
                     tokenizer,
                     case["prompt"],
-                    config["base_model_inference"]["input_mode"],
+                    config["evaluation"]["input_mode"],
                 ),
                 add_special_tokens=True,
             )["input_ids"]

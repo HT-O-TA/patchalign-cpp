@@ -51,6 +51,13 @@
 - 修正：同步验证器的冻结常量，并在配额一致性测试中直接调用 `validate_config`。Job 94321～94326 未运行即取消，Job 94320 的 SFT 以 preflight 未通过状态归档。
 - 论文意义：冗余验证能阻止错误实验，但重复维护的冻结常量本身会产生配置漂移。实验系统应为每项冗余断言提供跨组件一致性测试，并把 preflight 作为正式产物有效性的必要条件。
 
+### 7. Prompt 输入模式原为隐式常量
+
+- 证据：Job 94328 已再次稳定构建相同 5,000/500 数据，但新增 holdout token preflight 访问不存在的 `base_model_inference` 字段并失败；正式推理脚本此前直接写死 `raw_completion`。
+- 根因：输入模式是正式推理行为的一部分，却没有作为正式训练/评测配置字段冻结；preflight 接入该行为时错误假设了配置结构。
+- 修正：在 `evaluation.input_mode` 显式冻结 `raw_completion`，配置验证器、preflight 和正式推理共同读取该字段；Job 94329～94334 未运行即取消。
+- 论文意义：提示模板相同不代表模型输入相同，chat template 与 raw completion 会产生不同 token 序列。输入模式必须进入可哈希配置，并由数据门禁和推理共享。
+
 ## 已冻结且未放宽的条件
 
 - 正式 holdout 仍为 400 function + 100 file_window。

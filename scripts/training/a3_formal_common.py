@@ -102,6 +102,7 @@ def validate_config(config: dict[str, Any]) -> None:
     require(evaluation["required_task_levels"] == {"function": 400, "file_window": 100}, "wrong holdout counts")
     require(evaluation["scoring_protocol"] == "a3-scoring-v2", "wrong scoring protocol")
     require(evaluation["prompt_version"] == "a3-cpp-repair-v1", "wrong prompt version")
+    require(evaluation["input_mode"] == "raw_completion", "wrong input mode")
     require(evaluation["allowed_path"] == "main.cpp", "wrong allowed path")
     require(
         evaluation["generation"]

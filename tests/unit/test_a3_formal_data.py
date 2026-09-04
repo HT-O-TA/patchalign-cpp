@@ -91,6 +91,7 @@ def test_frozen_formal_data_config_matches_builder_targets() -> None:
         == config["formal_sft"]["task_level_counts"]
     )
     validate_config(training)
+    assert training["evaluation"]["input_mode"] == "raw_completion"
 
 
 def test_qualification_checkpoints_load_by_candidate_order(tmp_path: Path) -> None:
