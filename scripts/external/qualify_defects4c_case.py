@@ -43,6 +43,19 @@ def validate_config(config: dict[str, Any]) -> None:
     }
     if {key: runtime[key] for key in expected_hashes} != expected_hashes:
         raise RuntimeError("Defects4C runtime identity changed")
+    if config["prompt"] != {
+        "model_id": "Qwen/Qwen2.5-Coder-7B",
+        "model_revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+        "model_path": "/mingli01/models/Qwen2.5-Coder-7B",
+        "model_config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605",
+        "source_prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
+        "adapter_version": "a3-defects4c-unified-diff-v1",
+        "input_mode": "raw_completion",
+        "max_input_tokens": 4096,
+        "max_new_tokens": 512,
+        "scoring_protocol": "a3-scoring-v2",
+    }:
+        raise RuntimeError("Defects4C prompt contract changed")
     if config["qualification"] != {
         "minimum_qualified": 150,
         "cpu_count_per_case": 8,
@@ -85,7 +98,12 @@ def main() -> None:
         raise RuntimeError("qualification index outside frozen denominator")
     record = records[args.index]
     preflight = json.loads(args.preflight.read_text(encoding="utf-8"))
-    if preflight.get("status") != "passed" or preflight.get("config_sha256") != sha256_file(args.config):
+    current_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True).strip()
+    if (
+        preflight.get("status") != "passed"
+        or preflight.get("config_sha256") != sha256_file(args.config)
+        or preflight.get("git_commit") != current_commit
+    ):
         raise RuntimeError("qualification preflight mismatch")
     if preflight.get("rootfs_archive_sha256") != config["runtime"]["rootfs_archive_sha256"]:
         raise RuntimeError("qualification rootfs preflight mismatch")

@@ -19,6 +19,18 @@
     "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
     "conda_environment": "/mingli01/project/ht/.conda_envs/patchalign-cpp"
   },
+  "prompt": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "model_revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "model_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "model_config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605",
+    "source_prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
+    "adapter_version": "a3-defects4c-unified-diff-v1",
+    "input_mode": "raw_completion",
+    "max_input_tokens": 4096,
+    "max_new_tokens": 512,
+    "scoring_protocol": "a3-scoring-v2"
+  },
   "qualification": {
     "minimum_qualified": 150,
     "cpu_count_per_case": 8,
