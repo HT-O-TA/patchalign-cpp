@@ -71,6 +71,17 @@
   - score summary SHA256：`f183fa2cf203c2be95dbab1a56bfe13ec9718c117da14f0ed0592c45376a5ed0`；
   - score manifest SHA256：`6e1b6f097c30f602a43b93cacff2cda83d589cfabccc5528755c0efab549ae6d`。
 
+### 9. SFT 主修复率提升，但三条危险补丁造成真实超时退化
+
+- 正式结果：M1 Job 94341 完成 500/500 生成，scoring Job 94342 得到 parse/apply/compile/Pass 499/391/373/15；function Pass 为 12/400，相对 M0 提升 +3pp，paired bootstrap 95% 区间为 +1.5pp～+4.75pp。主提升门通过，但 3/500 timeout 相对 M0 增加 0.6pp，超过冻结上限 0.5pp，Job 94343 因此给出 `internal_gate_passed=false`。
+- `rbr-formal-020137ad770189b0c280`（p02549）：模型把 `modify(1, 1)` 改为 `modify(0, 1)`。Fenwick 更新循环在 `x=0` 时执行 `x += x & -x` 后仍为 0，形成确定性死循环。参考补丁实际修正区间查询右端的 off-by-one。
+- `rbr-formal-27a1be561eea53c3ae8e`（p03352）：模型把循环保护条件从 `j == 1` 改为 `j == x`。外层 `i=1` 时 `j *= i` 永远保持 1，输入 `x>1` 时形成确定性死循环。参考补丁把内层初值从 `i` 改为 `i*i`。
+- `rbr-formal-29456a56a2c230497296`（p02968）：模型把外层界限从 `i <= N` 改为 `i <= M`。公开样例为 `N=21, M=5139566`，使带二维 DP 分配的循环从 22 轮扩大到约 514 万轮，造成确定性的复杂度爆炸。参考补丁实际修正内层 `k` 的上界。
+- 排除环境噪声：资格回放中三例的 buggy 与 fixed 均无 timeout，public 最大耗时分别不超过 1.120/0.068/0.067 秒（buggy）和 0.118/0.036/0.368 秒（fixed）。CPU-only Job 94493 在相同 Bubblewrap、2 GiB 内存和 `-O2 -std=c++17` 下，对每例首个 public test 做 3 秒对照；buggy/fixed 均在 0.04 秒内退出，而三条 M1 补丁均在 3.00 秒超时且无输出。故三例均是模型引入的真实运行时退化，不应重分类为集群抖动。
+- 诊断审计：Job 94491 因 `sbatch --wrap` 默认 `/bin/sh` 不支持 `set -o pipefail` 而在执行前失败；Job 94492 因登录节点 `/tmp` 不与计算节点共享而在执行前失败；共享 Git 忽略目录上的 Job 94493 为 `COMPLETED 0:0`、用时 19 秒、无 GPU。两次无效提交不构成模型实验。
+- 方法学意义：可编译、可应用并不保证补丁安全。对循环初值、循环边界和索引更新的错误单行修改可把快速程序变成死循环或复杂度爆炸；timeout 应保留为独立门禁，而不能并入普通 public failure 或为了主指标提升而事后放宽。
+- 证据路径：`artifacts/a3/diagnostics/timeouts-94342-repro-v1/reproduction.json`，SHA256 `d60940873639974eeec8d2015ad9b26a1a12146b8b6cc2436d9614f688c2ef7a`；正式 comparison SHA256 `13e1a0b39f74cae60fb633ea77c5d53f9573a622743dfe148c37f3b605396517`。
+
 ## 已冻结且未放宽的条件
 
 - 正式 holdout 仍为 400 function + 100 file_window。
@@ -101,7 +112,6 @@ Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 
 
 ## 待回填
 
-- 当前作业链各阶段最终用时、CPU/GPU/内存峰值；
-- SFT 训练终态以及 M1 的正式生成与评分结果；
-- 失败样本类型是否与源码长度、测试输入长度或任务层相关的后续统计；
+- 全体非成功样本的错误类型、源码长度、测试输入长度和任务层关联统计；
+- 针对循环/复杂度危险修改的训练或候选过滤方案及预注册复评；
 - 外部 Defects4C 门禁结果；完成前不得宣称完整 promotion gate 通过。

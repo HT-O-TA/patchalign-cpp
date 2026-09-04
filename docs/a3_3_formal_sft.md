@@ -1,6 +1,6 @@
 # A3.3 正式 SFT 准备与冻结
 
-阶段状态：正式数据与 preflight 已冻结，正式作业链正在执行。实时 Job 状态和训练步数只在[项目状态](status.md)维护。
+阶段状态：正式训练、推理、评分与比较均已完成；主提升指标通过，但内部门禁因 timeout 退化超过上限而未通过。实时状态只在[项目状态](status.md)维护。
 
 ## 冻结契约
 
@@ -59,6 +59,15 @@ GPU 作业通过 `afterok` 串行依赖；前置失败时不得继续运行。CP
 - Job 94320/94328 分别由旧配额验证常量和未显式冻结的 input_mode 触发 fail-closed；两次均未进入 GPU，产物已归档。
 - Job 94337 在提交 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上完成 135 项测试、5,000/500 重建、数据锁和 500 条 holdout 实际 prompt 预检。
 - 有效运行身份：M0 94338 → M0 评分 94339 与正式 SFT 94340 → M1 94341 → M1 评分 94342 → 比较 94343。三个 GPU 阶段串行且每个只申请 1 张 GPU；各 Job 的当前/最终状态见[项目状态](status.md)。
+
+## 正式结果与门禁结论
+
+- 94340、94341、94342、94343 均为 `COMPLETED 0:0`；训练最佳 checkpoint 是 epoch 2 / step 1,250，validation loss `0.1280414615`。
+- M1 在 500 条固定分母上的 parse/apply/compile/Pass 为 499/391/373/15；function Pass 为 12/400，file_window Pass 为 3/100。
+- function 主指标相对 M0 提升 +3pp，超过 +2pp 阈值；paired bootstrap 95% 区间为 +1.5pp～+4.75pp，主提升门通过。
+- regression failure 增加 1.0pp，等于允许上限；timeout 增加 0.6pp，超过 0.5pp 上限。因此 `internal_gate_passed=false`。
+- Defects4C 外部分母仍为 0，低于 150 条要求，因此 `full_promotion_gate_passed=false`。比较器成功退出表示门禁计算正常完成，不表示模型通过门禁。
+- timeout 的逐例归因和独立复现见 [A3.3 正式实验问题与论文材料](evidence/a3_3_pipeline_findings.md)。正式评分、固定分母和冻结阈值均未修改。
 
 ## 2026-09-04 被替代的历史作业
 
