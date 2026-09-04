@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-04 19:18:53 CST（2026-09-04T11:18:53Z）
+最后核验：2026-09-04 20:27:57 CST（2026-09-04T12:27:57Z）
 
-项目状态：**已暂停**。暂停期间不提交训练、推理、评分或数据构建作业；当前正式结果和冻结协议保持不变。
+项目状态：**已恢复，处于 A3.4 CPU 准备阶段**。SFT-R2 契约和静态数据选择规则已冻结；尚未提交数据构建、训练、推理或评分作业。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,6 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
+| A3.4 | CPU 准备 | `SFT-R2` 契约与 1,200/117 静态安全子集规则已冻结；集群构建和 preflight 待执行 |
 
 ## A3.3 当前有效链
 
@@ -51,15 +52,20 @@
 - Defects4C 不少于 150 条的外部门禁尚未完成；即使内部 M1 门禁通过，也不能宣称完整 SFT promotion gate 已通过。
 - 下一步先把三例真实运行时退化作为训练/解码改进目标；不得删除样本、改写正式评分或事后放宽 timeout 阈值。
 
-## 暂停点与恢复清单
+## A3.4 当前状态
 
-恢复时按以下顺序推进；这些项目目前是待办，不代表已冻结的新实验设计：
+- 恢复审计已完成：本地、GitHub 与集群均为 `cbfb752d85aa2ad3c14f8cfde760b6c21494f31b`；A3.3 数据锁、M0 预测与评分、正式比较和 timeout 复现哈希均与记录一致。
+- `sacct` 未发现恢复后的 PatchAlign 排队或运行作业；管理节点直接 `squeue` 返回权限拒绝，因此当前结论以用户 accounting 记录和无新 Job ID 为依据。
+- 修正轮次正式命名为 `A3.4 / SFT-R2`，候选为 `M1-R2`；机器配置和方法见 [A3.4 协议](a3_4_sft_r2.md)。
+- 静态选择器只消费冻结 A3.3 SFT train/validation，输出冻结为 1,200/117；本机字节级重建哈希已进入数据配置。
+- A4 executable preference data 未启动；当前没有 A3.4 Slurm 作业。
 
-1. 核验本地、GitHub 和集群均从暂停提交恢复，确认现有正式 artifact 哈希未变，并确认没有遗留 PatchAlign Slurm 作业。
-2. 为 A3 修正轮次建立版本化名称和契约；建议暂称 `SFT-R2`，正式编号需在恢复时冻结。A4 executable preference data 暂不启动。
-3. 只从原训练候选中构造循环安全、边界更新和复杂度约束相关样本；禁止使用三条已调查 holdout 的参考补丁、隐藏测试或执行反馈进行训练。
-4. 若增加静态危险补丁检查、候选拒绝或多候选重排，必须先版本化推理/评分语义，并明确被拒绝候选如何计入固定分母；不得事后修改 A3.3 结果。
-5. 原 500 条 holdout 保留作可比性/开发分析。由于三个失败样本已被逐例检查，最终晋级还需新建一组未查看的确认集，重新执行 family 隔离、Schema、token 和 Bubblewrap 双重回放门禁。
-6. 建立并冻结不少于 150 条的 Defects4C 外部评测集；在此之前不得宣称完整 promotion gate 通过。
-7. 运行顺序为：CPU 数据审计与 preflight → GPU SFT-R2 → GPU 固定推理 → CPU scoring v2 → 新确认集与外部评测 → 冻结比较。GPU 作业继续串行，默认先申请 1 张。
-8. 晋级 A4 前，新的 M1 候选必须在预注册比较中同时满足 function 主提升、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁；现有阈值不得因本轮结果放宽。
+## 后续执行清单
+
+1. 在集群 CPU-only 重建 R2 数据，核对 1,200/117、标签分布、输出 SHA256 和 selection manifest。
+2. 实现版本化 R2 训练/恢复入口与 fail-closed preflight，并在本地、集群运行测试。
+3. 预检通过后串行提交单 GPU SFT-R2 与单 GPU 固定 500 条推理。
+4. CPU-only 运行 scoring v2，并分别对 M0 promotion baseline 和 M1 diagnostic baseline 比较；不得修改固定分母或阈值。
+5. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
+6. 建立并冻结不少于 150 条的 Defects4C 外部评测集。
+7. 只有新候选同时通过 function、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁后，才讨论进入 A4。

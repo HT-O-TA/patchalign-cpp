@@ -914,3 +914,15 @@ preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 50
 2026-09-04，A3.3 有效链 94338～94343 已全部完成。M1 function Pass 相对 M0 提升 +3pp，主提升门通过；但 timeout 增加 0.6pp，超过冻结上限 0.5pp，故内部门禁未通过。三例 timeout 已由 CPU-only Job 94493 确认为模型补丁引入的真实运行时退化，分析与证据见 `docs/evidence/a3_3_pipeline_findings.md`。正式评分、固定分母和阈值均未修改。
 
 项目在提交 `b9f44d5990ed5416281317ca30a980187aa14985` 后暂停。暂停检查确认集群没有 PatchAlign 作业处于运行或排队状态。恢复时的唯一说明性清单维护在 `docs/status.md` 的“暂停点与恢复清单”；在新的 SFT 候选通过完整预注册门禁前，不进入正式 A4 executable preference data。
+
+## 25. 项目恢复与 A3.4 SFT-R2 契约
+
+2026-09-04 恢复审计确认本地、GitHub 和集群均位于暂停提交 `cbfb752d85aa2ad3c14f8cfde760b6c21494f31b`。A3.3 正式数据锁、M0 预测与评分、最终 comparison 以及三条 timeout 复现 artifact 的 SHA256 均与冻结记录一致。`sacct` 中没有恢复后的 PatchAlign 排队或运行记录；管理节点 `squeue` 因权限拒绝不可用，该限制不影响 artifact 核验。
+
+修正轮次冻结命名为 `A3.4 / SFT-R2`，候选为 `M1-R2`，A4 不启动。训练数据选择只读取 A3.3 冻结的 5,000/500 train/validation gold diff，限定 `RunBugRun/function`，使用通用静态规则识别循环控制/推进、边界/索引更新和规模/分配复杂度相关修复。规则不读取 problem statement、正式 holdout、测试内容或执行反馈，也不使用三条已调查 timeout 样本的参考补丁。
+
+本机从冻结源数据两次重建均得到 1,200 train / 117 validation，输出 SHA256 分别为 `6eeab690c134c21f6789e1a50e9581307c726acfe7d2f6b600be809221f678cc` 和 `878abb76cb73d750ac061ffff539cb5f696b000efd01bfa4b51af871a9564b73`。选择器对源数据锁、源文件、输出计数、标签计数和输出哈希 fail closed。
+
+训练协议从 A3.3 最佳 epoch 2 / step 1,250 adapter（SHA256 `807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f`）继续，重置 optimizer/scheduler，以 `2e-5` 学习率对安全子集训练 1 epoch、150 optimizer steps。原 500 条 holdout、raw completion、greedy Pass@1、512 输出 token、scoring v2、固定分母和 ADR-0004 阈值保持不变；不增加候选过滤、拒绝或重排。
+
+本轮尚未提交 Slurm 作业。下一步是在集群 CPU-only 重建数据并实现独立 preflight 与训练恢复入口，通过后才提交单 GPU 训练和推理。

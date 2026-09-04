@@ -1,0 +1,67 @@
+{
+  "version": "a3-sft-r2-data-v1",
+  "seed": 20260830,
+  "source": {
+    "root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
+    "formal_data_lock_sha256": "sha256:f37eef03ce0a96ad1fa14622b8b7ef6f30c3f6bcc8dad85addbb1e4c53d12a12",
+    "counts": {
+      "train": 5000,
+      "validation": 500
+    },
+    "file_sha256": {
+      "train.jsonl": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400",
+      "validation.jsonl": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980"
+    }
+  },
+  "selection": {
+    "policy": "static-gold-diff-safety-v1",
+    "source_dataset": "RunBugRun",
+    "task_level": "function",
+    "signals": [
+      "loop_control_or_progress",
+      "boundary_or_index_update",
+      "scale_or_allocation_complexity"
+    ],
+    "uses_problem_statement": false,
+    "uses_holdout_content": false,
+    "uses_test_content": false,
+    "uses_execution_feedback": false
+  },
+  "output": {
+    "root": "/mingli01/data/patchalign-cpp/a3/sft-r2-data-v1",
+    "counts": {
+      "train": 1200,
+      "validation": 117
+    },
+    "task_level_counts": {
+      "train": {"function": 1200, "file_window": 0},
+      "validation": {"function": 117, "file_window": 0}
+    },
+    "source_counts": {
+      "train": {"RunBugRun": 1200},
+      "validation": {"RunBugRun": 117}
+    },
+    "tag_counts": {
+      "train": {
+        "loop_control_or_progress": 938,
+        "boundary_or_index_update": 637,
+        "scale_or_allocation_complexity": 19
+      },
+      "validation": {
+        "loop_control_or_progress": 89,
+        "boundary_or_index_update": 55,
+        "scale_or_allocation_complexity": 1
+      }
+    },
+    "file_sha256": {
+      "train.jsonl": "sha256:6eeab690c134c21f6789e1a50e9581307c726acfe7d2f6b600be809221f678cc",
+      "validation.jsonl": "sha256:878abb76cb73d750ac061ffff539cb5f696b000efd01bfa4b51af871a9564b73"
+    }
+  },
+  "isolation": {
+    "source_is_frozen_a3_sft_only": true,
+    "formal_holdout_content_read": false,
+    "hidden_test_content_read": false,
+    "train_validation_sample_overlap": 0
+  }
+}

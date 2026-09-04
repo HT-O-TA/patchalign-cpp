@@ -1,0 +1,75 @@
+{
+  "version": "a3-sft-r2-v1",
+  "seed": 20260830,
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "initialization": {
+    "kind": "adapter_continuation",
+    "source_run_id": "a33_sft_nf4_s20260830",
+    "source_checkpoint": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/formal/sft-training/checkpoints/checkpoint-step-001250-epoch-2/adapter",
+    "adapter_sha256": "sha256:807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f"
+  },
+  "data": {
+    "root": "/mingli01/data/patchalign-cpp/a3/sft-r2-data-v1",
+    "selection_manifest": "selection-manifest.json",
+    "selection_config": "configs/data/a3_sft_r2_v1.json",
+    "expected_counts": {"train": 1200, "validation": 117},
+    "reference_validation_root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
+    "reference_validation_count": 500
+  },
+  "training": {
+    "mode": "nf4_qlora_adapter_continuation",
+    "epochs": 1,
+    "max_sequence_tokens": 4096,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.00002,
+    "warmup_steps": 20,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "gradient_checkpointing": true,
+    "reset_optimizer_state": true,
+    "checkpoint_every_optimizer_steps": 50,
+    "validation_policy": "focused_validation_at_epoch_end",
+    "reference_validation_policy": "report_only_before_and_after",
+    "best_checkpoint_rule": "lowest_finite_focused_validation_loss_then_earliest_step",
+    "lora": {
+      "r": 8,
+      "alpha": 16,
+      "dropout": 0.0,
+      "bias": "none",
+      "target_modules": [
+        "q_proj", "k_proj", "v_proj", "o_proj",
+        "gate_proj", "up_proj", "down_proj"
+      ]
+    }
+  },
+  "evaluation": {
+    "holdout_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "required_task_levels": {"function": 400, "file_window": 100},
+    "prompt_version": "a3-cpp-repair-v1",
+    "input_mode": "raw_completion",
+    "allowed_path": "main.cpp",
+    "scoring_protocol": "a3-scoring-v2",
+    "generation": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "num_return_sequences": 1,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 512
+    }
+  },
+  "comparison": {
+    "promotion_baseline": "M0 Base / Job 94338+94339",
+    "diagnostic_baseline": "M1 SFT / Job 94341+94342",
+    "quality_gate_config": "configs/evaluation/quality_gates_v1.json",
+    "fixed_denominator": 500,
+    "new_confirmation_set_required": true,
+    "defects4c_minimum_required": 150
+  }
+}

@@ -20,7 +20,8 @@
 │   │   ├── data/
 │   │   │   ├── a1_pilot_v1.json            # 旧 pilot artifact 重放
 │   │   │   ├── a1_pilot_v2.json            # 隔离后的 A1 pilot
-│   │   │   └── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
+│   │   │   ├── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
+│   │   │   └── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
@@ -28,7 +29,8 @@
 │   │   ├── model/
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
-│   │       └── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
+│   │       ├── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
+│   │       └── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
 │   ├── docs/
 │   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
@@ -46,7 +48,8 @@
 │   │   │   ├── a2_output_matcher.py         # RunBugRun legacy 输出匹配语义
 │   │   │   ├── a2_stability.py              # 回放结果确定性投影
 │   │   │   ├── check_a2_replay_stability.py # 资格回放与最终回放精确核验
-│   │   │   └── summarize_a2_results.py      # A2 汇总与验收门禁
+│   │   │   ├── summarize_a2_results.py      # A2 汇总与验收门禁
+│   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
@@ -459,3 +462,11 @@ HT-O-TA/patchalign-cpp
 - 删除已与现有仓库不符的 A0 “预计目录树”，改为只登记真实存在的稳定目录；
 - 历史执行记录保留原事实，但明确所有“当前/尚未/正在”只对当时记录点有效；
 - 本次只调整 Git 跟踪文档，没有移动、删除或改写集群数据、模型、环境和 artifact。
+
+### 2026-09-04：恢复项目并建立 A3.4 SFT-R2 结构
+
+- 新增 `configs/data/a3_sft_r2_v1.json`，冻结安全子集来源、选择规则、1,200/117 计数和数据哈希；
+- 新增 `configs/training/a3_sft_r2_v1.json`，冻结 M1 adapter continuation、低学习率单轮训练和原 A3.3 评测语义；
+- 新增 `scripts/data/build_a3_sft_r2_data.py`，只从冻结 RunBugRun/function train/validation 静态选择循环、边界和复杂度相关样本；
+- 新增 `tests/unit/test_a3_sft_r2.py` 与 `docs/a3_4_sft_r2.md`，覆盖选择信号、跨配置一致性和防泄漏边界；
+- 当前只建立 Git 跟踪协议和 CPU 数据入口，尚未新增集群数据目录、artifact 或 Slurm 作业。
