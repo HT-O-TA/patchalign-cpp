@@ -40,6 +40,20 @@ def run(command: list[str], cwd: Path, timeout: int) -> subprocess.CompletedProc
     return result
 
 
+def run_with_transient_retry(command: list[str], cwd: Path, timeout: int) -> subprocess.CompletedProcess[str]:
+    transient = ("Could not resolve host", "Failed to connect", "Connection timed out", "TLS", "HTTP 5")
+    for attempt in range(1, 9):
+        try:
+            return run(command, cwd, timeout)
+        except RuntimeError as exc:
+            if attempt == 8 or not any(marker in str(exc) for marker in transient):
+                raise
+            delay = min(5 * (2 ** (attempt - 1)), 60)
+            print(json.dumps({"event": "transient_git_retry", "attempt": attempt, "delay_seconds": delay, "command": command[:3]}, sort_keys=True), flush=True)
+            time.sleep(delay)
+    raise AssertionError("unreachable")
+
+
 def validate_config(config: dict[str, Any]) -> None:
     if config.get("version") != VERSION:
         raise RuntimeError("wrong Defects4C source contract version")
@@ -148,10 +162,10 @@ def download_one(record: dict[str, Any], config: dict[str, Any]) -> dict[str, An
         command = (["git", "remote", "set-url", "origin", record["repository"]] if "origin" in remotes else ["git", "remote", "add", "origin", record["repository"]])
         run(command, target, 60)
         for commit in (record["commit_after"], record["commit_before"]):
-            run(["git", "fetch", "--depth", "1", "origin", commit], target, download["fetch_timeout_seconds"])
+            run_with_transient_retry(["git", "fetch", "--depth", "1", "origin", commit], target, download["fetch_timeout_seconds"])
         run(["git", "checkout", "-f", "--detach", record["commit_after"]], target, 120)
         run(["git", "submodule", "sync", "--recursive"], target, 120)
-        run(["git", "submodule", "update", "--init", "--recursive", "--jobs", "1"], target, download["submodule_timeout_seconds"])
+        run_with_transient_retry(["git", "submodule", "update", "--init", "--recursive", "--jobs", "1"], target, download["submodule_timeout_seconds"])
         validate_checkout(target, record)
         result["status"] = "completed"
     except BaseException as exc:
@@ -172,6 +186,9 @@ def main() -> None:
     if commit != config["official_source"]["git_commit"]:
         raise RuntimeError(f"official Defects4C source changed: {commit}")
     records = discover(source, config)
+    implementation_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
+    ).strip()
     progress = Path(config["download"]["progress_directory"])
     Path(config["download"]["output_directory"]).mkdir(parents=True, exist_ok=True)
     progress.mkdir(parents=True, exist_ok=True)
@@ -192,7 +209,7 @@ def main() -> None:
     results.sort(key=lambda item: item["key"])
     manifest = {
         "version": VERSION, "created_at": utc_now(), "config_sha256": sha256_file(args.config),
-        "official_source_commit": commit, "plan_sha256": sha256_file(identity_path),
+        "official_source_commit": commit, "implementation_git_commit": implementation_commit, "plan_sha256": sha256_file(identity_path),
         "total": len(results), "completed": sum(x["status"] == "completed" for x in results),
         "failed": sum(x["status"] != "completed" for x in results), "results": results,
     }

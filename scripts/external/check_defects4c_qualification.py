@@ -48,16 +48,17 @@ def main() -> None:
     require(Path(runtime["conda_environment"]).is_dir(), "Conda environment missing")
     command = [
         runtime["bwrap"], "--unshare-all", "--die-with-parent", "--new-session", "--cap-drop", "ALL",
-        "--ro-bind", runtime["rootfs_directory"], "/",
+        "--bind", runtime["rootfs_directory"], "/",
         "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--tmpfs", "/root", "--dir", "/tmp/home",
         "--ro-bind", source["official_directory"], "/src",
         "--bind", source["checkout_directory"], "/out",
         "--ro-bind", runtime["conda_environment"], "/opt/host-conda",
         "--ro-bind", str(repo), "/patchalign",
+        "--remount-ro", "/",
         "--setenv", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/host-conda/bin",
         "--setenv", "HOME", "/tmp/home", "--setenv", "PYTHONNOUSERSITE", "1",
         "--chdir", "/patchalign", "/bin/bash", "-c",
-        "test -x /usr/local/bin/clang-16 && test -f scripts/external/run_defects4c_qualification_case.py && /opt/host-conda/bin/python -c 'import jinja2; print(jinja2.__version__)' && ! touch /src/patchalign-readonly-probe 2>/dev/null && ! touch /patchalign/patchalign-readonly-probe 2>/dev/null && ! timeout 3 bash -c '</dev/tcp/github.com/443' 2>/dev/null",
+        "test -x /usr/local/bin/clang-16 && test -f scripts/external/run_defects4c_qualification_case.py && /opt/host-conda/bin/python -c 'import jinja2; print(jinja2.__version__)' && ! touch /rootfs-write-probe 2>/dev/null && ! touch /src/patchalign-readonly-probe 2>/dev/null && ! touch /patchalign/patchalign-readonly-probe 2>/dev/null && touch /out/.patchalign-bwrap-probe && rm /out/.patchalign-bwrap-probe && ! timeout 3 bash -c '</dev/tcp/github.com/443' 2>/dev/null",
     ]
     result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
     require(result.returncode == 0, "offline rootfs smoke failed: " + result.stdout[-2000:])

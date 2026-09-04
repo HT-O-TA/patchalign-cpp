@@ -106,12 +106,13 @@ def main() -> None:
     repo = Path(__file__).resolve().parents[2]
     command = [
         runtime["bwrap"], "--unshare-all", "--die-with-parent", "--new-session", "--cap-drop", "ALL",
-        "--ro-bind", runtime["rootfs_directory"], "/",
+        "--bind", runtime["rootfs_directory"], "/",
         "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--tmpfs", "/root", "--dir", "/tmp/home",
         "--ro-bind", config["source"]["official_directory"], "/src",
         "--bind", config["source"]["checkout_directory"], "/out",
         "--ro-bind", runtime["conda_environment"], "/opt/host-conda",
         "--ro-bind", str(repo), "/patchalign",
+        "--remount-ro", "/",
         "--setenv", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/host-conda/bin",
         "--setenv", "HOME", "/tmp/home", "--setenv", "PYTHONNOUSERSITE", "1", "--setenv", "LC_ALL", "C.UTF-8",
         "--chdir", "/patchalign",
