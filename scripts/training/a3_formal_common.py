@@ -51,7 +51,7 @@ def validate_config(config: dict[str, Any]) -> None:
     require(
         config["data"]["expected_task_levels"]
         == {
-            "train": {"function": 4214, "file_window": 786},
+            "train": {"function": 4213, "file_window": 787},
             "validation": {"function": 425, "file_window": 75},
         },
         "wrong task-level counts",
@@ -59,7 +59,7 @@ def validate_config(config: dict[str, Any]) -> None:
     require(
         config["data"]["expected_sources"]
         == {
-            "train": {"CommitPackFT": 2043, "RunBugRun": 2957},
+            "train": {"CommitPackFT": 2044, "RunBugRun": 2956},
             "validation": {"CommitPackFT": 200, "RunBugRun": 300},
         },
         "wrong source counts",

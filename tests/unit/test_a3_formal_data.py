@@ -16,6 +16,7 @@ from scripts.data.qualify_a3_formal_holdout import (
     selectable_count,
     write_json_atomic,
 )
+from scripts.training.a3_formal_common import validate_config
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -89,6 +90,7 @@ def test_frozen_formal_data_config_matches_builder_targets() -> None:
         training["data"]["expected_task_levels"]
         == config["formal_sft"]["task_level_counts"]
     )
+    validate_config(training)
 
 
 def test_qualification_checkpoints_load_by_candidate_order(tmp_path: Path) -> None:
