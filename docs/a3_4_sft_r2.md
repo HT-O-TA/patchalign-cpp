@@ -51,3 +51,6 @@ A3.3 的 M1 在冻结 500 条 holdout 上取得 15/500 Pass，function 相对 M0
 5. 只有内部指标通过后，才构造新确认集和 Defects4C 外部集；这些数据不得反向用于选择本轮 checkpoint。
 
 CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 结束，耗时 2 秒并通过 5 项定向测试。Preflight Job `94523` 以 `COMPLETED 0:0` 结束，耗时 28 秒并通过全量 `145 passed`；报告 SHA256 为 `9da6ed4148026d2f0b472ce97577da60f746444b84cde491951fb7b1d885ce3b`。单 GPU 训练 Job `94524` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 15 分 15 秒并完成 150 optimizer steps。最佳 checkpoint 为 epoch 1/step 150，focused validation loss 为 `0.07718202`；原 500 条 reference validation loss 从 `0.12804146` 上升至 `0.13105401`。最佳 adapter SHA256 为 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`，training summary/manifest SHA256 分别为 `4cab1f118ebddc90e69e5f3d202b96906c5ab399d00906adc842c6f378cf2f4d` 和 `b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884`。绑定实现提交仍为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`；推理未预提交。
+
+
+CPU-only 固定推理 preflight Job `94537` 在实现提交 `84fb9dfe06c4530b8fab32d03ef3e15d803a94e7` 上以 `COMPLETED 0:0` 结束，用时 21 秒并通过全量 `154 passed`。报告确认 500 条组成 400/100、输入 token 范围 170～3,589，重建 prompt artifact SHA256 `1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f` 与 A3.3 M0/M1 完全一致；报告 SHA256 为 `8eb0350779242ee62dd5c734a0e8f44cdcf70fb00a15c70131cdde84f120f88c`。单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动。
