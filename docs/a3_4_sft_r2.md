@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：契约与数据选择规则已冻结；集群数据构建、CPU preflight、GPU 训练和评测尚未执行。
+阶段状态：契约、数据选择规则和集群安全子集已冻结；训练入口与 CPU preflight 尚未实现，GPU 训练和评测尚未执行。
 
 ## 目标
 
@@ -46,4 +46,4 @@ A3.3 的 M1 在冻结 500 条 holdout 上取得 15/500 Pass，function 相对 M0
 4. CPU-only scoring v2 和与 M0/M1 的冻结比较。
 5. 只有内部指标通过后，才构造新确认集和 Defects4C 外部集；这些数据不得反向用于选择本轮 checkpoint。
 
-当前尚未提交任何 A3.4 Slurm 作业。
+CPU-only 数据 Job `94521` 已以 `COMPLETED 0:0` 结束，耗时 2 秒并通过 5 项定向测试。集群 train/validation SHA256 与冻结配置一致，selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。当前没有 A3.4 运行或排队作业，也未申请 GPU。

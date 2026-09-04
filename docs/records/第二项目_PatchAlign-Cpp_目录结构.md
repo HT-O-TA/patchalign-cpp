@@ -122,6 +122,7 @@
 ├── formal-holdout-qualification-v1/        # 已完成的候选级资格缓存，可审计和恢复
 ├── formal-holdout-v1/                      # token 门禁后的冻结 400 function + 100 file-window
 ├── formal-sft-v1/                          # 有效 5,000 train + 500 validation 与哈希锁
+├── sft-r2-data-v1/                      # Job 94521 冻结的 1,200/117 安全子集与 manifest
 └── history/                                # 被后续门禁替代、未通过 preflight 的冻结产物
     ├── formal-holdout-v1-pre-prompt-token-gate-94174/
     ├── formal-sft-v1-pre-prompt-token-gate-94304/

@@ -925,4 +925,4 @@ preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 50
 
 训练协议从 A3.3 最佳 epoch 2 / step 1,250 adapter（SHA256 `807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f`）继续，重置 optimizer/scheduler，以 `2e-5` 学习率对安全子集训练 1 epoch、150 optimizer steps。原 500 条 holdout、raw completion、greedy Pass@1、512 输出 token、scoring v2、固定分母和 ADR-0004 阈值保持不变；不增加候选过滤、拒绝或重排。
 
-本轮尚未提交 Slurm 作业。下一步是在集群 CPU-only 重建数据并实现独立 preflight 与训练恢复入口，通过后才提交单 GPU 训练和推理。
+CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向测试和集群重建；train/validation SHA256 与冻结配置一致，selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。该作业申请 2 CPU、4 GiB、0 GPU。下一步是实现独立 preflight 与训练恢复入口，通过后才提交单 GPU 训练和推理。
