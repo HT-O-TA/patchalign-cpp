@@ -66,6 +66,10 @@ def validate_config(config: dict[str, Any]) -> None:
     }, "external generation settings changed")
     require(config["input_mode"] == "raw_completion", "external input mode changed")
     require(config["prompt_version"] == "a3-defects4c-unified-diff-v1", "external prompt version changed")
+    require(config["inference"] == {
+        "m0": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/inference-m0",
+        "m1_r2": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/inference-m1_r2",
+    }, "external inference directories changed")
 
     qualification = config["qualification"]
     require(qualification["config"] == "configs/external/a3_defects4c_qualification_v1.json", "wrong qualification config")
