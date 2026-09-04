@@ -10,14 +10,22 @@ BASE=${REPO}/artifacts/a3/formal
 cd "${REPO}"
 test -z "$(git status --porcelain)"
 test -f "${CANDIDATES}/candidate-manifest.json"
-test ! -e "${HOLDOUT}"
 test ! -e "${SFT}"
 test ! -e "${BASE}/m0-inference"
 test ! -e "${BASE}/sft-training"
 test ! -e "${BASE}/sft-inference"
 
-qualify=$(sbatch --parsable slurm/a3_3_qualify.sbatch)
-finalize=$(sbatch --parsable --dependency=afterok:${qualify} slurm/a3_3_finalize.sbatch)
+if test -f "${HOLDOUT}/a2-manifest.json"; then
+  test -f "${HOLDOUT}/qualification-report.json"
+  test -f "${HOLDOUT}/qualification-results.jsonl"
+  qualify=reused
+  finalize=$(sbatch --parsable slurm/a3_3_finalize.sbatch)
+else
+  test ! -e "${HOLDOUT}"
+  qualify=$(sbatch --parsable slurm/a3_3_qualify.sbatch)
+  finalize=$(sbatch --parsable --dependency=afterok:${qualify} \
+    slurm/a3_3_finalize.sbatch)
+fi
 m0=$(sbatch --parsable --dependency=afterok:${finalize} \
   --export=ALL,FORMAL_ROLE=m0 slurm/a3_3_infer.sbatch)
 m0_score=$(sbatch --parsable --dependency=afterok:${m0} \
