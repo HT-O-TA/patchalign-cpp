@@ -31,6 +31,7 @@
 - A3.3：[正式 SFT](a3_3_formal_sft.md)
 - A3.4：[SFT-R2 安全修正轮次](a3_4_sft_r2.md)
 - 正式实验问题：[A3.3 论文材料](evidence/a3_3_pipeline_findings.md)
+- 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)
 - 历史过程：[执行记录](records/第二项目_PatchAlign-Cpp_执行记录.md)

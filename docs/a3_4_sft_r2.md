@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：数据冻结和 CPU preflight 已通过；单 GPU SFT-R2 Job `94524` 正在运行，推理和评分尚未提交。
+阶段状态：数据冻结、CPU preflight 和单 GPU SFT-R2 训练已完成；固定 500 条推理和评分尚未提交。
 
 ## 目标
 
@@ -46,4 +46,4 @@ A3.3 的 M1 在冻结 500 条 holdout 上取得 15/500 Pass，function 相对 M0
 4. CPU-only scoring v2 和与 M0/M1 的冻结比较。
 5. 只有内部指标通过后，才构造新确认集和 Defects4C 外部集；这些数据不得反向用于选择本轮 checkpoint。
 
-CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 结束，耗时 2 秒并通过 5 项定向测试。Preflight Job `94523` 以 `COMPLETED 0:0` 结束，耗时 28 秒并通过全量 `145 passed`；报告 SHA256 为 `9da6ed4148026d2f0b472ce97577da60f746444b84cde491951fb7b1d885ce3b`。单 GPU 训练 Job `94524` 已在 `gpu10` 启动，绑定实现提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`；推理未预提交。
+CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 结束，耗时 2 秒并通过 5 项定向测试。Preflight Job `94523` 以 `COMPLETED 0:0` 结束，耗时 28 秒并通过全量 `145 passed`；报告 SHA256 为 `9da6ed4148026d2f0b472ce97577da60f746444b84cde491951fb7b1d885ce3b`。单 GPU 训练 Job `94524` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 15 分 15 秒并完成 150 optimizer steps。最佳 checkpoint 为 epoch 1/step 150，focused validation loss 为 `0.07718202`；原 500 条 reference validation loss 从 `0.12804146` 上升至 `0.13105401`。最佳 adapter SHA256 为 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`，training summary/manifest SHA256 分别为 `4cab1f118ebddc90e69e5f3d202b96906c5ab399d00906adc842c6f378cf2f4d` 和 `b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884`。绑定实现提交仍为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`；推理未预提交。

@@ -928,3 +928,11 @@ preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 50
 CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向测试和集群重建；train/validation SHA256 与冻结配置一致，selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。该作业申请 2 CPU、4 GiB、0 GPU。
 
 提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c` 新增 R2 配置验证、数据与 adapter 身份验证、CPU preflight、可恢复 adapter-continuation 训练器及对应 Slurm 入口。集群全量测试为 `145 passed`。CPU-only preflight Job `94523` 以 `COMPLETED 0:0` 在 28 秒内验证 1,200/117 子集、M1 adapter、原 500 validation 和 400/100 holdout token 身份；报告 SHA256 为 `9da6ed4148026d2f0b472ce97577da60f746444b84cde491951fb7b1d885ce3b`。单 GPU 训练 Job `94524` 随后在 `gpu10` 启动，未预提交推理作业。
+
+## 26. A3.4 SFT-R2 正式训练完成
+
+2026-09-04，单 GPU Job `94524` 在 `gpu10` 以 `COMPLETED 0:0` 结束，总耗时 15 分 15 秒。作业在实现提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c` 的干净工作树上完成 1 epoch、1,200 micro-steps 和 150 optimizer steps；loss 与 grad norm 全程有限，无 OOM、NaN 或训练超时。
+
+最佳 checkpoint 为 `checkpoint-step-000150-epoch-1`，focused validation loss 为 `0.07718201535037504`。原 A3.3 500 条 reference validation loss 从源 adapter 的 `0.12804146145377307` 上升到 `0.13105400611041113`，差值 `+0.0030125446566380554`。该变化记录为潜在遗忘信号，不用 validation loss 代替真实 holdout Pass、timeout 或 promotion gate；结论等待固定 500 条推理与 scoring v2。
+
+最佳 adapter SHA256 为 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`；training summary、training manifest、best-checkpoint SHA256 分别为 `4cab1f118ebddc90e69e5f3d202b96906c5ab399d00906adc842c6f378cf2f4d`、`b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884`、`86258a8d5529d59b100648ed1e339e04be16aa4400a57568b55f887c14768c8c`。manifest 绑定 Qwen2.5-Coder-7B revision `0396a76181e127dfc13e5c5ec48a8cee09938b02`、R2 配置 SHA256 `e088976699f481e3760eb4a0c4e5afeebc74050f3bce8dace264c656c6a04c23` 和选择 manifest `7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac`。推理作业未预提交。

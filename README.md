@@ -30,6 +30,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [A3.2 LoRA/QLoRA SFT 训练 pilot](docs/a3_2_sft_pilot.md)
 - [A3.3 正式 SFT](docs/a3_3_formal_sft.md)
 - [A3.4 SFT-R2 安全修正轮次](docs/a3_4_sft_r2.md)
+- [项目复盘与面试复述](docs/interview_retrospective.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)

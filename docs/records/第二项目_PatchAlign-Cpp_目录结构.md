@@ -31,7 +31,8 @@
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
 │   │       ├── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
 │   │       └── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
-│   ├── docs/
+│   ├── docs/                               # 协议、状态、证据、复盘与历史记录
+│   │   └── interview_retrospective.md       # 面试复述：阶段经历、故障归因和诚实边界
 │   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
