@@ -881,4 +881,4 @@ Job 94111 实际运行 06:00:29 后以 TIMEOUT 结束，sacct 记录 MaxRSS 9876
 
 本机 Python 编译、Shell 语法和 diff 检查通过；集群冻结环境在设置 PYTHONNOUSERSITE=1 后通过 A3.3 相关 6 passed 与全量 135 passed。直接测试时曾遗漏该环境变量，用户目录残缺 boto3 因缺少 jmespath 导致 collection error；正式 Slurm 脚本始终设置该变量，因此这不是项目依赖缺失，也未修改环境。
 
-替代流水线尚未提交；最终 Job ID、资格检查点数量、正式数据哈希和训练结果待后续回填。
+可恢复替代链已提交：CPU qualification 94174 → CPU finalization/preflight 94175 → M0 GPU 推理 94176；M0 CPU 评分 94177 与 GPU 正式 SFT 94178 均依赖 M0 推理，M1 GPU 推理 94179、CPU 评分 94180、最终 CPU 比较 94181 继续使用 afterok 串联。三个 GPU 作业各申请 1 张并严格串行。94174 已在 gpu16 启动但未申请 GPU，初始日志通过 6 项测试与 Bubblewrap 自检，progress manifest 已写入且首批候选检查点开始落盘。最终检查点数量、正式数据哈希和训练结果待后续回填。
