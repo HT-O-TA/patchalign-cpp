@@ -77,6 +77,18 @@ def test_frozen_formal_data_config_matches_builder_targets() -> None:
         assert EDIT_TARGETS[split] == config["formal_sft"]["edit_type_targets"][split]
         assert sum(EDIT_TARGETS[split].values()) == config["formal_sft"]["counts"][split]
 
+    training = json.loads(
+        (ROOT / "configs/training/a3_sft_formal_v1.json").read_text()
+    )
+    assert (
+        training["data"]["expected_sources"]
+        == config["formal_sft"]["source_counts"]
+    )
+    assert (
+        training["data"]["expected_task_levels"]
+        == config["formal_sft"]["task_level_counts"]
+    )
+
 
 def test_qualification_checkpoints_load_by_candidate_order(tmp_path: Path) -> None:
     items = [

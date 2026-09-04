@@ -29,9 +29,9 @@ VERSION = "a3-formal-sft-data-v1"
 MAX_PER_FAMILY = 2
 TARGETS = {
     "train": {
-        ("commitpackft", "function"): 1277,
+        ("commitpackft", "function"): 1320,
         ("commitpackft", "file_window"): 723,
-        ("runbugrun", "function"): 2973,
+        ("runbugrun", "function"): 2930,
         ("runbugrun", "file_window"): 27,
     },
     "validation": {

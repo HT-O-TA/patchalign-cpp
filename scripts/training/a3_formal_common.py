@@ -56,6 +56,14 @@ def validate_config(config: dict[str, Any]) -> None:
         },
         "wrong task-level counts",
     )
+    require(
+        config["data"]["expected_sources"]
+        == {
+            "train": {"CommitPackFT": 2043, "RunBugRun": 2957},
+            "validation": {"CommitPackFT": 200, "RunBugRun": 300},
+        },
+        "wrong source counts",
+    )
     training = config["training"]
     require(
         {key: training[key] for key in (

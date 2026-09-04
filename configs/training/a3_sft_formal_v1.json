@@ -16,7 +16,7 @@
       "validation": {"function": 425, "file_window": 75}
     },
     "expected_sources": {
-      "train": {"CommitPackFT": 2000, "RunBugRun": 3000},
+      "train": {"CommitPackFT": 2043, "RunBugRun": 2957},
       "validation": {"CommitPackFT": 200, "RunBugRun": 300}
     }
   },

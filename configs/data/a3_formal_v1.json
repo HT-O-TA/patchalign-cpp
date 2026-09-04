@@ -34,8 +34,8 @@
     },
     "source_counts": {
       "train": {
-        "CommitPackFT": 2000,
-        "RunBugRun": 3000
+        "CommitPackFT": 2043,
+        "RunBugRun": 2957
       },
       "validation": {
         "CommitPackFT": 200,
@@ -55,11 +55,11 @@
     "source_task_cells": {
       "train": {
         "CommitPackFT": {
-          "function": 1277,
+          "function": 1320,
           "file_window": 723
         },
         "RunBugRun": {
-          "function": 2973,
+          "function": 2930,
           "file_window": 27
         }
       },
