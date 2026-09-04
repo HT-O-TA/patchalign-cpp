@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-04 22:53:55 CST（2026-09-04T14:53:55Z）
+最后核验：2026-09-04 22:56:30 CST（2026-09-04T14:56:30Z）
 
-项目状态：**A3.4 scoring v2 准备中**。M1-R2 固定推理已完成且 GPU 已释放；不可变预测的评分绑定与 CPU 作业入口正在冻结。
+项目状态：**A3.4 M1-R2 scoring v2 运行中**。CPU-only Job `94558` 已通过 artifact preflight，正在对固定 500 条执行真实评分。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | 评分准备中 | 推理已完成；scoring v2 将绑定不可变预测、holdout、评分配置和沙箱身份 |
+| A3.4 | CPU 评分中 | scoring preflight 已通过；Job `94558` 正在执行 apply、compile 和测试 |
 
 ## A3.3 当前有效链
 
@@ -68,7 +68,7 @@
 2. **已完成**：实现版本化 R2 训练/恢复入口与 fail-closed preflight；集群全量测试 `145 passed`，preflight Job `94523` 通过。
 3. **已完成**：单 GPU SFT-R2 Job `94524` 完成 150/150 optimizer steps并固化最佳 adapter。
 4. **已完成**：CPU preflight Job `94537` 和单 GPU 固定推理 Job `94538` 均完成。
-5. **进行中**：冻结不可变预测的 scoring v2 artifact 绑定；集群全量测试通过后提交 CPU-only 评分作业，并分别对 M0 promotion baseline 和 M1 diagnostic baseline 比较；不得修改固定分母或阈值。
+5. **进行中**：CPU-only scoring v2 Job `94558` 已通过 artifact preflight 并开始固定 500 条真实执行评分，并分别对 M0 promotion baseline 和 M1 diagnostic baseline 比较；不得修改固定分母或阈值。
 6. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
 7. 建立并冻结不少于 150 条的 Defects4C 外部评测集。
 8. 只有新候选同时通过 function、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁后，才讨论进入 A4。

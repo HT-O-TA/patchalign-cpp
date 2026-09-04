@@ -58,3 +58,6 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 结束，耗时 2 秒并通过 5
 
 
 CPU-only 固定推理 preflight Job `94537` 在实现提交 `84fb9dfe06c4530b8fab32d03ef3e15d803a94e7` 上以 `COMPLETED 0:0` 结束，用时 21 秒并通过全量 `154 passed`。报告确认 500 条组成 400/100、输入 token 范围 170～3,589，重建 prompt artifact SHA256 `1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f` 与 A3.3 M0/M1 完全一致；报告 SHA256 为 `8eb0350779242ee62dd5c734a0e8f44cdcf70fb00a15c70131cdde84f120f88c`。单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，并以 `COMPLETED 0:0` 结束，用时 1 小时 13 分 49 秒。500/500 生成状态为 `ok`，499/500 为 strict diff，3/3 确定性 probe 稳定；generation failure、OOM 均为 0。predictions、run manifest、generation summary、determinism probe SHA256 分别为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a`、`88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878`、`eb82f96cef4c103a4944f888f0d171307f1a25d3b35b15d780d5c18b1d26c09a`、`3176c6a73d397561b75a3215a74380626dc290e4c41fc67111999202d790a38a`。scoring v2 尚未提交。
+
+
+A3.4 scoring 实现提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 在集群通过全量 `163 passed`。CPU-only Job `94558` 随后启动，申请 4 CPU、4 GiB、0 GPU；artifact preflight 已确认 500 条预测、499 条 strict diff、3 条稳定 probe 及全部冻结哈希，正在执行 scoring v2。preflight config SHA256 为 `2e44189ed400fdd497a4508d488be702c61c71ff7d6663192fc142f6a9cb3e4a`。

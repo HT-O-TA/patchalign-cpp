@@ -944,3 +944,10 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向�
 集群全量测试为 `154 passed`。CPU-only Job `94537` 以 `COMPLETED 0:0` 结束，用时 21 秒、0 GPU；报告确认 holdout 500 条、function/file-window 为 400/100、输入 token 170～3,589，重建 prompts SHA256 为 `1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f`，与 A3.3 M0/M1 prompt artifact 逐字节一致。preflight 报告 SHA256 为 `8eb0350779242ee62dd5c734a0e8f44cdcf70fb00a15c70131cdde84f120f88c`。
 
 单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，申请 1 GPU、8 CPU、32 GiB、8 小时。作业越过身份检查和模型加载后按样本原子追加预测，并以 `COMPLETED 0:0` 在 1 小时 13 分 49 秒结束。500 条记录全部为 `ok`，499 条 strict diff，3 条确定性重放全部稳定；无 generation failure 或 OOM。predictions/run manifest SHA256 为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a` 和 `88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878`。本结果仅证明生成闭环与格式遵循，补丁正确率和三例 timeout 是否消失仍等待 scoring v2；评分作业尚未提交。
+
+
+## 28. A3.4 scoring v2 绑定与启动
+
+提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 新增 A3.4 scoring binding、fail-closed artifact preflight 和 CPU-only Slurm 入口。绑定精确固定 Job `94538` 的 predictions、run manifest、generation summary、determinism probe、adapter、推理配置与提交，同时固定 holdout manifest、A3.1 scoring v2 配置和 Bubblewrap 身份；任一哈希变化都会在创建评分输出目录前失败。
+
+集群全量测试为 `163 passed`。CPU-only Job `94558` 申请 4 CPU、4 GiB、0 GPU并立即启动。作业内 preflight 确认固定分母 500、function/file-window 400/100、499 条 strict diff、3 条稳定 probe，scoring binding config SHA256 为 `2e44189ed400fdd497a4508d488be702c61c71ff7d6663192fc142f6a9cb3e4a`。正式 scoring v2 已开始；结果和门禁判断等待作业完成后回填。
