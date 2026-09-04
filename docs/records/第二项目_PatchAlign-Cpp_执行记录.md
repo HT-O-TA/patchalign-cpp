@@ -950,4 +950,8 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向�
 
 提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 新增 A3.4 scoring binding、fail-closed artifact preflight 和 CPU-only Slurm 入口。绑定精确固定 Job `94538` 的 predictions、run manifest、generation summary、determinism probe、adapter、推理配置与提交，同时固定 holdout manifest、A3.1 scoring v2 配置和 Bubblewrap 身份；任一哈希变化都会在创建评分输出目录前失败。
 
-集群全量测试为 `163 passed`。CPU-only Job `94558` 申请 4 CPU、4 GiB、0 GPU并立即启动。作业内 preflight 确认固定分母 500、function/file-window 400/100、499 条 strict diff、3 条稳定 probe，scoring binding config SHA256 为 `2e44189ed400fdd497a4508d488be702c61c71ff7d6663192fc142f6a9cb3e4a`。正式 scoring v2 已开始；结果和门禁判断等待作业完成后回填。
+集群全量测试为 `163 passed`。CPU-only Job `94558` 申请 4 CPU、4 GiB、0 GPU；作业内 preflight 确认固定分母 500、function/file-window 400/100、499 条 strict diff、3 条稳定 probe，scoring binding config SHA256 为 `2e44189ed400fdd497a4508d488be702c61c71ff7d6663192fc142f6a9cb3e4a`。作业以 `COMPLETED 0:0` 在 41 分 2 秒结束。
+
+M1-R2 的 parse/apply/compile 为 499/412/392，public-test success 为 22/500，最终 Pass 为 14/500；function 为 11/400，file_window 为 3/100，regression failure 为 3/500，timeout 为 2/500。相对 A3.3 M1，apply/compile 增加 21/19，regression failure 从 5 降到 3，timeout 从 3 降到 2；但总 Pass 从 15 降到 14，function Pass 从 12 降到 11。三个旧 timeout 中 `27a1...3ae8e` 和 `2945...7296` 不再超时，`0201...c280` 仍超时；同时新增 `4538...eb05`，因此不能仅凭 timeout 总数下降声称风险模式已被彻底修复。
+
+scores、summary、manifest SHA256 分别为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`、`23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07`、`b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2`，均已交叉核验。M0 promotion comparison 和 M1 diagnostic comparison 尚未执行，门禁结论留待 paired-bootstrap 与全部冻结阈值计算后记录。

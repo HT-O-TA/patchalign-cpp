@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-04 22:56:30 CST（2026-09-04T14:56:30Z）
+最后核验：2026-09-04 23:39:33 CST（2026-09-04T15:39:33Z）
 
-项目状态：**A3.4 M1-R2 scoring v2 运行中**。CPU-only Job `94558` 已通过 artifact preflight，正在对固定 500 条执行真实评分。
+项目状态：**A3.4 M1-R2 scoring v2 已完成，正式比较待执行**。CPU-only Job `94558` 已完成固定 500 条真实评分；当前不得在 paired-bootstrap 和冻结门禁比较完成前宣称通过。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | CPU 评分中 | scoring preflight 已通过；Job `94558` 正在执行 apply、compile 和测试 |
+| A3.4 | 评分完成、比较待执行 | Job `94558` 已完成；M1-R2 Pass 14/500，正式 promotion/diagnostic 比较尚未执行 |
 
 ## A3.3 当前有效链
 
@@ -61,6 +61,9 @@
 - preflight Job `94523` 以 `COMPLETED 0:0` 在 28 秒内完成 `145 passed`、数据/adapter/token/holdout 身份校验；报告 SHA256 为 `9da6ed41...ce3b`。
 - 单 GPU 训练 Job `94524` 以 `COMPLETED 0:0` 结束，用时 15 分 15 秒；完成 150 optimizer steps，最佳 checkpoint 为 epoch 1/step 150，adapter SHA256 为 `8437acca...425a`。原 500 条 reference validation loss 从 `0.12804146` 变为 `0.13105401`（+`0.00301254`）；该轻微上升只作为遗忘风险信号，最终判断必须等待固定 500 条真实推理与评分。运行代码提交为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`，A4 仍未启动。
 - 固定推理 preflight Job `94537` 完成 `154 passed` 和 prompt 逐字节身份核验。单 GPU Job `94538` 以 `COMPLETED 0:0` 结束，用时 `01:13:49`；500/500 状态为 `ok`，499/500 为 strict diff，3/3 确定性 probe 稳定。predictions/run manifest SHA256 分别为 `c5fe4e6d...7bb6a`、`88abe605...3878`。
+- CPU-only scoring v2 Job `94558` 以 `COMPLETED 0:0` 结束，用时 `00:41:02`。M1-R2 parse/apply/compile 为 499/412/392，最终 Pass 为 14/500；function 为 11/400，file_window 为 3/100，regression failure 为 3/500，timeout 为 2/500。
+- 相对 A3.3 M1，apply/compile 分别增加 21/19，regression failure 从 5 降到 3，timeout 从 3 降到 2，但总 Pass 从 15 降到 14、function Pass 从 12 降到 11。原 3 个 timeout 中 2 个消失、1 个保留，同时新增 1 个 timeout；因此不能把总数下降表述为三个风险样本均已修复。
+- scores、summary、manifest SHA256 分别为 `f05b54a...50b8`、`23ee63ff...1c07`、`b6d72c85...bf2`，均已与 manifest 交叉核验。
 
 ## 后续执行清单
 
@@ -68,7 +71,8 @@
 2. **已完成**：实现版本化 R2 训练/恢复入口与 fail-closed preflight；集群全量测试 `145 passed`，preflight Job `94523` 通过。
 3. **已完成**：单 GPU SFT-R2 Job `94524` 完成 150/150 optimizer steps并固化最佳 adapter。
 4. **已完成**：CPU preflight Job `94537` 和单 GPU 固定推理 Job `94538` 均完成。
-5. **进行中**：CPU-only scoring v2 Job `94558` 已通过 artifact preflight 并开始固定 500 条真实执行评分，并分别对 M0 promotion baseline 和 M1 diagnostic baseline 比较；不得修改固定分母或阈值。
-6. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
-7. 建立并冻结不少于 150 条的 Defects4C 外部评测集。
-8. 只有新候选同时通过 function、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁后，才讨论进入 A4。
+5. **已完成**：CPU-only scoring v2 Job `94558` 完成固定 500 条真实执行评分，产物哈希已核验。
+6. **下一步**：分别执行 M0→M1-R2 promotion comparison 和 M1→M1-R2 diagnostic comparison；前者使用冻结门禁和 paired-bootstrap，后者只解释变化，不替代 promotion baseline。
+7. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
+8. 建立并冻结不少于 150 条的 Defects4C 外部评测集。
+9. 只有新候选同时通过 function、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁后，才讨论进入 A4。
