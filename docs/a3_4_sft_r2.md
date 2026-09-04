@@ -42,6 +42,10 @@ A3.3 的 M1 在冻结 500 条 holdout 上取得 15/500 Pass，function 相对 M0
 
 训练 Job `94524` 必须保留其原始提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`，不得为了运行后续代码而改写 training manifest。固定推理使用独立配置 `configs/evaluation/a3_sft_r2_inference_v1.json`，同时绑定训练 commit、training manifest/summary、best-checkpoint、adapter、模型 revision 和 holdout manifest 的 SHA256；推理 preflight 与推理本身再绑定新的实现提交。由此允许经过审计的跨提交 artifact 消费，同时拒绝未声明的训练权重或数据变化。
 
+## 评分 artifact 绑定
+
+scoring v2 只消费 Job `94538` 已固化的不可变预测。`configs/evaluation/a3_sft_r2_scoring_v1.json` 精确绑定 predictions、run manifest、generation summary、determinism probe、adapter、推理提交、holdout manifest、scoring v2 配置和 Bubblewrap 身份。评分 preflight 在创建输出目录前校验全部身份；正式评分继续复用 A3.1 冻结评分器，不修改固定分母、终止 LF 规范化、`git apply --recount` 或测试语义。
+
 ## 执行顺序
 
 1. 集群 CPU-only 构造 R2 数据并核对选择 manifest。

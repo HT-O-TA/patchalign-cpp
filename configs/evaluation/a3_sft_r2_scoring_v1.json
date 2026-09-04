@@ -1,0 +1,30 @@
+{
+  "version": "a3-sft-r2-scoring-v1",
+  "inference": {
+    "directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/inference",
+    "git_commit": "84fb9dfe06c4530b8fab32d03ef3e15d803a94e7",
+    "config_sha256": "sha256:d2ceed71424b89002e8774b500b9fe00020f54635119a7b05465e5590c2df07e",
+    "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+    "holdout_manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+    "predictions_sha256": "sha256:c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a",
+    "run_manifest_sha256": "sha256:88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878",
+    "generation_summary_sha256": "sha256:eb82f96cef4c103a4944f888f0d171307f1a25d3b35b15d780d5c18b1d26c09a",
+    "determinism_probe_sha256": "sha256:3176c6a73d397561b75a3215a74380626dc290e4c41fc67111999202d790a38a"
+  },
+  "holdout": {
+    "directory": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "manifest": "a2-manifest.json",
+    "cases": 500,
+    "task_level_counts": {
+      "function": 400,
+      "file_window": 100
+    }
+  },
+  "scoring": {
+    "protocol": "a3-scoring-v2",
+    "config": "configs/evaluation/a3_scoring_v2.json",
+    "config_sha256": "sha256:b8d9507ec7fc97c370e52230759e0b2b84591d6fb4200a50944add19ebe859e8",
+    "sandbox": "bubblewrap-0.12.0-rootless-no-network"
+  },
+  "output_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/inference/scoring-v2"
+}

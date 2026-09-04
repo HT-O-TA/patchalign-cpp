@@ -90,6 +90,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 - 训练与推理代码处于不同提交，因此不伪造“同一 commit”；使用独立 inference binding，以 training manifest、summary、checkpoint、adapter 和 holdout/prompt 的 SHA256 显式桥接，并让 CPU preflight 与正式推理绑定新的实现 commit。
 - CPU-only preflight Job `94537` 用 21 秒完成 `154 passed`，并证明新渲染的 500 条 prompt 与 A3.3 M0/M1 prompt artifact 逐字节一致；正式推理因此只改变 adapter，不改变输入和解码协议。
 - 正式推理 Job `94538` 完成 500/500 生成，499 条为 strict diff，3/3 确定性重放稳定且无 OOM；这只能证明生成与格式闭环，修复正确率和超时风险仍由真实执行评分决定。
+- 生成与评分彻底解耦：评分只读取已哈希冻结的 predictions，并在创建输出前验证推理 manifest、holdout、scoring v2 配置和 Bubblewrap 身份，因此可以复评而不重新消耗 GPU。
 
 面试要点：修正策略针对一般风险模式而非记忆失败样本答案，同时保持评测协议不变，避免 holdout 泄漏和事后优化。
 

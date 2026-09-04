@@ -26,7 +26,8 @@
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
 │   │   │   ├── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
-│   │   │   └── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
+│   │   │   ├── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
+│   │   │   └── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
 │   │   ├── model/
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
@@ -78,6 +79,7 @@
 │   │   ├── a3_4_train.sbatch               # A3.4 单 GPU 可恢复 adapter continuation
 │   │   ├── a3_4_infer_preflight.sbatch     # A3.4 固定推理 CPU-only fail-closed 预检
 │   │   ├── a3_4_infer.sbatch               # A3.4 单 GPU、分段可恢复固定推理
+│   │   ├── a3_4_score.sbatch               # A3.4 CPU-only 固定 scoring v2
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
