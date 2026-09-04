@@ -908,3 +908,9 @@ config            358894a6e8e3b54a1b71ea1884848296c8af6381063cb44fb1a0f70483f4ab
 preflight 记录 train/validation 最大编码长度为 3,461/2,198，holdout 500 条提示最大 3,589。当前有效依赖链为 M0 GPU 94338 → M0 CPU 评分 94339 与正式 SFT GPU 94340 → M1 GPU 94341 → M1 CPU 评分 94342 → CPU 比较 94343；GPU 阶段严格串行且各申请 1 张。94338 已在 gpu28 启动并进入四分片模型加载，已越过此前的超长提示失败点。
 
 上述数据容量、后置 Schema、真实 prompt token、holdout/SFT 联合隔离和配置漂移问题统一记录在 `docs/evidence/a3_3_pipeline_findings.md`，作为论文实验设置、工程约束和局限性分析材料。失败冻结产物只读移入数据 history，Job 94305 的不完整 M0 移入 artifact history；均未覆盖或删除。
+
+## 24. A3.3 结束与项目暂停
+
+2026-09-04，A3.3 有效链 94338～94343 已全部完成。M1 function Pass 相对 M0 提升 +3pp，主提升门通过；但 timeout 增加 0.6pp，超过冻结上限 0.5pp，故内部门禁未通过。三例 timeout 已由 CPU-only Job 94493 确认为模型补丁引入的真实运行时退化，分析与证据见 `docs/evidence/a3_3_pipeline_findings.md`。正式评分、固定分母和阈值均未修改。
+
+项目在提交 `b9f44d5990ed5416281317ca30a980187aa14985` 后暂停。暂停检查确认集群没有 PatchAlign 作业处于运行或排队状态。恢复时的唯一说明性清单维护在 `docs/status.md` 的“暂停点与恢复清单”；在新的 SFT 候选通过完整预注册门禁前，不进入正式 A4 executable preference data。
