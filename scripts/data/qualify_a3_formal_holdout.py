@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import hashlib
 import json
 from pathlib import Path
@@ -27,12 +27,67 @@ from scripts.data.run_a2_cases import execute_version, resolve_case, sanitizer_r
 
 
 VERSION = "a3-formal-holdout-v1"
+PROGRESS_VERSION = "a3-formal-qualification-progress-v1"
 
 
 def write_json(path: Path, value: object) -> None:
     path.write_text(
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+    )
+
+
+def write_json_atomic(path: Path, value: object) -> None:
+    """Write one checkpoint without exposing a partial JSON file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    write_json(temporary, value)
+    temporary.replace(path)
+
+
+def progress_identity(
+    candidate_manifest: dict[str, Any],
+    candidate_manifest_sha256: str,
+) -> dict[str, Any]:
+    return {
+        "version": PROGRESS_VERSION,
+        "source_candidate_version": candidate_manifest["version"],
+        "source_candidate_manifest_sha256": candidate_manifest_sha256,
+        "required_task_levels": candidate_manifest["required_task_levels"],
+        "sandbox_policy_version": SANDBOX_VERSION,
+        "output_matcher": matcher_metadata(),
+    }
+
+
+def load_cached_evaluations(
+    progress_dir: Path,
+    items_by_order: dict[int, dict[str, Any]],
+) -> dict[int, dict[str, Any]]:
+    evaluations: dict[int, dict[str, Any]] = {}
+    for path in sorted((progress_dir / "evaluations").glob("*.json")):
+        evaluation = json.loads(path.read_text(encoding="utf-8"))
+        decision = evaluation["decision"]
+        order = decision["candidate_order"]
+        item = items_by_order.get(order)
+        if item is None:
+            raise RuntimeError(f"checkpoint has unknown candidate_order: {path}")
+        for key in ("case_id", "problem_id", "task_level", "candidate_order"):
+            if decision[key] != item[key]:
+                raise RuntimeError(f"checkpoint identity mismatch for {path}: {key}")
+        if order in evaluations:
+            raise RuntimeError(f"duplicate checkpoint for candidate_order={order}")
+        evaluations[order] = evaluation
+    return evaluations
+
+
+def qualified_count(
+    items: list[dict[str, Any]],
+    evaluations: dict[int, dict[str, Any]],
+) -> int:
+    return sum(
+        bool(evaluations[item["candidate_order"]]["decision"]["qualified"])
+        for item in items
+        if item["candidate_order"] in evaluations
     )
 
 
@@ -154,41 +209,140 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate-dir", type=Path, required=True)
     parser.add_argument("--holdout-dir", type=Path, required=True)
+    parser.add_argument("--progress-dir", type=Path, required=True)
     parser.add_argument("--bwrap", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=16)
+    parser.add_argument("--batch-size", type=int, default=16)
     args = parser.parse_args()
     if args.workers < 1:
         raise SystemExit("workers must be positive")
+    if args.batch_size < 1:
+        raise SystemExit("batch-size must be positive")
     bwrap = resolve_bwrap(args.bwrap)
     if args.holdout_dir.exists():
         raise SystemExit(f"refusing to overwrite holdout: {args.holdout_dir}")
 
-    candidate_manifest = json.loads(
-        (args.candidate_dir / "candidate-manifest.json").read_text(encoding="utf-8")
-    )
+    candidate_manifest_path = args.candidate_dir / "candidate-manifest.json"
+    candidate_manifest = json.loads(candidate_manifest_path.read_text(encoding="utf-8"))
     if candidate_manifest["version"] != "a3-formal-candidate-pool-v1":
         raise RuntimeError("unexpected formal candidate version")
     required = candidate_manifest["required_task_levels"]
     items = candidate_manifest["cases"]
-    payloads = [
-        (str(args.candidate_dir), item, str(bwrap))
-        for item in items
-    ]
-    with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        evaluations = list(
-            executor.map(evaluate_candidate, payloads, chunksize=1)
+    items_by_order = {item["candidate_order"]: item for item in items}
+    if len(items_by_order) != len(items):
+        raise RuntimeError("candidate_order values must be unique")
+    levels = ["function", "file_window"]
+    if set(required) != set(levels):
+        raise RuntimeError(f"unexpected required task levels: {sorted(required)}")
+    unknown_levels = sorted({item["task_level"] for item in items} - set(levels))
+    if unknown_levels:
+        raise RuntimeError(f"candidate manifest has unknown task levels: {unknown_levels}")
+
+    identity = progress_identity(candidate_manifest, sha256_file(candidate_manifest_path))
+    progress_manifest_path = args.progress_dir / "progress-manifest.json"
+    if progress_manifest_path.exists():
+        existing_identity = json.loads(
+            progress_manifest_path.read_text(encoding="utf-8")
         )
+        if existing_identity != identity:
+            raise RuntimeError(
+                "qualification progress does not match the candidate manifest or policy"
+            )
+    else:
+        unexpected_progress = (
+            [
+                path
+                for path in args.progress_dir.iterdir()
+                if path.name != ".progress-manifest.json.tmp"
+            ]
+            if args.progress_dir.exists()
+            else []
+        )
+        if unexpected_progress:
+            raise RuntimeError(
+                f"progress directory is non-empty without manifest: {args.progress_dir}"
+            )
+        args.progress_dir.mkdir(parents=True, exist_ok=True)
+        write_json_atomic(progress_manifest_path, identity)
+
+    evaluations = load_cached_evaluations(args.progress_dir, items_by_order)
+    items_by_level = {
+        level: [item for item in items if item["task_level"] == level]
+        for level in levels
+    }
+    print(
+        json.dumps(
+            {
+                "event": "qualification_resume",
+                "cached": len(evaluations),
+                "total_candidates": len(items),
+                "qualified_by_level": {
+                    level: qualified_count(items_by_level[level], evaluations)
+                    for level in levels
+                },
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        for level in levels:
+            level_items = items_by_level[level]
+            while qualified_count(level_items, evaluations) < required[level]:
+                pending = [
+                    item
+                    for item in level_items
+                    if item["candidate_order"] not in evaluations
+                ][: args.batch_size]
+                if not pending:
+                    break
+                payloads = [
+                    (str(args.candidate_dir), item, str(bwrap))
+                    for item in pending
+                ]
+                futures = [
+                    executor.submit(evaluate_candidate, payload)
+                    for payload in payloads
+                ]
+                completed = 0
+                for future in as_completed(futures):
+                    evaluation = future.result()
+                    decision = evaluation["decision"]
+                    order = decision["candidate_order"]
+                    checkpoint_path = (
+                        args.progress_dir
+                        / "evaluations"
+                        / f"{order:04d}.json"
+                    )
+                    write_json_atomic(checkpoint_path, evaluation)
+                    evaluations[order] = evaluation
+                    completed += 1
+                print(
+                    json.dumps(
+                        {
+                            "event": "qualification_batch_complete",
+                            "task_level": level,
+                            "batch_size": completed,
+                            "evaluated": len(evaluations),
+                            "qualified": qualified_count(level_items, evaluations),
+                            "required": required[level],
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
 
     selected_counts: Counter[str] = Counter()
     rejection_counts: Counter[str] = Counter()
     decisions: list[dict[str, Any]] = []
     selected: list[dict[str, Any]] = []
-    for evaluation in evaluations:
-        decision = evaluation["decision"]
+    for order in sorted(evaluations):
+        evaluation = evaluations[order]
+        decision = dict(evaluation["decision"])
         task_level = decision["task_level"]
         if decision["qualified"] and selected_counts[task_level] < required[task_level]:
             decision["selected"] = True
-            evaluation["selected_item"]["test_partition"] = evaluation["partitions"]
             selected.append(evaluation)
             selected_counts[task_level] += 1
         elif decision["reasons"]:
@@ -251,9 +405,12 @@ def main() -> None:
             "selected_count": len(selected_manifest),
             "selected_task_levels": dict(selected_counts),
             "evaluated_candidates": len(decisions),
+            "unevaluated_candidates": len(items) - len(decisions),
             "qualified_candidates": sum(d["qualified"] for d in decisions),
             "rejection_counts": dict(sorted(rejection_counts.items())),
             "workers": args.workers,
+            "batch_size": args.batch_size,
+            "progress_version": PROGRESS_VERSION,
             "decisions": decisions,
         }
         write_json(temporary / "a2-manifest.json", manifest)

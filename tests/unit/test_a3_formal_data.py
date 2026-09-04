@@ -10,6 +10,11 @@ from scripts.data.build_a3_formal_sft_data import (
     classify_edit,
     formal_level,
 )
+from scripts.data.qualify_a3_formal_holdout import (
+    load_cached_evaluations,
+    qualified_count,
+    write_json_atomic,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -71,3 +76,61 @@ def test_frozen_formal_data_config_matches_builder_targets() -> None:
         } == config["formal_sft"]["task_level_counts"][split]
         assert EDIT_TARGETS[split] == config["formal_sft"]["edit_type_targets"][split]
         assert sum(EDIT_TARGETS[split].values()) == config["formal_sft"]["counts"][split]
+
+
+def test_qualification_checkpoints_load_by_candidate_order(tmp_path: Path) -> None:
+    items = [
+        {
+            "case_id": "case-b",
+            "problem_id": "problem-b",
+            "task_level": "function",
+            "candidate_order": 2,
+        },
+        {
+            "case_id": "case-a",
+            "problem_id": "problem-a",
+            "task_level": "function",
+            "candidate_order": 1,
+        },
+    ]
+    for item, qualified in zip(items, (False, True), strict=True):
+        evaluation = {
+            "decision": {
+                **item,
+                "selected": False,
+                "qualified": qualified,
+                "stability_replayed": qualified,
+                "reasons": [] if qualified else ["fixed_test_failure"],
+            }
+        }
+        write_json_atomic(
+            tmp_path / "evaluations" / f"{item['candidate_order']:04d}.json",
+            evaluation,
+        )
+
+    loaded = load_cached_evaluations(
+        tmp_path,
+        {item["candidate_order"]: item for item in items},
+    )
+
+    assert list(loaded) == [1, 2]
+    assert qualified_count(items, loaded) == 1
+    assert not list((tmp_path / "evaluations").glob(".*.tmp"))
+
+
+def test_qualification_checkpoint_rejects_identity_mismatch(tmp_path: Path) -> None:
+    item = {
+        "case_id": "expected",
+        "problem_id": "problem",
+        "task_level": "file_window",
+        "candidate_order": 3,
+    }
+    evaluation = {"decision": {**item, "case_id": "wrong"}}
+    write_json_atomic(tmp_path / "evaluations" / "0003.json", evaluation)
+
+    try:
+        load_cached_evaluations(tmp_path, {3: item})
+    except RuntimeError as error:
+        assert "identity mismatch" in str(error)
+    else:
+        raise AssertionError("mismatched checkpoint must fail closed")
