@@ -38,6 +38,7 @@ def utc_now() -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--role", choices=("m0", "m1_r2"), default="m1_r2")
     parser.add_argument("--preflight", type=Path, required=True)
     parser.add_argument("--environment-lock", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -87,11 +88,12 @@ def main() -> None:
         return
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    adapter_dir = training["adapter_dir"]
-    adapter_sha = config["source_training"]["adapter_sha256"]
+    adapter_dir = training["adapter_dir"] if args.role == "m1_r2" else None
+    adapter_sha = config["source_training"]["adapter_sha256"] if args.role == "m1_r2" else None
     state_path = args.output_dir / "inference-state.json"
     expected_state = {
         "version": "a3-sft-r2-inference-state-v1",
+        "role": args.role,
         "git_commit": commit,
         "config_sha256": sha256_file(args.config),
         "preflight_sha256": sha256_file(args.preflight),
@@ -133,9 +135,13 @@ def main() -> None:
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
     evaluation = config["evaluation"]
-    manifest, cases = load_cases(Path(evaluation["holdout_root"]), evaluation["allowed_path"])
+    manifest, cases = load_cases(
+        Path(evaluation["holdout_root"]),
+        evaluation["allowed_path"],
+        evaluation["holdout_manifest"],
+    )
     require(manifest["task_level_counts"] == evaluation["required_task_levels"], "holdout composition mismatch")
-    require(len(cases) == 500, "formal holdout denominator mismatch")
+    require(len(cases) == sum(evaluation["required_task_levels"].values()), "holdout denominator mismatch")
     prepared = []
     for case in cases:
         rendered = render_model_input(tokenizer, case["prompt"], evaluation["input_mode"])
@@ -187,10 +193,10 @@ def main() -> None:
     )
 
     load_started = time.monotonic()
-    model = load_model(model_path, "sft", adapter_dir)
+    model = load_model(model_path, "m0" if args.role == "m0" else "sft", adapter_dir)
     load_seconds = time.monotonic() - load_started
     segment_started = time.monotonic()
-    run_id = config["run_id"]
+    run_id = config["run_id"] + "_" + args.role
     prediction_schema = json.loads(
         (repo / "schemas/prediction-v0.1.schema.json").read_text(encoding="utf-8")
     )
@@ -260,7 +266,7 @@ def main() -> None:
         print(
             json.dumps(
                 {
-                    "role": "m1-r2",
+                    "role": args.role,
                     "index": index + 1,
                     "total": len(prepared),
                     "case": item["case_id"],
@@ -297,7 +303,7 @@ def main() -> None:
     write_json(args.output_dir / "determinism-probe.json", probe_records)
     summary = {
         "version": "a3-sft-r2-generation-v1",
-        "role": "m1-r2",
+        "role": args.role,
         "cases": len(records),
         "status_counts": dict(Counter(record["status"] for record in records)),
         "strict_diff_count": sum(record["extracted_patch"] is not None for record in records),
@@ -313,7 +319,7 @@ def main() -> None:
     run_manifest = {
         "schema_version": "0.1.0",
         "run_id": run_id,
-        "stage": "sft",
+        "stage": "baseline" if args.role == "m0" else "sft",
         "started_at": state["started_at"],
         "finished_at": utc_now(),
         "git_commit": commit,
@@ -330,7 +336,7 @@ def main() -> None:
         "prediction_artifact_sha256": sha256_file(predictions_path),
         "execution_artifact_sha256": None,
         "notes": (
-            f"role=m1-r2; quantization=nf4; prompts={sha256_file(prompts_path)}; "
+            f"role={args.role}; quantization=nf4; prompts={sha256_file(prompts_path)}; "
             f"source_training_commit={config['source_training']['git_commit']}; "
             f"source_training_manifest={config['source_training']['manifest_sha256']}; "
             f"preflight={sha256_file(args.preflight)}"

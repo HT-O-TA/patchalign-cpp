@@ -62,10 +62,14 @@ def main() -> None:
         model_path, local_files_only=True, trust_remote_code=False, use_fast=True
     )
     evaluation = config["evaluation"]
-    manifest, cases = load_cases(Path(evaluation["holdout_root"]), evaluation["allowed_path"])
+    manifest, cases = load_cases(
+        Path(evaluation["holdout_root"]),
+        evaluation["allowed_path"],
+        evaluation["holdout_manifest"],
+    )
     task_counts = Counter(case["item"]["task_level"] for case in cases)
-    require(len(cases) == 500, "formal holdout denominator mismatch")
-    require(dict(task_counts) == evaluation["required_task_levels"], "formal holdout composition mismatch")
+    require(len(cases) == sum(evaluation["required_task_levels"].values()), "holdout denominator mismatch")
+    require(dict(task_counts) == evaluation["required_task_levels"], "holdout composition mismatch")
     require(manifest["task_level_counts"] == evaluation["required_task_levels"], "holdout manifest composition mismatch")
     token_counts = []
     for case in cases:

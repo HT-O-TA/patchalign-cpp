@@ -77,8 +77,12 @@ def render_model_input(tokenizer: Any, prompt: str, input_mode: str) -> str:
     raise ValueError(f"unsupported input_mode: {input_mode}")
 
 
-def load_cases(holdout_dir: Path, allowed_path: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    manifest = json.loads((holdout_dir / "a2-manifest.json").read_text(encoding="utf-8"))
+def load_cases(
+    holdout_dir: Path,
+    allowed_path: str,
+    manifest_name: str = "a2-manifest.json",
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    manifest = json.loads((holdout_dir / manifest_name).read_text(encoding="utf-8"))
     records = []
     for item in manifest["cases"]:
         case_dir = holdout_dir / "cases" / item["case_id"]

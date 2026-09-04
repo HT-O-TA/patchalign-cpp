@@ -10,14 +10,17 @@ from scripts.training.a3_formal_common import require, sha256_file
 
 
 VERSION = "a3-sft-r2-inference-v1"
+CONFIRMATION_VERSION = "a3-confirmation-inference-v1"
 TRAINING_VERSION = "a3-sft-r2-training-v1"
 TRAINING_MANIFEST_COMMIT = "8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c"
 MODEL_REVISION = "0396a76181e127dfc13e5c5ec48a8cee09938b02"
 
 
 def validate_config(config: dict[str, Any]) -> None:
-    require(config.get("version") == VERSION, "wrong R2 inference config version")
-    require(config.get("run_id") == "a34_m1_r2_nf4_s20260830", "wrong R2 run id")
+    version = config.get("version")
+    require(version in {VERSION, CONFIRMATION_VERSION}, "wrong R2 inference config version")
+    expected_run = "a34_m1_r2_nf4_s20260830" if version == VERSION else "a34_confirmation_s20260830"
+    require(config.get("run_id") == expected_run, "wrong R2 run id")
     require(config.get("seed") == 20260830, "wrong R2 inference seed")
     model = config["model"]
     require(model["model_id"] == "Qwen/Qwen2.5-Coder-7B", "wrong model id")
@@ -42,24 +45,25 @@ def validate_config(config: dict[str, Any]) -> None:
         require(source[key].startswith("sha256:"), f"missing source hash: {key}")
 
     evaluation = config["evaluation"]
-    require(
-        evaluation["holdout_manifest"] == "a2-manifest.json",
-        "wrong holdout manifest name",
+    expected_evaluation = (
+        {
+            "manifest": "a2-manifest.json",
+            "manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+            "prompt_sha256": "sha256:1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f",
+            "counts": {"function": 400, "file_window": 100},
+        }
+        if version == VERSION
+        else {
+            "manifest": "confirmation-manifest.json",
+            "manifest_sha256": "sha256:7adf960fff4e7f1ee3ca95539ffa1196c3421805659c94bb46a29d0022690917",
+            "prompt_sha256": "sha256:cf141a9d4f90c8fd9f1a8f9cd03509cc2b2fd48905a3c1e533e93cad702ad58f",
+            "counts": {"function": 100, "file_window": 24},
+        }
     )
-    require(
-        evaluation["holdout_manifest_sha256"]
-        == "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
-        "formal holdout identity changed",
-    )
-    require(
-        evaluation["prompt_artifact_sha256"]
-        == "sha256:1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f",
-        "formal prompt artifact identity changed",
-    )
-    require(
-        evaluation["required_task_levels"] == {"function": 400, "file_window": 100},
-        "wrong holdout composition",
-    )
+    require(evaluation["holdout_manifest"] == expected_evaluation["manifest"], "wrong holdout manifest name")
+    require(evaluation["holdout_manifest_sha256"] == expected_evaluation["manifest_sha256"], "holdout identity changed")
+    require(evaluation["prompt_artifact_sha256"] == expected_evaluation["prompt_sha256"], "prompt artifact identity changed")
+    require(evaluation["required_task_levels"] == expected_evaluation["counts"], "wrong holdout composition")
     require(evaluation["prompt_version"] == "a3-cpp-repair-v1", "wrong prompt version")
     require(evaluation["input_mode"] == "raw_completion", "wrong input mode")
     require(evaluation["allowed_path"] == "main.cpp", "wrong allowed path")

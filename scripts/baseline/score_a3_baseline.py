@@ -414,6 +414,7 @@ def main() -> None:
     parser.add_argument("--bwrap", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--scoring-config", type=Path)
+    parser.add_argument("--manifest-name", default="a2-manifest.json")
     args = parser.parse_args()
 
     bwrap = resolve_bwrap(args.bwrap)
@@ -432,13 +433,12 @@ def main() -> None:
     predictions = load_predictions(
         args.predictions, repo / "schemas" / "prediction-v0.1.schema.json"
     )
-    manifest = json.loads(
-        (args.holdout_dir / "a2-manifest.json").read_text(encoding="utf-8")
-    )
+    manifest_path = args.holdout_dir / args.manifest_name
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     expected_ids = [item["case_id"] for item in manifest["cases"]]
     actual_ids = [record["sample_id"] for record in predictions]
     if actual_ids != expected_ids:
-        raise SystemExit("prediction order or frozen denominator differs from A2 manifest")
+        raise SystemExit("prediction order or frozen denominator differs from dataset manifest")
     inference_manifest = json.loads(
         args.inference_manifest.read_text(encoding="utf-8")
     )
@@ -462,7 +462,7 @@ def main() -> None:
     ):
         raise SystemExit("prediction artifact hash does not match inference manifest")
     if inference_manifest["dataset_manifest_sha256"] != sha256_file(
-        args.holdout_dir / "a2-manifest.json"
+        manifest_path
     ):
         raise SystemExit("dataset manifest hash mismatch")
 
