@@ -13,6 +13,7 @@ from scripts.data.build_a3_formal_sft_data import (
 from scripts.data.qualify_a3_formal_holdout import (
     load_cached_evaluations,
     qualified_count,
+    selectable_count,
     write_json_atomic,
 )
 
@@ -127,6 +128,8 @@ def test_qualification_checkpoints_load_by_candidate_order(tmp_path: Path) -> No
 
     assert list(loaded) == [1, 2]
     assert qualified_count(items, loaded) == 1
+    assert selectable_count(items, loaded, {1: 4096}, 4096) == 1
+    assert selectable_count(items, loaded, {1: 4097}, 4096) == 0
     assert not list((tmp_path / "evaluations").glob(".*.tmp"))
 
 

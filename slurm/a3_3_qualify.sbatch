@@ -16,6 +16,7 @@ REPO=/mingli01/project/ht/patchalign-cpp
 CANDIDATES=/mingli01/data/patchalign-cpp/a3/formal-holdout-candidates-v1
 PROGRESS=/mingli01/data/patchalign-cpp/a3/formal-holdout-qualification-v1
 HOLDOUT=/mingli01/data/patchalign-cpp/a3/formal-holdout-v1
+MODEL=/mingli01/models/Qwen2.5-Coder-7B
 BWRAP=/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap
 
 export PATH="${ENV_PREFIX}/bin:${PATH}"
@@ -45,6 +46,9 @@ python -u scripts/data/qualify_a3_formal_holdout.py \
   --candidate-dir "${CANDIDATES}" \
   --progress-dir "${PROGRESS}" \
   --holdout-dir "${HOLDOUT}" \
+  --model-path "${MODEL}" \
+  --max-input-tokens 4096 \
+  --allowed-path main.cpp \
   --bwrap "${BWRAP}" \
   --workers "${SLURM_CPUS_PER_TASK}" \
   --batch-size "${A33_QUALIFY_BATCH_SIZE:-16}"

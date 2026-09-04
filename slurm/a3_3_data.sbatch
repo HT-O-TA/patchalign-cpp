@@ -58,6 +58,7 @@ fi
 python -u scripts/data/qualify_a3_formal_holdout.py \
   --candidate-dir "${CANDIDATES}" --holdout-dir "${HOLDOUT}" \
   --progress-dir "${PROGRESS}" --bwrap "${BWRAP}" \
+  --model-path "${MODEL}" --max-input-tokens 4096 --allowed-path main.cpp \
   --workers "${SLURM_CPUS_PER_TASK}" --batch-size "${A33_QUALIFY_BATCH_SIZE:-16}"
 python -u scripts/data/build_a3_formal_sft_data.py \
   --commitpack-file "${CP_RAW}" --runbugrun-dir "${RBR_RAW}" \

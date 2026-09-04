@@ -13,7 +13,9 @@ import tempfile
 from typing import Any
 
 from jsonschema import Draft202012Validator
+from transformers import AutoTokenizer
 
+from scripts.baseline.run_a3_baseline import build_prompt, render_model_input
 from scripts.data.a2_output_matcher import matcher_metadata
 from scripts.data.a2_sandbox_runtime import SANDBOX_VERSION, resolve_bwrap
 from scripts.data.a2_stability import stable_replay
@@ -88,6 +90,47 @@ def qualified_count(
         bool(evaluations[item["candidate_order"]]["decision"]["qualified"])
         for item in items
         if item["candidate_order"] in evaluations
+    )
+
+
+def prompt_token_count(
+    candidate_dir: Path,
+    evaluation: dict[str, Any],
+    tokenizer: Any,
+    allowed_path: str,
+) -> int:
+    """Count the exact raw-completion input used by formal inference."""
+    item = evaluation["selected_item"]
+    case_dir = candidate_dir / "cases" / item["case_id"]
+    tests = {
+        str(test["id"]): test
+        for test in map(
+            json.loads,
+            (case_dir / "tests.jsonl").read_text(encoding="utf-8").splitlines(),
+        )
+    }
+    public_id = str(evaluation["partitions"]["public"][0])
+    prompt = build_prompt(
+        item,
+        (case_dir / "buggy.cpp").read_text(encoding="utf-8"),
+        tests[public_id],
+        allowed_path,
+    )
+    rendered = render_model_input(tokenizer, prompt, "raw_completion")
+    return len(tokenizer(rendered, add_special_tokens=True)["input_ids"])
+
+
+def selectable_count(
+    items: list[dict[str, Any]],
+    evaluations: dict[int, dict[str, Any]],
+    prompt_tokens: dict[int, int],
+    max_input_tokens: int,
+) -> int:
+    return sum(
+        bool(evaluations[order]["decision"]["qualified"])
+        and prompt_tokens.get(order, max_input_tokens + 1) <= max_input_tokens
+        for item in items
+        if (order := item["candidate_order"]) in evaluations
     )
 
 
@@ -211,6 +254,9 @@ def main() -> None:
     parser.add_argument("--holdout-dir", type=Path, required=True)
     parser.add_argument("--progress-dir", type=Path, required=True)
     parser.add_argument("--bwrap", type=Path, required=True)
+    parser.add_argument("--model-path", type=Path, required=True)
+    parser.add_argument("--max-input-tokens", type=int, default=4096)
+    parser.add_argument("--allowed-path", default="main.cpp")
     parser.add_argument("--workers", type=int, default=16)
     parser.add_argument("--batch-size", type=int, default=16)
     args = parser.parse_args()
@@ -218,6 +264,8 @@ def main() -> None:
         raise SystemExit("workers must be positive")
     if args.batch_size < 1:
         raise SystemExit("batch-size must be positive")
+    if args.max_input_tokens < 1:
+        raise SystemExit("max-input-tokens must be positive")
     bwrap = resolve_bwrap(args.bwrap)
     if args.holdout_dir.exists():
         raise SystemExit(f"refusing to overwrite holdout: {args.holdout_dir}")
@@ -266,6 +314,19 @@ def main() -> None:
         write_json_atomic(progress_manifest_path, identity)
 
     evaluations = load_cached_evaluations(args.progress_dir, items_by_order)
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.model_path,
+        local_files_only=True,
+        trust_remote_code=False,
+        use_fast=True,
+    )
+    prompt_tokens = {
+        order: prompt_token_count(
+            args.candidate_dir, evaluation, tokenizer, args.allowed_path
+        )
+        for order, evaluation in evaluations.items()
+        if evaluation["decision"]["qualified"]
+    }
     items_by_level = {
         level: [item for item in items if item["task_level"] == level]
         for level in levels
@@ -280,6 +341,15 @@ def main() -> None:
                     level: qualified_count(items_by_level[level], evaluations)
                     for level in levels
                 },
+                "selectable_by_level": {
+                    level: selectable_count(
+                        items_by_level[level],
+                        evaluations,
+                        prompt_tokens,
+                        args.max_input_tokens,
+                    )
+                    for level in levels
+                },
             },
             sort_keys=True,
         ),
@@ -289,7 +359,15 @@ def main() -> None:
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         for level in levels:
             level_items = items_by_level[level]
-            while qualified_count(level_items, evaluations) < required[level]:
+            while (
+                selectable_count(
+                    level_items,
+                    evaluations,
+                    prompt_tokens,
+                    args.max_input_tokens,
+                )
+                < required[level]
+            ):
                 pending = [
                     item
                     for item in level_items
@@ -317,6 +395,13 @@ def main() -> None:
                     )
                     write_json_atomic(checkpoint_path, evaluation)
                     evaluations[order] = evaluation
+                    if decision["qualified"]:
+                        prompt_tokens[order] = prompt_token_count(
+                            args.candidate_dir,
+                            evaluation,
+                            tokenizer,
+                            args.allowed_path,
+                        )
                     completed += 1
                 print(
                     json.dumps(
@@ -326,6 +411,12 @@ def main() -> None:
                             "batch_size": completed,
                             "evaluated": len(evaluations),
                             "qualified": qualified_count(level_items, evaluations),
+                            "selectable": selectable_count(
+                                level_items,
+                                evaluations,
+                                prompt_tokens,
+                                args.max_input_tokens,
+                            ),
                             "required": required[level],
                         },
                         sort_keys=True,
@@ -341,6 +432,15 @@ def main() -> None:
         evaluation = evaluations[order]
         decision = dict(evaluation["decision"])
         task_level = decision["task_level"]
+        if decision["qualified"]:
+            order = decision["candidate_order"]
+            decision["prompt_tokens"] = prompt_tokens[order]
+            if prompt_tokens[order] > args.max_input_tokens:
+                decision["qualified"] = False
+                decision["reasons"] = [
+                    *decision["reasons"],
+                    "prompt_tokens_over_limit",
+                ]
         if decision["qualified"] and selected_counts[task_level] < required[task_level]:
             decision["selected"] = True
             selected.append(evaluation)
@@ -398,6 +498,12 @@ def main() -> None:
                 "of F; hidden=remaining F; regression=buggy-pass/fixed-pass"
             ),
             "output_matcher": matcher_metadata(),
+            "prompt_token_policy": {
+                "model_config_sha256": sha256_file(args.model_path / "config.json"),
+                "input_mode": "raw_completion",
+                "allowed_path": args.allowed_path,
+                "max_input_tokens": args.max_input_tokens,
+            },
             "cases": selected_manifest,
         }
         report = {
@@ -408,6 +514,13 @@ def main() -> None:
             "unevaluated_candidates": len(items) - len(decisions),
             "qualified_candidates": sum(d["qualified"] for d in decisions),
             "rejection_counts": dict(sorted(rejection_counts.items())),
+            "prompt_token_policy": manifest["prompt_token_policy"],
+            "selected_prompt_token_stats": {
+                "count": len(selected),
+                "min": min(d["prompt_tokens"] for d in decisions if d["selected"]),
+                "max": max(d["prompt_tokens"] for d in decisions if d["selected"]),
+                "total": sum(d["prompt_tokens"] for d in decisions if d["selected"]),
+            },
             "workers": args.workers,
             "batch_size": args.batch_size,
             "progress_version": PROGRESS_VERSION,

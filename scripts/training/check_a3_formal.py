@@ -11,7 +11,7 @@ import subprocess
 from jsonschema import Draft202012Validator
 from transformers import AutoTokenizer
 
-from scripts.baseline.run_a3_baseline import load_cases
+from scripts.baseline.run_a3_baseline import load_cases, render_model_input
 from scripts.training.a3_formal_common import (
     require,
     sha256_file,
@@ -75,6 +75,24 @@ def main() -> None:
     require(len(cases) == 500, "holdout case denominator mismatch")
     public_counts = Counter(len(json.loads((case["case_dir"] / "test-partition.json").read_text())["public"]) for case in cases)
     require(all(key >= 1 for key in public_counts), "holdout case without public tests")
+    holdout_prompt_tokens = [
+        len(
+            tokenizer(
+                render_model_input(
+                    tokenizer,
+                    case["prompt"],
+                    config["base_model_inference"]["input_mode"],
+                ),
+                add_special_tokens=True,
+            )["input_ids"]
+        )
+        for case in cases
+    ]
+    require(
+        max(holdout_prompt_tokens)
+        <= config["evaluation"]["generation"]["max_input_tokens"],
+        "holdout prompt exceeds max_input_tokens",
+    )
 
     report = {
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
@@ -99,6 +117,12 @@ def main() -> None:
         },
         "holdout_public_test_count_distribution": {
             str(key): value for key, value in sorted(public_counts.items())
+        },
+        "holdout_prompt_token_stats": {
+            "count": len(holdout_prompt_tokens),
+            "min": min(holdout_prompt_tokens),
+            "max": max(holdout_prompt_tokens),
+            "total": sum(holdout_prompt_tokens),
         },
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
