@@ -49,9 +49,12 @@ def validate_config(config: dict[str, Any]) -> None:
         "prompt_file": "data/single_function_allinone.saved.jsonl",
         "prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
         "cpp_extensions": [".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"],
-        "expected_projects": 13,
-        "expected_unique_pairs": 206,
-        "expected_checkout_targets": 206,
+        "training_manifest": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/dataset-manifest.json",
+        "training_manifest_sha256": "sha256:50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02",
+        "excluded_training_overlap": ["bblanchon___ArduinoJson", "znc___znc"],
+        "expected_projects": 11,
+        "expected_unique_pairs": 203,
+        "expected_checkout_targets": 203,
     }:
         raise RuntimeError("Defects4C source selection changed")
     download = config["download"]
@@ -92,7 +95,18 @@ def discover(source: Path, config: dict[str, Any]) -> list[dict[str, Any]]:
         sha, separator, filename = prompt["idx"].partition("___")
         if separator and Path(filename).suffix.lower() in selection["cpp_extensions"] and sha in by_after:
             selected[sha] = {**by_after[sha], "prompt_idx": prompt["idx"], "source_file": filename}
-    records = [selected[key] for key in sorted(selected)]
+    training_manifest = Path(selection["training_manifest"])
+    if sha256_file(training_manifest) != selection["training_manifest_sha256"]:
+        raise RuntimeError("formal SFT manifest changed")
+    training = json.loads(training_manifest.read_text(encoding="utf-8"))
+    training_families = {item["repo_family"].lower() for item in training["samples"]}
+    overlap = sorted({
+        item["project"] for item in selected.values()
+        if item["project"].replace("___", "/").lower() in training_families
+    })
+    if overlap != selection["excluded_training_overlap"]:
+        raise RuntimeError(f"external/training family overlap changed: {overlap}")
+    records = [selected[key] for key in sorted(selected) if selected[key]["project"] not in overlap]
     projects = {item["project"] for item in records}
     targets = {(item["project"], item["commit_after"]) for item in records}
     expected = config["selection"]

@@ -15,7 +15,7 @@ def config() -> dict:
 def test_defects4c_source_contract_is_frozen() -> None:
     value = config()
     validate_config(value)
-    assert value["selection"]["expected_unique_pairs"] == 206
+    assert value["selection"]["expected_unique_pairs"] == 203
     assert value["selection"]["prompt_sha256"] == "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff"
     assert value["download"]["workers"] == 4
 
@@ -25,8 +25,8 @@ def test_defects4c_source_contract_is_frozen() -> None:
     [
         (("version",), "changed"),
         (("official_source", "git_commit"), "0" * 40),
-        (("selection", "expected_projects"), 12),
-        (("selection", "expected_unique_pairs"), 205),
+        (("selection", "expected_projects"), 10),
+        (("selection", "expected_unique_pairs"), 202),
         (("download", "workers"), 16),
         (("download", "fetch_timeout_seconds"), 60),
     ],

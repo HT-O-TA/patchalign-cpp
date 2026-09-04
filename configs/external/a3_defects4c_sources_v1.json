@@ -8,9 +8,12 @@
     "prompt_file": "data/single_function_allinone.saved.jsonl",
     "prompt_sha256": "sha256:3ef1b7e0867b8616f6becf48c30c92478a04a3111dba5f6398c2887db87808ff",
     "cpp_extensions": [".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"],
-    "expected_projects": 13,
-    "expected_unique_pairs": 206,
-    "expected_checkout_targets": 206
+    "training_manifest": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/dataset-manifest.json",
+    "training_manifest_sha256": "sha256:50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02",
+    "excluded_training_overlap": ["bblanchon___ArduinoJson", "znc___znc"],
+    "expected_projects": 11,
+    "expected_unique_pairs": 203,
+    "expected_checkout_targets": 203
   },
   "download": {
     "output_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",
