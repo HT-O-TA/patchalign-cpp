@@ -71,6 +71,7 @@
 │   │   ├── a3_3_train.sbatch               # 单 GPU、checkpoint 可恢复的正式 NF4 QLoRA
 │   │   ├── a3_3_score.sbatch               # CPU-only 正式 scoring v2
 │   │   ├── a3_3_compare.sbatch             # CPU-only 冻结质量门比较
+│   │   ├── a3_4_data.sbatch                # A3.4 CPU-only 安全子集冻结
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
