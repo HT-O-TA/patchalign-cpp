@@ -11,15 +11,25 @@
     "kind": "adapter_continuation",
     "source_run_id": "a33_sft_nf4_s20260830",
     "source_checkpoint": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/formal/sft-training/checkpoints/checkpoint-step-001250-epoch-2/adapter",
-    "adapter_sha256": "sha256:807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f"
+    "adapter_sha256": "sha256:807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f",
+    "adapter_config_sha256": "sha256:2840cf5c7fd2bf3d9c7b381db6fff7880c48c41380f06f544a096c50e03ba37b",
+    "source_training_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/formal/sft-training/training-manifest.json",
+    "source_training_manifest_sha256": "sha256:7a9becd707556557c679c55e219838757e83632fc6d8967c2674fb5a6e4adf17"
   },
   "data": {
     "root": "/mingli01/data/patchalign-cpp/a3/sft-r2-data-v1",
     "selection_manifest": "selection-manifest.json",
+    "selection_manifest_sha256": "sha256:7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac",
     "selection_config": "configs/data/a3_sft_r2_v1.json",
+    "selection_config_sha256": "sha256:d75e5c8578c8ca809a67f3f7347a6480149e06effc513d1274218ec1f6c3aa68",
     "expected_counts": {"train": 1200, "validation": 117},
+    "file_sha256": {
+      "train.jsonl": "sha256:6eeab690c134c21f6789e1a50e9581307c726acfe7d2f6b600be809221f678cc",
+      "validation.jsonl": "sha256:878abb76cb73d750ac061ffff539cb5f696b000efd01bfa4b51af871a9564b73"
+    },
     "reference_validation_root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
-    "reference_validation_count": 500
+    "reference_validation_count": 500,
+    "reference_validation_sha256": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980"
   },
   "training": {
     "mode": "nf4_qlora_adapter_continuation",
@@ -50,6 +60,7 @@
   },
   "evaluation": {
     "holdout_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "holdout_manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
     "required_task_levels": {"function": 400, "file_window": 100},
     "prompt_version": "a3-cpp-repair-v1",
     "input_mode": "raw_completion",

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
+
+import pytest
 
 from scripts.data.build_a3_sft_r2_data import (
     SOURCE_FILE_SHA256,
@@ -9,6 +12,7 @@ from scripts.data.build_a3_sft_r2_data import (
     VERSION,
     safety_tags,
 )
+from scripts.training.a3_sft_r2_common import validate_config
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -77,12 +81,34 @@ def test_data_and_training_contracts_are_consistent() -> None:
     }
     assert data["output"]["counts"] == training["data"]["expected_counts"]
     assert training["version"] == "a3-sft-r2-v1"
+    validate_config(training)
     assert training["initialization"]["kind"] == "adapter_continuation"
     assert training["training"]["epochs"] == 1
     assert training["training"]["learning_rate"] == 0.00002
     assert training["training"]["reset_optimizer_state"] is True
     assert training["evaluation"]["scoring_protocol"] == "a3-scoring-v2"
     assert training["evaluation"]["generation"]["num_return_sequences"] == 1
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [
+        (("training", "epochs"), 2),
+        (("training", "learning_rate"), 0.0001),
+        (("evaluation", "input_mode"), "chat_template"),
+        (("evaluation", "generation", "num_return_sequences"), 2),
+        (("comparison", "fixed_denominator"), 499),
+    ],
+)
+def test_r2_config_rejects_protocol_drift(path: tuple[str, ...], value: object) -> None:
+    config = json.loads((ROOT / "configs/training/a3_sft_r2_v1.json").read_text())
+    changed = copy.deepcopy(config)
+    target = changed
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    with pytest.raises(RuntimeError):
+        validate_config(changed)
 
 
 def test_r2_output_hashes_match_frozen_local_probe() -> None:
