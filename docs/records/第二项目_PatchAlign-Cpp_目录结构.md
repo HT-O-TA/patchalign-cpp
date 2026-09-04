@@ -25,7 +25,8 @@
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
-│   │   │   └── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
+│   │   │   ├── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
+│   │   │   └── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
 │   │   ├── model/
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
@@ -54,7 +55,7 @@
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
-│   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、可恢复训练与验证
+│   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -75,6 +76,8 @@
 │   │   ├── a3_4_data.sbatch                # A3.4 CPU-only 安全子集冻结
 │   │   ├── a3_4_preflight.sbatch           # A3.4 CPU-only 全量 fail-closed 预检
 │   │   ├── a3_4_train.sbatch               # A3.4 单 GPU 可恢复 adapter continuation
+│   │   ├── a3_4_infer_preflight.sbatch     # A3.4 固定推理 CPU-only fail-closed 预检
+│   │   ├── a3_4_infer.sbatch               # A3.4 单 GPU、分段可恢复固定推理
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成

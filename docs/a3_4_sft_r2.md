@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：数据冻结、CPU preflight 和单 GPU SFT-R2 训练已完成；固定 500 条推理和评分尚未提交。
+阶段状态：数据冻结、CPU preflight 和单 GPU SFT-R2 训练已完成；固定 500 条推理的独立 artifact 绑定与作业入口已实现，等待集群 preflight。
 
 ## 目标
 
@@ -37,6 +37,10 @@ A3.3 的 M1 在冻结 500 条 holdout 上取得 15/500 Pass，function 相对 M0
 - `M1-R2` 对 M0 运行原 SFT promotion gate；同时对 M1 做诊断比较，明确报告 Pass 和三个 timeout 样本的逐例变化，但不据此修改门禁。
 - timeout 相对 M0 最多增加 0.5 个百分点，因此 500 条中最多允许 2 个 timeout；function 主提升仍至少为 2 个百分点且 paired-bootstrap 95% 下界不小于 0。其余 parse/apply/compile、regression 和 file-window 上限保持 ADR-0004 不变。
 - 原 500 条 holdout 已用于开发分析，只能用于可比性结果。晋级 A4 前仍必须建立未查看的新确认集，并完成不少于 150 条 Defects4C 外部门禁。
+
+## 推理 artifact 绑定
+
+训练 Job `94524` 必须保留其原始提交 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`，不得为了运行后续代码而改写 training manifest。固定推理使用独立配置 `configs/evaluation/a3_sft_r2_inference_v1.json`，同时绑定训练 commit、training manifest/summary、best-checkpoint、adapter、模型 revision 和 holdout manifest 的 SHA256；推理 preflight 与推理本身再绑定新的实现提交。由此允许经过审计的跨提交 artifact 消费，同时拒绝未声明的训练权重或数据变化。
 
 ## 执行顺序
 

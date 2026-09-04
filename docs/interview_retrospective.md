@@ -87,6 +87,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 - 从 A3.3 最佳 adapter 继续训练，重置 optimizer/scheduler，以更低学习率训练 1 epoch、150 optimizer steps。
 - 推理仍使用原 500 条 holdout、raw completion、greedy Pass@1、512 token 和 scoring v2；不增加候选过滤、拒绝或重排，确保与 M0/M1 可比。
 - 单 GPU 训练 Job `94524` 完成 150/150 optimizer steps，用时 15 分 15 秒；最佳 adapter 位于 epoch 1 / step 150。聚焦 validation loss 为 `0.07718202`，原 500 条 reference validation loss 相对起点增加 `0.00301254`。这只是潜在遗忘信号，不能替代真实可执行评测，因此暂不宣称风险修正有效。
+- 训练与推理代码处于不同提交，因此不伪造“同一 commit”；使用独立 inference binding，以 training manifest、summary、checkpoint、adapter 和 holdout/prompt 的 SHA256 显式桥接，并让 CPU preflight 与正式推理绑定新的实现 commit。
 
 面试要点：修正策略针对一般风险模式而非记忆失败样本答案，同时保持评测协议不变，避免 holdout 泄漏和事后优化。
 
