@@ -1,6 +1,6 @@
 # A0 样本与运行 Schema
 
-状态：Draft
+状态：`sample-v0.2` 已冻结；A2 execution `0.2.0-draft` 仅用于内部实验
 当前 canonical sample 版本：`0.2.0`
 
 ## 1. 设计原则
@@ -72,7 +72,7 @@
 
 ## 4. 执行结果
 
-执行结果后续在 A2 固化独立 Schema，至少包含：
+A2 已将执行结果固化为独立的 [`a2-execution-v0.2.schema.json`](../../schemas/a2-execution-v0.2.schema.json)，覆盖：
 
 - sandbox/backend 版本；
 - base revision 和临时工作树 ID；
@@ -82,11 +82,11 @@
 - CPU time、wall time、MaxRSS、最大进程数和输出大小；
 - 最终失败分类和成功布尔值。
 
-在 A2 Schema 冻结前，不得生成正式评测报告。
+该 Schema 的版本仍为 `0.2.0-draft`：A2/A3 内部 artifact 必须绑定其具体哈希，公开正式评测前应以新版本提升，不得静默改写既有结果。
 
 ## 5. Run manifest
 
-机器定义见 [`run-manifest-v0.1.schema.json`](../../schemas/run-manifest-v0.1.schema.json)。一个可报告 run 必须绑定：
+A3.1 及后续机器定义见 [`run-manifest-v0.2.schema.json`](../../schemas/run-manifest-v0.2.schema.json)；v0.1 保留用于历史重放。一个可报告 run 必须绑定：
 
 ```text
 run_id

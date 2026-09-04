@@ -79,7 +79,7 @@ artifacts/a3/sft-pilot/<mode>/<train-job-id>/
 5. 记录 Job ID、资源、wall time、峰值显存、loss、结果与 artifact SHA256；
 6. 本机、GitHub、集群同步到同一干净提交。
 
-A3.2 已关闭；正式 SFT 尚未启动。
+A3.2 已关闭。其终态只负责选择正式 SFT 方案；后续 A3.3 进度见[项目状态](status.md)。
 
 ## 7. 实际执行与预检
 

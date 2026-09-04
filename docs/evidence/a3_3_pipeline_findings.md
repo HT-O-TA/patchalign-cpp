@@ -58,6 +58,19 @@
 - 修正：在 `evaluation.input_mode` 显式冻结 `raw_completion`，配置验证器、preflight 和正式推理共同读取该字段；Job 94329～94334 未运行即取消。
 - 论文意义：提示模板相同不代表模型输入相同，chat template 与 raw completion 会产生不同 token 序列。输入模式必须进入可哈希配置，并由数据门禁和推理共享。
 
+### 8. Base 模型在正式规模下没有遵守补丁输出协议
+
+- 证据：M0 Job 94338 在冻结 500 条 holdout 上完成 500/500 生成，无 generation failure、OOM 或 timeout，3 条确定性 probe 逐字节稳定；但 `strict_diff_count=0`。scoring v2 Job 94339 将全部 500 条终态分类为 `parse_failed`，其中 function 400/400、file_window 100/100。
+- 传输排除：scoring v2 对 478 条缺少终止 LF 的输出只追加一个 LF，仍没有任何输出形成合法 unified diff；因此不能把本结果归因于 A3.0 曾发现的单个换行传输问题。
+- 解释：在冻结 raw-completion 输入、greedy decoding 和 512-token 输出预算下，未经指令微调的 Base 没有按要求生成唯一纯 unified diff。该结论只适用于本模型 revision、prompt 和评测集，不外推为 Base 模型一般能力。
+- 方法学意义：格式遵循本身是代码修复流水线的首个质量瓶颈；若只统计可解析补丁，会删除全部 Base 失败并破坏固定分母。SFT 的正式比较应同时报告 parse、apply、compile 和最终 Pass，区分“学会协议”与“学会正确修复”。
+- 关键身份：
+  - predictions SHA256：`dadf0cfe5c0178ed3b2497536c8509a8437f9f8461f7c10ec86591cd99d7429e`；
+  - run manifest SHA256：`8c35904e2ab2f5118c9b8fbec7913c51a45394779dc03a38e5421d3e2e28a87d`；
+  - scores SHA256：`92ceb428df80ed772a2c9ce4dfaefd0f3d9b36fd7d96cc74e5cafd538fd6df3d`；
+  - score summary SHA256：`f183fa2cf203c2be95dbab1a56bfe13ec9718c117da14f0ed0592c45376a5ed0`；
+  - score manifest SHA256：`6e1b6f097c30f602a43b93cacff2cda83d589cfabccc5528755c0efab549ae6d`。
+
 ## 已冻结且未放宽的条件
 
 - 正式 holdout 仍为 400 function + 100 file_window。
@@ -66,7 +79,7 @@
 - 保留 Sample Schema v0.2、Bubblewrap、buggy/fixed 双重稳定回放及输出匹配规则。
 - 不把 Job 94305 计为 M0 结果，不把数据管线修正计为模型提升。
 
-## 当前正式数据证据
+## 正式数据证据
 
 Job 94337 在 Git 提交 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上完成最终冻结与 preflight：
 
@@ -80,7 +93,7 @@ Job 94337 在 Git 提交 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上完成最
 - train/validation 最大编码长度分别为 3,461/2,198；holdout 500 条实际 prompt 为 170～3,589；
 - 修改类型仍为 train 2,703/2,150/64/83、validation 255/235/6/4（single/multi/add-helper/refactor）。
 
-Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 SFT 和 Job 94305 不完整 M0 均保留在 history，不进入正式结果。当前有效链为 M0 94338、M0 评分 94339、SFT 94340、M1 94341、M1 评分 94342、比较 94343。
+Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 SFT 和 Job 94305 不完整 M0 均保留在 history，不进入正式结果。有效运行身份为 M0 94338、M0 评分 94339、SFT 94340、M1 94341、M1 评分 94342、比较 94343；实时状态见[项目状态](../status.md)。
 
 ## 可用于论文的方法学表述草案
 
@@ -89,6 +102,6 @@ Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 
 ## 待回填
 
 - 当前作业链各阶段最终用时、CPU/GPU/内存峰值；
-- M0、SFT、M1 的正式生成与评分结果；
+- SFT 训练终态以及 M1 的正式生成与评分结果；
 - 失败样本类型是否与源码长度、测试输入长度或任务层相关的后续统计；
 - 外部 Defects4C 门禁结果；完成前不得宣称完整 promotion gate 通过。

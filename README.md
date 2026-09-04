@@ -2,7 +2,7 @@
 
 PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目研究在固定数据、提示和评测协议下，LoRA/QLoRA SFT 与 DPO 是否能提高开放权重 Base 模型生成可应用、可编译、通过隐藏测试且修改克制的补丁的能力。
 
-当前状态：**A0、A1、A2、A3.0、A3.1 和 A3.2 均已完成；A3.2 依据冻结规则选择 NF4 QLoRA 作为正式 SFT 候选方案**。正式 SFT 尚未开始。
+项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
 
 ## 第一阶段范围
 
@@ -15,6 +15,8 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 当前入口
 
+- [项目状态（唯一实时状态页）](docs/status.md)
+- [文档索引与防漂移规则](docs/README.md)
 - [A0 阶段索引](docs/a0/README.md)
 - [核心任务与评测协议](docs/a0/core_protocol.md)
 - [样本与运行 Schema](docs/a0/sample_schema.md)
@@ -26,6 +28,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - [A3.0 冻结基线协议](docs/a3_baseline.md)
 - [A3.1 评分协议与重评分](docs/a3_1_scoring.md)
 - [A3.2 LoRA/QLoRA SFT 训练 pilot](docs/a3_2_sft_pilot.md)
+- [A3.3 正式 SFT](docs/a3_3_formal_sft.md)
 - [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
 - [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
 - [本机—集群 Git 同步规范](docs/development/git-sync.md)
@@ -57,13 +60,9 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 - G0 仅证明环境、BF16 LoRA、NF4 QLoRA 和 adapter 生命周期兼容；
 - A3.2 的 70 条 executable training pilot 中，BF16 LoRA 与 NF4 QLoRA 均为 1/70 Pass；该结果只用于选择训练方案，不能形成正式 Base/SFT/DPO 质量结论；
-- 当前已完成 A1 pilot 和 A2 50 function + 20 file-window 可执行 pilot；正式 500 条内部评测集与训练规模数据尚未构建；
-- A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 仅冻结用于 A2 pilot，生产 Schema 仍待正式评测前升级；
+- A1/A2 pilot 与正式 A3.3 数据不是同一证据等级；正式运行的当前状态和身份必须从状态页及 artifact manifest 核对；
+- A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 绑定 A2/A3 内部 artifact，公开正式报告前应以新版本提升且不改写历史结果；
 - 基础模型预训练污染未知，只能披露，不能声称完全排除。
-
-## 开发状态
-
-A0 协议验收、A1 pilot、A2 安全执行闭环、A3.0 双基线、A3.1 scoring v2 重评分及 A3.2 LoRA/QLoRA 训练 pilot 均已完成。A3.2 在质量差不足 2 条时按资源 tie-break 选择 NF4 QLoRA；正式 SFT 尚未启动。
 
 ## 许可证与发布边界
 

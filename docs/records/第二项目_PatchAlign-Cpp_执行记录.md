@@ -1,10 +1,12 @@
 # PatchAlign-Cpp 执行记录
 
-> 用途：持续记录第二项目已经真实完成、正在进行和仍被阻塞的事项。
-> 记录原则：只写可由命令、文件、作业或用户确认支持的事实；不把计划写成完成。
+> 用途：按时间保留第二项目已经发生的执行事实，是历史台账，不是当前状态页。
+> 当前阶段与作业状态以 [`docs/status.md`](../status.md) 为唯一说明性入口；冻结配置以 [`docs/README.md`](../README.md) 列出的机器事实源为准。
+> 记录原则：只写可由命令、文件、作业或用户确认支持的事实；不把计划写成完成。各节中的“当前”“尚未”“正在”均只表示该节记录时点，后续事实可覆盖它，但不回写历史。
+> 实时进度不追加到本文；作业终止并固化 artifact 后再记录最终事实。
 > 首次建立：2026-08-30 18:28 CST（祝融 2026-08-30 10:28 UTC）
 
-目录结构的独立台账见：`/home/lenovo/A/patchalign-cpp/docs/records/第二项目_PatchAlign-Cpp_目录结构.md`。发生较大目录更新时，应同步更新该台账及本文中的相关执行记录。
+目录结构的独立台账见[目录结构台账](第二项目_PatchAlign-Cpp_目录结构.md)。发生较大目录职责变化时更新该台账；运行状态变化只更新状态页。
 
 ## 1. 已冻结的用户决策
 
@@ -56,7 +58,7 @@
 - 产物、环境、模型、数据和权重不进入 Git；
 - 具体流程见 `docs/development/git-sync.md`。
 
-A0 当前为 Draft，尚未通过验收门禁。
+当时状态：A0 为 Draft，尚未通过验收门禁；该状态已由后续 A0 closeout 记录取代。
 
 ## 3. 祝融目录与基础设施
 
@@ -832,28 +834,6 @@ BF16 反向传播日志包含 Flash Attention 非严格确定性警告，因此�
 
 关键 artifact：
 
-
-## 21. A3.3 正式 SFT 准备与冻结
-
-2026-09-04 启动 A3.3。正式静态契约冻结为 5,000 train、500 validation、400 function holdout 与 100 file-window holdout；训练采用 A3.2 资源平局选出的 NF4 QLoRA，3 epochs、micro batch 1、gradient accumulation 8、学习率 1e-4、4,096 token 上限、每 200 optimizer steps 及 epoch 末 checkpoint，完整 validation loss 选择最佳 checkpoint。
-
-正式留出集从排除 A1 pilot problem family 的 RunBugRun 候选中构建，先取 900 function + 250 file-window 候选，再经 Bubblewrap 真实 buggy/fixed 双重稳定回放冻结 400/100。函数级分类修正为“变更被任一完整花括号 span 包含”，避免嵌套控制块把函数内修改误判为 file-window。
-
-正式 SFT 数据保留 A1 isolated-v2 300/50，最终配额为：
-
-- train：CommitPackFT 2,000 + RunBugRun 3,000；function 4,250 + file-window 750；
-- validation：CommitPackFT 200 + RunBugRun 300；function 425 + file-window 75；
-- train/validation repository family 零交叉，RunBugRun 与正式 holdout problem family 零交叉，exact payload 零重复，单一 family 每 split 最多 2 条。
-
-35% single-line、50% multi-line、10% add-helper、5% localized-refactor 继续作为分布目标。来源审计确认 add-helper/refactor 真实候选不足以无损填满目标，因此构建器报告实际值和偏差，不合成数据、不放松资格条件。
-
-作业入口拆为 CPU 数据构建与哈希锁、GPU M0 推理、GPU 正式训练、GPU M1 推理、两组 CPU scoring v2 和 CPU 质量门比较。三个 GPU 阶段使用 `afterok` 严格串行；训练和推理均可从稳定目录恢复。正式内部门可以运行，但 Defects4C 不少于 150 条的外部门仍缺失，完成前不得声明完整 promotion gate 通过。
-
-首次集群实现提交 `6d4aea03a9e7021d10735d870602294ae6a32072` 通过 `133 passed`；恢复与资源补强后集群同步至 `54a610333fc4f8fee1fca817d550470308967ec1`，再次为 `133 passed`。
-
-CPU 数据与 preflight Job 为 `94111`。正式依赖链已提交：M0 GPU 推理 `94118` → GPU SFT `94120` → M1 GPU 推理 `94121`；M0/M1 CPU 评分分别为 `94119`/`94122`，最终 CPU 比较为 `94123`。三个 GPU 阶段严格串行，均受 `afterok` 约束；提交后显示 `PD (Dependency)`，不会在 94111 失败时运行。
-
-最终数据哈希、实际修改类型分布、训练和评测结果待作业执行后续写。
 ```text
 artifacts/a3/sft-pilot/bf16_lora/93951
   adapter      5eb7b3d939c02fbe7cacc7090dba9c7cc564eccd21ca8df622d7c127a713d8cd
@@ -867,7 +847,30 @@ artifacts/a3/comparison-a32/93955/comparison.json
   sha256       4e9a436893984bebeb180641e34ee5882854ab527262f52c006f06c948105e56
 ```
 
-结论：A3.2 已关闭，NF4 QLoRA 只被选为后续正式 SFT 的候选加载方案；70 条 pilot 不应用正式 400 条门禁，不构成正式 SFT 质量结论，正式训练尚未启动。
+结论：A3.2 已关闭，NF4 QLoRA 只被选为后续正式 SFT 的候选加载方案；70 条 pilot 不应用正式 400 条门禁，不构成正式 SFT 质量结论。
+
+
+## 21. A3.3 正式 SFT 准备与冻结
+
+2026-09-04 启动 A3.3。正式静态契约冻结为 5,000 train、500 validation、400 function holdout 与 100 file-window holdout；训练采用 A3.2 资源平局选出的 NF4 QLoRA，3 epochs、micro batch 1、gradient accumulation 8、学习率 1e-4、4,096 token 上限、每 200 optimizer steps 及 epoch 末 checkpoint，完整 validation loss 选择最佳 checkpoint。
+
+正式留出集从排除 A1 pilot problem family 的 RunBugRun 候选中构建，先取 900 function + 250 file-window 候选，再经 Bubblewrap 真实 buggy/fixed 双重稳定回放冻结 400/100。函数级分类修正为“变更被任一完整花括号 span 包含”，避免嵌套控制块把函数内修改误判为 file-window。
+
+正式 SFT 数据保留 A1 isolated-v2 300/50；本节启动时的初始配额为（随后被第 23 节的容量与 prompt 门禁修订，不是最终机器契约）：
+
+- train：CommitPackFT 2,000 + RunBugRun 3,000；function 4,250 + file-window 750；
+- validation：CommitPackFT 200 + RunBugRun 300；function 425 + file-window 75；
+- train/validation repository family 零交叉，RunBugRun 与正式 holdout problem family 零交叉，exact payload 零重复，单一 family 每 split 最多 2 条。
+
+35% single-line、50% multi-line、10% add-helper、5% localized-refactor 继续作为分布目标。来源审计确认 add-helper/refactor 真实候选不足以无损填满目标，因此构建器报告实际值和偏差，不合成数据、不放松资格条件。
+
+作业入口拆为 CPU 数据构建与哈希锁、GPU M0 推理、GPU 正式训练、GPU M1 推理、两组 CPU scoring v2 和 CPU 质量门比较。三个 GPU 阶段使用 `afterok` 严格串行；训练和推理均可从稳定目录恢复。正式内部门可以运行，但 Defects4C 不少于 150 条的外部门仍缺失，完成前不得声明完整 promotion gate 通过。
+
+首次集群实现提交 `6d4aea03a9e7021d10735d870602294ae6a32072` 通过 `133 passed`；恢复与资源补强后集群同步至 `54a610333fc4f8fee1fca817d550470308967ec1`，再次为 `133 passed`。
+
+CPU 数据与 preflight Job 为 `94111`。正式依赖链已提交：M0 GPU 推理 `94118` → GPU SFT `94120` → M1 GPU 推理 `94121`；M0/M1 CPU 评分分别为 `94119`/`94122`，最终 CPU 比较为 `94123`。三个 GPU 阶段严格串行，均受 `afterok` 约束；提交后显示 `PD (Dependency)`，不会在 94111 失败时运行。
+
+当时状态：最终数据哈希、实际修改类型分布、训练和评测结果尚待后续作业；第 23 节记录了替代后的正式冻结身份。
 
 ## 22. A3.3 Job 94111 超时与恢复实现
 

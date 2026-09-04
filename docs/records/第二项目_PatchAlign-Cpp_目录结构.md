@@ -1,9 +1,9 @@
 # PatchAlign-Cpp 目录结构台账
 
 > 用途：记录 PatchAlign-Cpp 本地、祝融、模型和环境目录的当前结构与职责边界。
-> 更新规则：每次发生较大的目录新增、移动、删除、重命名或职责变化时，必须同步更新“当前结构”“目录备注”和“变更记录”。
+> 更新规则：只在稳定目录新增、移动、删除、重命名或职责变化时更新；实时作业和 checkpoint 状态见[项目状态](../status.md)。
 > 首次建立：2026-08-30
-> 当前状态：G0、A0、A1、A2、A3.0、A3.1、A3.2 均已完成；A3.3 正式数据与 preflight 已冻结，M0 Job 94338 正在单 GPU 运行。
+> 本页不维护阶段状态，避免与状态页重复。
 
 ## 1. 祝融当前结构
 
@@ -14,18 +14,21 @@
 │   ├── .gitignore                          # 忽略 artifact、日志、缓存、权重和密钥文件
 │   ├── LICENSE                             # Apache License 2.0 原文
 │   ├── NOTICE                              # 项目版权与许可边界说明
-│   │   ├── data/a3_formal_v1.json          # A3.3 正式数据配额、隔离和候选池契约
-│   │   ├── training/a3_sft_formal_v1.json  # A3.3 NF4 QLoRA 训练与正式评测契约
 │   ├── THIRD_PARTY_NOTICES.md              # 模型、依赖和未来数据来源的审计清单
 │   ├── README.md
 │   ├── configs/
+│   │   ├── data/
+│   │   │   ├── a1_pilot_v1.json            # 旧 pilot artifact 重放
+│   │   │   ├── a1_pilot_v2.json            # 隔离后的 A1 pilot
+│   │   │   └── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
 │   │   │   └── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
 │   │   ├── model/
 │   │   └── training/
-│   │       └── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
+│   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
+│   │       └── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
 │   ├── docs/
 │   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
@@ -84,7 +87,7 @@
 │       │   │   └── history/                 # 不完整 M0 等失败正式产物，只读归档
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
-│       │   └── logs/                        # A3.0～A3.2 Slurm 原始日志
+│       │   └── logs/                        # A3 各阶段 Slurm 原始日志
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -111,10 +114,10 @@
 
 ```text
 /mingli01/data/patchalign-cpp/a3/
-├── formal-holdout-candidates-v1/           # 900/250 待资格回放候选
-├── formal-holdout-qualification-v1/        # 候选级原子 JSON 检查点，可跨作业恢复
+├── formal-holdout-candidates-v1/           # 冻结的 900/250 候选池
+├── formal-holdout-qualification-v1/        # 已完成的候选级资格缓存，可审计和恢复
 ├── formal-holdout-v1/                      # token 门禁后的冻结 400 function + 100 file-window
-├── formal-sft-v1/                          # 当前有效 5,000 train + 500 validation 与哈希锁
+├── formal-sft-v1/                          # 有效 5,000 train + 500 validation 与哈希锁
 └── history/                                # 被后续门禁替代、未通过 preflight 的冻结产物
     ├── formal-holdout-v1-pre-prompt-token-gate-94174/
     ├── formal-sft-v1-pre-prompt-token-gate-94304/
@@ -131,15 +134,17 @@
 │   ├── NOTICE
 │   ├── THIRD_PARTY_NOTICES.md
 │   ├── pyproject.toml
-│   ├── configs/model/
+│   ├── configs/                            # data/model/training/evaluation 机器契约
 │   ├── docs/
+│   │   ├── README.md                       # 文档职责与防漂移规则
+│   │   ├── status.md                       # 唯一实时状态页
 │   │   ├── a0/                            # 索引、核心协议、Schema、实验、治理
 │   │   ├── decisions/
 │   │   ├── development/
 │   │   ├── evidence/                      # A0/G0 证据与 A3.3 论文问题材料
 │   │   └── records/                       # 执行记录与独立目录台账
 │   ├── schemas/
-│   ├── scripts/smoke/
+│   ├── scripts/                            # data/baseline/training/smoke
 │   ├── slurm/
 │   ├── src/patchalign/
 │   └── tests/
@@ -209,10 +214,10 @@ HT-O-TA/patchalign-cpp
 ### 3.7 `/home/lenovo/A/patchalign-cpp`
 
 - 已创建的本地 Git 主工作区，当前分支为 `main`；
-- 已建立 README、A0 Draft 文档、ADR、Schema、模型配置和最小 Python 包骨架；
+- 已建立 README、分层文档、ADR、Schema、版本化配置和 Python 包；
 - 当前 canonical sample 为 `schemas/sample-v0.2.schema.json`；v0.1 保留用于历史重放；
 - 原 `/home/lenovo/A/new` 中三份项目文档已迁入本仓库；
-- A0 技术验收和 A2 的 70 条安全执行 pilot 均已完成；正式 500 条评测集与模型质量评测尚未完成；
+- 阶段完成情况不在目录台账重复维护，统一见 `docs/status.md`；
 - 作为主要开发与提交工作区；GitHub 是同步中枢，祝融是计算工作副本。
 
 ### 3.8 `LICENSE`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`
@@ -255,50 +260,12 @@ HT-O-TA/patchalign-cpp
 - A2 诊断日志保存在 Git 忽略的 `artifacts/a2-diagnostics`；
 - Job `93650` 已完成 70/70 独立重放和验收，qualification 与 final 的状态及输出哈希完全稳定；全流程为 CPU-only。
 
-## 4. 预计的正式项目结构
+## 4. 结构扩展规则
 
-以下是 A0～A2 逐步形成的目标结构。其中 README、pyproject、A0 文档、Schema 和最小包骨架已经存在，其余目录仍是规划：
-
-```text
-patchalign-cpp/
-├── README.md
-├── pyproject.toml
-├── .gitignore
-├── configs/
-│   ├── data/
-│   ├── model/
-│   ├── sft/
-│   └── dpo/
-├── docs/
-│   ├── decisions/
-│   ├── learning/
-│   ├── data_card.md
-│   ├── model_card.md
-│   └── evaluation_report.md
-├── manifests/
-├── src/patchalign/
-│   ├── data/
-│   ├── prompts/
-│   ├── patches/
-│   ├── sandbox/
-│   ├── evaluation/
-│   ├── training/
-│   └── reporting/
-├── scripts/
-│   ├── smoke/
-│   ├── data/
-│   ├── baseline/
-│   ├── train/
-│   └── eval/
-├── slurm/
-├── tests/
-│   ├── fixtures/
-│   ├── unit/
-│   └── integration/
-└── artifacts/                              # Git 忽略
-```
-
-在正式创建前，本节只能称为“预计结构”，不得和实际目录混淆。
+- 上文只展示已经存在的稳定目录，不预先维护“预计目录树”。
+- 新目录必须有实际代码、配置或产物消费者后再创建和登记。
+- 未来的 DPO、数据卡、模型卡和最终评测报告在对应阶段落地前只属于计划，不出现在当前结构树。
+- 大型 artifact 内部的 Job/checkpoint 子目录由 manifest 和报告索引，不逐项复制到本文。
 
 ## 5. 更新触发条件
 
@@ -482,3 +449,13 @@ patchalign-cpp/
 - 新增数据 history/，保存旧 holdout、旧 SFT 及两次未通过 preflight 的 SFT；artifacts/a3/formal/history/ 保存 Job 94305 不完整 M0。
 - 新增 docs/evidence/a3_3_pipeline_findings.md，按“证据—根因—修正—论文意义”累计正式实验问题。
 - Job 94337 完成有效数据锁与 preflight；集群仓库在正式 GPU 链期间固定为 b9aa00248d4264eca0f75c378b004f462ddea9a6。
+
+### 2026-09-04：建立文档单一事实源
+
+- 新增 `docs/README.md`，定义配置、Schema、ADR、阶段文档、证据与历史台账的职责和冲突优先级；
+- 新增 `docs/status.md`，作为阶段和 Slurm 作业的唯一实时状态页；
+- 根 README、A0/A2/A3 阶段文档不再各自维护动态作业状态；
+- 修正祝融结构树中 `configs` 被错误缩进到 `NOTICE` 下的问题，并补入正式数据/训练配置；
+- 删除已与现有仓库不符的 A0 “预计目录树”，改为只登记真实存在的稳定目录；
+- 历史执行记录保留原事实，但明确所有“当前/尚未/正在”只对当时记录点有效；
+- 本次只调整 Git 跟踪文档，没有移动、删除或改写集群数据、模型、环境和 artifact。

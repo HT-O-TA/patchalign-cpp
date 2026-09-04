@@ -2,7 +2,7 @@
 
 任务契约状态：**Accepted for A0**
 任务契约版本：`0.1.0`
-评测协议状态：Draft
+评测协议状态：Accepted for A0；运行时评分修订由版本化配置与 ADR 承接
 评测协议版本：`0.3.0`
 
 本文合并原任务契约与评测协议，作为第一版输入、输出、修改范围、执行顺序、指标和沙箱边界的唯一当前规范。
@@ -166,7 +166,7 @@ raw model text
 - stdout/stderr、exit code、signal 和 timeout 可回放；
 - 不在宿主机无限制运行不可信仓库脚本。
 
-当前仅确认 Slurm 暴露 `--container`；OCI 隔离尚未验收，因此 A2 未完成。
+A2 后续采用项目自建的 rootless Bubblewrap 验证上述边界；实现、版本与真实重放证据见 [A2 文档](../a2_sandbox.md)。本协议不把 Slurm `--container` 视为已采用的执行后端。
 
 ## 12. 可比性、统计与版本
 
@@ -179,6 +179,6 @@ prompt、Schema、评分器和协议必须版本化；样本由 `provenance_hash
 - 用户已于 2026-09-01 接受完整任务契约和 ADR-0002 输出协议；
 - 严格 parser、`--recount`、阶段分类和重复评分已通过合成 fixture；
 - 指标分母、跳过规则、失败优先级和质量门禁已机器化测试；
-- A2 不可信仓库沙箱和正式执行结果 Schema 仍待完成。
+- A2 后续已完成不可信仓库沙箱和 70 条真实执行 pilot；该事实不改变本节作为 A0 契约验收记录的范围。
 
 合并后的 A0 验收证据见 [`a0-validation.md`](../evidence/a0-validation.md)。
