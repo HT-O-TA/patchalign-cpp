@@ -201,6 +201,10 @@ def main() -> None:
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
+    schema_path = Path(__file__).resolve().parents[2] / "schemas" / "sample-v0.2.schema.json"
+    validator = Draft202012Validator(
+        json.loads(schema_path.read_text(encoding="utf-8"))
+    )
     selected = list(seeds)
     used_source_keys = {sample_seed_key(sample) for sample in seeds}
     used_payloads = {payload_key_from_sample(sample) for sample in seeds}
@@ -262,6 +266,8 @@ def main() -> None:
     }
     ordinal = len(selected)
     token_rejections: Counter[str] = Counter()
+    schema_rejections: Counter[str] = Counter()
+    schema_rejection_examples: list[dict[str, Any]] = []
 
     def fill(split: str, source: str, level: str, target: int) -> None:
         nonlocal ordinal
@@ -305,6 +311,26 @@ def main() -> None:
                     },
                 }
             )
+            proposed_errors = list(validator.iter_errors(proposed))
+            if proposed_errors:
+                cell = f"{split}:{source}:{level}"
+                schema_rejections[cell] += 1
+                if len(schema_rejection_examples) < 20:
+                    schema_rejection_examples.append(
+                        {
+                            "sample_id": proposed["sample_id"],
+                            "source_id": source_key(record),
+                            "cell": cell,
+                            "errors": [
+                                {
+                                    "path": list(error.absolute_path),
+                                    "message": error.message,
+                                }
+                                for error in proposed_errors
+                            ],
+                        }
+                    )
+                continue
             try:
                 encode_example(tokenizer, proposed, 4096)
             except RuntimeError:
@@ -328,8 +354,6 @@ def main() -> None:
             for level in ("function", "file_window"):
                 fill(split, source, level, TARGETS[split][(source, level)])
 
-    schema_path = Path(__file__).resolve().parents[2] / "schemas" / "sample-v0.2.schema.json"
-    validator = Draft202012Validator(json.loads(schema_path.read_text(encoding="utf-8")))
     errors = [
         {"sample_id": sample["sample_id"], "message": error.message}
         for sample in selected
@@ -394,6 +418,8 @@ def main() -> None:
         "raw_records_seen": dict(raw_seen),
         "reject_counts": dict(sorted(rejects.items())),
         "token_rejections": dict(sorted(token_rejections.items())),
+        "schema_rejections": dict(sorted(schema_rejections.items())),
+        "schema_rejection_examples": schema_rejection_examples,
         "counts": actual_counts,
         "source_counts": source_counts,
         "task_level_counts": task_counts,
