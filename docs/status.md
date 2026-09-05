@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-04 23:39:33 CST（2026-09-04T15:39:33Z）
+最后核验：2026-09-05 02:55 CST（2026-09-04T18:55Z）
 
-项目状态：**A3.4 M1-R2 scoring v2 已完成，正式比较待执行**。CPU-only Job `94558` 已完成固定 500 条真实评分；当前不得在 paired-bootstrap 和冻结门禁比较完成前宣称通过。
+项目状态：**A3.4 内部比较和新确认集已经完成，Defects4C 外部门禁执行中；A4 不具备进入条件**。内部冻结门禁通过，但 124 条新确认集门禁失败；外部评测仍按预注册协议完成，以形成完整负结果证据链，而不是反向选择模型。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | 评分完成、比较待执行 | Job `94558` 已完成；M1-R2 Pass 14/500，正式 promotion/diagnostic 比较尚未执行 |
+| A3.4 | 外部门禁执行中；确认集门禁失败 | 固定 500 条评分与比较、新 124 条确认集均完成；Defects4C 源码准备/资格筛选/外部成对评测尚待闭环 |
 
 ## A3.3 当前有效链
 
@@ -48,9 +48,9 @@
 
 ## 当前边界与下一门禁
 
-- M1 的主修复率提升成立，但冻结的内部门禁整体未通过；不得把主指标通过写成 promotion gate 通过。
-- Defects4C 不少于 150 条的外部门禁尚未完成；即使内部 M1 门禁通过，也不能宣称完整 SFT promotion gate 已通过。
-- 下一步先把三例真实运行时退化作为训练/解码改进目标；不得删除样本、改写正式评分或事后放宽 timeout 阈值。
+- A3.3 的 M1 主修复率提升成立，但 timeout 超限，历史门禁结论保持未通过。
+- A3.4 的旧 500 条内部门禁通过，但未查看确认集门禁已经失败；无论 Defects4C 最终结果如何，M1-R2 都不能晋级 A4。
+- Defects4C 不少于 150 条的外部门禁仍须按原协议完成，用于量化外部分布表现；不得删除样本、改写评分或事后放宽阈值。
 
 ## A3.4 当前状态
 
@@ -64,6 +64,9 @@
 - CPU-only scoring v2 Job `94558` 以 `COMPLETED 0:0` 结束，用时 `00:41:02`。M1-R2 parse/apply/compile 为 499/412/392，最终 Pass 为 14/500；function 为 11/400，file_window 为 3/100，regression failure 为 3/500，timeout 为 2/500。
 - 相对 A3.3 M1，apply/compile 分别增加 21/19，regression failure 从 5 降到 3，timeout 从 3 降到 2，但总 Pass 从 15 降到 14、function Pass 从 12 降到 11。原 3 个 timeout 中 2 个消失、1 个保留，同时新增 1 个 timeout；因此不能把总数下降表述为三个风险样本均已修复。
 - scores、summary、manifest SHA256 分别为 `f05b54a...50b8`、`23ee63ff...1c07`、`b6d72c85...bf2`，均已与 manifest 交叉核验。
+- CPU-only 正式比较 Job `94580` 完成。M0→M1-R2 的 function 提升为 `+2.75pp`，paired bootstrap 95% 区间为 `+1.25pp～+4.5pp`；parse/apply/compile、regression、timeout、file-window 和 validity 均满足冻结上限，因此 `internal_gate_passed=true`。promotion artifact SHA256 为 `5425feb2...1027`；完整门禁当时只因 Defects4C 分母为 0 而保持关闭。
+- 新确认集冻结为 124 条（100 function + 24 file-window），manifest/prompts SHA256 分别为 `7adf...917`、`cf141...58f`。M0 与 M1-R2 均为 0/124 Pass；R2 相对 M0 的 parse/apply/compile 分别增加 `+99.19pp/+83.87pp/+83.06pp`，但 regression 增加 `+2.42pp`、timeout 增加 `+3.23pp`，确认集门禁失败。比较 Job `94605` 的 artifact SHA256 为 `faca13cc...e6094`。
+- Defects4C 外部管线使用官方源提交 `aecc2cf...`，排除与训练来源 family 重叠的 `bblanchon___ArduinoJson` 和 `znc___znc` 后得到 203 个 C++ function 候选。源码准备 Job `94642` 以 `COMPLETED 0:0` 完成 203/203，下载 manifest SHA256 为 `6b7162f4...ff6a`；资格数组 `94643` 执行中，聚合 Job `94644` 等待依赖。preflight Job `94638` 已以 `224 passed` 完成，并绑定源码计划、rootfs、Bubblewrap、离线和只读挂载身份。
 
 ## 后续执行清单
 
@@ -72,7 +75,8 @@
 3. **已完成**：单 GPU SFT-R2 Job `94524` 完成 150/150 optimizer steps并固化最佳 adapter。
 4. **已完成**：CPU preflight Job `94537` 和单 GPU 固定推理 Job `94538` 均完成。
 5. **已完成**：CPU-only scoring v2 Job `94558` 完成固定 500 条真实执行评分，产物哈希已核验。
-6. **下一步**：分别执行 M0→M1-R2 promotion comparison 和 M1→M1-R2 diagnostic comparison；前者使用冻结门禁和 paired-bootstrap，后者只解释变化，不替代 promotion baseline。
-7. 若内部指标通过，建立未查看的新确认集并执行 family 隔离、Schema、token 和 Bubblewrap 双重回放。
-8. 建立并冻结不少于 150 条的 Defects4C 外部评测集。
-9. 只有新候选同时通过 function、bootstrap、parse/apply/compile、regression、timeout、file-window、validity 和外部门禁后，才讨论进入 A4。
+6. **已完成**：Job `94580` 执行 M0→M1-R2 promotion comparison 与 M1→M1-R2 diagnostic comparison；内部门禁通过。
+7. **已完成**：冻结并评测未查看的 124 条新确认集；Job `94605` 判定确认集门禁失败。
+8. **执行中**：完成 203 个 Defects4C 候选的可恢复源码准备、离线双资格筛选，并冻结不少于 150 条的外部成对评测集。
+9. 对冻结外部集分别完成 M0/M1-R2 推理、逐例离线执行、聚合和最终 pre-A4 readiness 账本。
+10. readiness 必须忠实记录确认集失败并停止在 A4 之前；不得提交 A4 作业或构造 A4 数据。

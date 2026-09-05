@@ -943,7 +943,7 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向�
 
 集群全量测试为 `154 passed`。CPU-only Job `94537` 以 `COMPLETED 0:0` 结束，用时 21 秒、0 GPU；报告确认 holdout 500 条、function/file-window 为 400/100、输入 token 170～3,589，重建 prompts SHA256 为 `1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f`，与 A3.3 M0/M1 prompt artifact 逐字节一致。preflight 报告 SHA256 为 `8eb0350779242ee62dd5c734a0e8f44cdcf70fb00a15c70131cdde84f120f88c`。
 
-单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，申请 1 GPU、8 CPU、32 GiB、8 小时。作业越过身份检查和模型加载后按样本原子追加预测，并以 `COMPLETED 0:0` 在 1 小时 13 分 49 秒结束。500 条记录全部为 `ok`，499 条 strict diff，3 条确定性重放全部稳定；无 generation failure 或 OOM。predictions/run manifest SHA256 为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a` 和 `88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878`。本结果仅证明生成闭环与格式遵循，补丁正确率和三例 timeout 是否消失仍等待 scoring v2；评分作业尚未提交。
+单 GPU 正式推理 Job `94538` 随后在 `gpu10` 启动，申请 1 GPU、8 CPU、32 GiB、8 小时。作业越过身份检查和模型加载后按样本原子追加预测，并以 `COMPLETED 0:0` 在 1 小时 13 分 49 秒结束。500 条记录全部为 `ok`，499 条 strict diff，3 条确定性重放全部稳定；无 generation failure 或 OOM。predictions/run manifest SHA256 为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a` 和 `88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878`。本结果只证明生成闭环与格式遵循；后续 Job `94558` 已完成 scoring v2，结果见第 28 节。
 
 
 ## 28. A3.4 scoring v2 绑定与启动
@@ -954,4 +954,19 @@ CPU-only 数据 Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项定向�
 
 M1-R2 的 parse/apply/compile 为 499/412/392，public-test success 为 22/500，最终 Pass 为 14/500；function 为 11/400，file_window 为 3/100，regression failure 为 3/500，timeout 为 2/500。相对 A3.3 M1，apply/compile 增加 21/19，regression failure 从 5 降到 3，timeout 从 3 降到 2；但总 Pass 从 15 降到 14，function Pass 从 12 降到 11。三个旧 timeout 中 `27a1...3ae8e` 和 `2945...7296` 不再超时，`0201...c280` 仍超时；同时新增 `4538...eb05`，因此不能仅凭 timeout 总数下降声称风险模式已被彻底修复。
 
-scores、summary、manifest SHA256 分别为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`、`23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07`、`b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2`，均已交叉核验。M0 promotion comparison 和 M1 diagnostic comparison 尚未执行，门禁结论留待 paired-bootstrap 与全部冻结阈值计算后记录。
+scores、summary、manifest SHA256 分别为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`、`23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07`、`b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2`，均已交叉核验。后续 Job `94580` 已完成 M0 promotion comparison 和 M1 diagnostic comparison，结论见第 29 节。
+
+
+## 29. A3.4 正式比较与新确认集
+
+CPU-only Job `94580` 完成 M0→M1-R2 promotion comparison 和 M1→M1-R2 diagnostic comparison。旧 500 条上，M1-R2 相对 M0 的 function Pass 提升 `+2.75pp`，paired-bootstrap 95% 区间为 `+1.25pp～+4.5pp`；parse/apply/compile、regression、timeout、file-window 和 validity 均满足冻结阈值，故 `internal_gate_passed=true`。promotion artifact SHA256 为 `5425feb24a635cdad734756277680803c984ccb06386f3b91d2379d691b81027`。相对 M1 的诊断显示 apply/compile 改善、regression/timeout 总数下降，但 Pass 从 15/500 降到 14/500，成功转移为新增 5 条、丢失 6 条；该诊断不替代 M0 promotion baseline。
+
+随后冻结新的 124 条确认集（100 function + 24 file-window），未将其反馈给 checkpoint 选择。M0 和 M1-R2 均为 0/124 Pass；M1-R2 的 parse/apply/compile 大幅提高，但新增 3 条 regression failure 和 4 条 timeout。Job `94605` 因主提升不足、regression 增幅超限和 timeout 增幅超限，给出 `supplementary_confirmation_passed=false`；comparison SHA256 为 `faca13cc9695c011e19ce1b30a28ce7a02c783b65eec4af07d71aecacf9e6094`。旧 holdout 内部门禁通过与新确认集失败并存，表明协议遵循改善没有转化为可泛化的端到端修复；确认集失败已独立阻断 A4。
+
+## 30. Defects4C 外部门禁工程准备
+
+外部源固定为官方提交 `aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39`。官方 364 条 prompt 中 359 条可映射；按 C++ function、源码可定位和训练 family 隔离筛选后，冻结 203 个候选、11 个项目，并排除 `bblanchon___ArduinoJson` 与 `znc___znc`。候选分布为 LLVM 141、cppcheck 31、SPIRV-Tools 11、其余项目合计 20；跨项目但高度偏向 LLVM，最终报告不得把它表述为均衡外部分布。源码计划 SHA256 为 `f07f76ad29c55a01374e12cde8507de623e587a54eac872d3e78f4b69ef12c7d`。
+
+为在集群无容器守护进程条件下重放第三方项目，构建固定 rootfs，并使用 Bubblewrap 将 rootfs、官方源和项目代码只读挂载，仅允许精确 checkout 目录可写，同时 `--unshare-all` 关闭网络。资格规则为 fixed build/test 通过且 buggy build/test 失败；每例 8 CPU、5,400 秒，sanitizer 仅在官方元数据明确适用时执行，最低冻结分母为 150。Job `94638` 通过全量 `224 passed`、网络隔离和只读写入探针，报告 SHA256 为 `492bc13f8aaacb97f7656d24b5110fc85b1ebe76642cf02cd0e99e2d792e3967`。
+
+源码准备暴露了三个可复述的工程故障：首次下载遇到瞬时 DNS；LLVM checkout 的 120 秒硬上限误伤真实慢下载；取消旧作业后遗留四个 `.git/*.lock`。改进为有限退避重试、checkout 上限提高到 900 秒、以及在验证作业和进程均终止后只删除精确核实的锁文件。成功检查点原子复用，避免每次重跑已经完成的几十个大仓库提交。最终源码 Job `94642` 用时 1 小时 56 分 34 秒，203/203 全部完成、0 失败；下载 manifest SHA256 为 `6b7162f4a2ca2905893f38b74714b19e1149f738904f48c97493b5690a80ff6a`。资格数组 `94643` 随后按 4 路并发启动；最终资格数量、外部 M0/M1-R2 成对结果和 readiness 账本待正式 artifact 生成后回填。

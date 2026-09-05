@@ -21,13 +21,22 @@
 │   │   │   ├── a1_pilot_v1.json            # 旧 pilot artifact 重放
 │   │   │   ├── a1_pilot_v2.json            # 隔离后的 A1 pilot
 │   │   │   ├── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
-│   │   │   └── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
+│   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
+│   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
+│   │   │   └── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
 │   │   │   ├── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
 │   │   │   ├── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
-│   │   │   └── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
+│   │   │   ├── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
+│   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
+│   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
+│   │   │   └── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
+│   │   ├── external/
+│   │   │   ├── a3_defects4c_sources_v1.json # 官方源与 203 候选计划
+│   │   │   ├── a3_defects4c_qualification_v1.json # 离线双资格契约
+│   │   │   └── a3_defects4c_external_v1.json # 资格冻结后生成的成对评测绑定
 │   │   ├── model/
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
@@ -57,6 +66,7 @@
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
 │   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
+│   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -80,6 +90,10 @@
 │   │   ├── a3_4_infer_preflight.sbatch     # A3.4 固定推理 CPU-only fail-closed 预检
 │   │   ├── a3_4_infer.sbatch               # A3.4 单 GPU、分段可恢复固定推理
 │   │   ├── a3_4_score.sbatch               # A3.4 CPU-only 固定 scoring v2
+│   │   ├── a3_4_compare.sbatch             # A3.4 内部 promotion/diagnostic 比较
+│   │   ├── a3_4_confirmation_*.sbatch      # 确认集构建、资格、推理、评分与比较
+│   │   ├── a3_4_defects4c_*.sbatch         # 外部源、资格、GPU 推理、CPU 评分与聚合
+│   │   ├── a3_4_finalize_pre_a4.sbatch     # 只生成 readiness；不启动 A4
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -96,8 +110,11 @@
 │       │   ├── comparison/93721/            # A3.0 双基线可比性与汇总
 │       │   ├── comparison-a31/93828/        # A3.1 v1/v2 可比性审计
 │       │   ├── formal/                      # A3.3 preflight、M0/M1、checkpoint、评分和比较
-│       │   ├── sft-r2/                    # A3.4 preflight、训练 checkpoint 与后续评测
+│       │   ├── sft-r2/                      # A3.4 训练、推理、评分与内部比较
 │       │   │   └── history/                 # 不完整 M0 等失败正式产物，只读归档
+│       │   ├── confirmation/                # 124 条确认集 M0/R2 与失败门禁
+│       │   ├── defects4c/                   # 外部 preflight、推理、评分与比较
+│       │   ├── pre-a4-readiness-v1.json     # 最终只读晋级账本（生成后存在）
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3 各阶段 Slurm 原始日志
@@ -131,12 +148,21 @@
 ├── formal-holdout-qualification-v1/        # 已完成的候选级资格缓存，可审计和恢复
 ├── formal-holdout-v1/                      # token 门禁后的冻结 400 function + 100 file-window
 ├── formal-sft-v1/                          # 有效 5,000 train + 500 validation 与哈希锁
-├── sft-r2-data-v1/                      # Job 94521 冻结的 1,200/117 安全子集与 manifest
+├── sft-r2-data-v1/                         # Job 94521 冻结的 1,200/117 安全子集与 manifest
+├── confirmation-v1-1/                     # 冻结的 100 function + 24 file-window 新确认集
 └── history/                                # 被后续门禁替代、未通过 preflight 的冻结产物
     ├── formal-holdout-v1-pre-prompt-token-gate-94174/
     ├── formal-sft-v1-pre-prompt-token-gate-94304/
     ├── formal-sft-v1-preflight-config-drift-94320/
     └── formal-sft-v1-preflight-input-mode-94328/
+
+/mingli01/data/patchalign-cpp/external/defects4c/
+├── source/                                 # 官方仓库固定提交，只读输入
+├── runtime/source-progress-v1/             # 203 个源码目标的可恢复检查点
+├── runtime/out/                            # 每个提交的精确可写 checkout
+├── runtime/qualification-progress-v1/      # 203 个资格结果的原子检查点
+├── rootfs-cb4efcac/                        # 离线第三方构建 rootfs
+└── qualified-v1/                           # >=150 条冻结外部集（聚合后生成）
 
 /mingli01/models/
 └── Qwen2.5-Coder-7B/                       # 主训练 Base 模型，只读使用

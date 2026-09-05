@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：数据冻结、CPU preflight 和单 GPU SFT-R2 训练已完成；固定 500 条推理的独立 artifact 绑定与作业入口已实现，等待集群 preflight。
+阶段状态：固定 500 条训练、推理、评分和正式比较已完成；新 124 条确认集门禁失败；Defects4C 外部门禁执行中。由于确认集失败，A4 已确定不可进入。
 
 ## 目标
 
@@ -62,4 +62,19 @@ CPU-only 固定推理 preflight Job `94537` 在实现提交 `84fb9dfe06c4530b8fa
 
 A3.4 scoring 实现提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 在集群通过全量 `163 passed`。CPU-only Job `94558` 申请 4 CPU、4 GiB、0 GPU，以 `COMPLETED 0:0` 在 41 分 2 秒结束。artifact preflight 确认 500 条预测、499 条 strict diff、3 条稳定 probe 及全部冻结哈希；preflight config SHA256 为 `2e44189ed400fdd497a4508d488be702c61c71ff7d6663192fc142f6a9cb3e4a`。
 
-正式结果为 parse/apply/compile `499/412/392`，public-test success `22/500`，最终 Pass `14/500`。function 为 `11/400`，file_window 为 `3/100`；regression failure `3/500`，timeout `2/500`。相对 A3.3 M1，apply/compile 增加 `21/19`，regression failure 减少 2，timeout 减少 1，但总 Pass 和 function Pass 各减少 1。上一轮三个 timeout 中两个消失、一个仍存在，本轮另有一个新 timeout。scores、summary、manifest SHA256 分别为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`、`23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07`、`b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2`。正式 M0 promotion comparison 与 M1 diagnostic comparison 尚未执行，因此本节不提前给出门禁结论。
+正式结果为 parse/apply/compile `499/412/392`，public-test success `22/500`，最终 Pass `14/500`。function 为 `11/400`，file_window 为 `3/100`；regression failure `3/500`，timeout `2/500`。相对 A3.3 M1，apply/compile 增加 `21/19`，regression failure 减少 2，timeout 减少 1，但总 Pass 和 function Pass 各减少 1。上一轮三个 timeout 中两个消失、一个仍存在，本轮另有一个新 timeout。scores、summary、manifest SHA256 分别为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`、`23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07`、`b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2`。CPU-only 正式比较 Job `94580` 已完成。M0→M1-R2 的 function Pass 提升为 `+2.75pp`，paired-bootstrap 95% 区间为 `+1.25pp～+4.5pp`，旧 500 条 `internal_gate_passed=true`；M1→M1-R2 仅作诊断，显示 Pass 从 15/500 降至 14/500，成功样本新增 5 条、丢失 6 条。promotion、diagnostic 与 comparison manifest SHA256 分别为 `5425feb24a635cdad734756277680803c984ccb06386f3b91d2379d691b81027`、`92ae55a83957b1197d76f1dc64b382434f1a8166f5579b1d90355d204e5c5d51`、`138d1e87361b5366bbb8e1963509af9647ee41c94cf3439af38aa88a741189c2`。
+
+
+## 新确认集结果
+
+确认集来自未用于 R2 checkpoint 选择的新冻结切片，共 124 条（100 function + 24 file-window）。M0 和 M1-R2 分别使用同一 prompt、greedy Pass@1 和 scoring v2；两个模型均为 0/124 Pass。M1-R2 显著改善格式和可执行前置阶段，但相对 M0 增加 3/124 regression failure 和 4/124 timeout，因此 Job `94605` 给出 `supplementary_confirmation_passed=false`，原因是主提升不足、回归退化超限和 timeout 退化超限。comparison artifact SHA256 为 `faca13cc9695c011e19ce1b30a28ce7a02c783b65eec4af07d71aecacf9e6094`。
+
+这项结果说明旧 500 条上的内部门禁通过不能外推为泛化成功。确认集是预注册的独立晋级条件，因此失败本身已足以阻止 A4；后续 Defects4C 不用于重新选择 checkpoint，只用于完成外部分布证据。
+
+## Defects4C 外部门禁
+
+官方源固定在提交 `aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39`。在排除与训练来源 family 重叠的 ArduinoJson 和 znc 后，源码计划含 203 个 C++ function 候选、11 个项目，其中 LLVM 141 条、cppcheck 31 条、SPIRV-Tools 11 条、其余项目合计 20 条；外部集跨项目但明显偏向 LLVM，报告必须披露该局限。目标是以 buggy build/test 失败且 fixed build/test 通过的双资格规则冻结至少 150 条。构建与测试在固定 rootfs 和 Bubblewrap 中离线运行，官方元数据明确适用时才启用 sanitizer。
+
+工程准备中记录了三类非模型失败：首次源码作业遇到瞬时 DNS；LLVM 浅层 checkout 的 120 秒硬超时不足；取消旧下载作业后遗留精确 `.git/*.lock`。实现分别加入有限重试、把 checkout 上限提高到 900 秒，并在确认旧进程终止后只删除四个已核实的锁文件。Job `94638` 已通过 224 项测试及网络隔离、只读挂载探针；Job `94642` 已以 `COMPLETED 0:0` 完成 203/203 个源码目标且 0 失败，下载 manifest SHA256 为 `6b7162f4a2ca2905893f38b74714b19e1149f738904f48c97493b5690a80ff6a`；资格数组 `94643` 执行中，`94644` 等待聚合。
+
+无论外部门禁最终结果如何，最终 pre-A4 readiness 必须同时绑定旧 500 条比较、新确认集比较和 Defects4C 比较。由于确认集已经失败，合法结论只能是停止在 A4 之前。
