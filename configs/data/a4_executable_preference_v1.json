@@ -1,0 +1,57 @@
+{
+  "version": "a4-executable-preference-data-v1",
+  "mode": "owner_authorized_exploratory",
+  "seed": 20260830,
+  "source": {
+    "formal_train": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/train.jsonl",
+    "formal_train_sha256": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400",
+    "formal_manifest": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/dataset-manifest.json",
+    "formal_manifest_sha256": "sha256:50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02",
+    "runbugrun_directory": "/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data",
+    "runbugrun_source_record_sha256": "sha256:047305c1b01cbe4e00e700b5ad053cfcceed0df0fea6605c47aeaddb353940fa",
+    "runbugrun_tests_sha256": "sha256:2fab824c5dd5244e1471d38655faea668fc6cd6a669cb4ce124d1fee7ce70d96"
+  },
+  "selection": {
+    "source_dataset": "RunBugRun",
+    "split": "train",
+    "language": "cpp",
+    "candidate_counts": {
+      "function": 600,
+      "file_window": 27
+    },
+    "required_counts": {
+      "function": 256,
+      "file_window": 8
+    },
+    "maximum_samples_per_problem_family": 1,
+    "order": "sha256(seed, sample_id); file_window selected first, then function"
+  },
+  "paths": {
+    "candidate_directory": "/mingli01/data/patchalign-cpp/a4/executable-candidates-v1",
+    "qualification_progress_directory": "/mingli01/data/patchalign-cpp/a4/executable-qualification-progress-v1",
+    "qualified_directory": "/mingli01/data/patchalign-cpp/a4/executable-source-v1"
+  },
+  "qualification": {
+    "workers": 16,
+    "batch_size": 16,
+    "double_replay_required": true,
+    "max_input_tokens": 4096,
+    "allowed_path": "main.cpp",
+    "sanitizer": "only_if_explicitly_applicable",
+    "network": "unshared"
+  },
+  "leakage_policy": {
+    "allowed": [
+      "A3.3 frozen train records",
+      "RunBugRun raw record and tests matching the selected train identity",
+      "post-generation execution feedback for preference construction"
+    ],
+    "forbidden": [
+      "A3.3 validation",
+      "formal internal holdout",
+      "A3.4 confirmation set",
+      "Defects4C external set",
+      "their predictions, gold patches, fixed sources, hidden tests, or execution feedback"
+    ]
+  }
+}
