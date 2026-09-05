@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-05 14:05 CST（2026-09-05T06:05Z）
+最后核验：2026-09-05 14:18 CST（2026-09-05T06:18Z）
 
-项目状态：**A3.4 Defects4C 外部成对 GPU 推理已完成，CPU 评分首轮失败并进入恢复；A4 不具备正式晋级条件**。内部冻结门禁通过，但 124 条新确认集门禁失败；外部评测仍按预注册协议完成，以形成完整负结果证据链。完整 pre-A4 账本落盘后，仅可依据 ADR-0006 以负责人授权的 exploratory 口径进入 A4，不得反向选择模型或表述为晋级。
+项目状态：**A3.4 Defects4C 外部成对 GPU 推理已完成，修复后的 CPU 评分数组正在运行；A4 不具备正式晋级条件**。内部冻结门禁通过，但 124 条新确认集门禁失败；外部评测仍按预注册协议完成，以形成完整负结果证据链。完整 pre-A4 账本落盘后，仅可依据 ADR-0006 以负责人授权的 exploratory 口径进入 A4，不得反向选择模型或表述为晋级。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,7 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | 外部 CPU 评分恢复中；确认集门禁失败 | Defects4C M0/M1-R2 已完成 176/176；首轮评分数组因 rootfs runner 无结果统一快失败，原依赖链已停止 |
+| A3.4 | 外部 CPU 评分中；确认集门禁失败 | Defects4C M0/M1-R2 已完成 176/176；rootfs 导入路径修复经单例闭环验证，替换数组 `95144` 运行中 |
 
 ## A3.3 当前有效链
 
@@ -66,7 +66,7 @@
 - scores、summary、manifest SHA256 分别为 `f05b54a...50b8`、`23ee63ff...1c07`、`b6d72c85...bf2`，均已与 manifest 交叉核验。
 - CPU-only 正式比较 Job `94580` 完成。M0→M1-R2 的 function 提升为 `+2.75pp`，paired bootstrap 95% 区间为 `+1.25pp～+4.5pp`；parse/apply/compile、regression、timeout、file-window 和 validity 均满足冻结上限，因此 `internal_gate_passed=true`。promotion artifact SHA256 为 `5425feb2...1027`；完整门禁当时只因 Defects4C 分母为 0 而保持关闭。
 - 新确认集冻结为 124 条（100 function + 24 file-window），manifest/prompts SHA256 分别为 `7adf...917`、`cf141...58f`。M0 与 M1-R2 均为 0/124 Pass；R2 相对 M0 的 parse/apply/compile 分别增加 `+99.19pp/+83.87pp/+83.06pp`，但 regression 增加 `+2.42pp`、timeout 增加 `+3.23pp`，确认集门禁失败。比较 Job `94605` 的 artifact SHA256 为 `faca13cc...e6094`。
-- Defects4C 外部管线使用官方源提交 `aecc2cf...`，排除与训练来源 family 重叠的 `bblanchon___ArduinoJson` 和 `znc___znc` 后得到 203 个 C++ function 候选。源码准备 Job `94642` 完成 203/203；资格数组 `94643` 完成 203/203，176 条合格、27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。旧聚合 Job `94644` 暴露官方 prompt 双模板兼容问题后失败；提交 `3ea8a5f` 增加精确双后缀白名单并通过 234 项测试和 176 条真实 prompt 遍历，重提 Job `94925` 成功冻结 176 条。manifest/prompts SHA256 为 `0728c602...28631`、`b23663fc...5484f`；最终 LLVM 占 139/176，分布偏斜必须披露。正式 preflight Job `94927` 以 `COMPLETED 0:0` 通过 241 项测试和冻结身份核验；M0 Job `94928`、M1-R2 Job `94929` 分别用时 `00:40:40`、`00:38:08`，均以 `COMPLETED 0:0` 结束并冻结 176/176 预测。CPU 评分数组 `94930` 释放后，所有进入 rootfs runner 的样本均在约 1 秒内因未返回结果 JSON 而失败；仅 4 条在 parse/policy 阶段提前终止的样本写出有效检查点。为避免继续消耗资源，原数组及聚合 `94931`、readiness `94932` 已停止；预测和 4 个有效检查点保留，等待带诊断证据的单样本恢复。
+- Defects4C 外部管线使用官方源提交 `aecc2cf...`，排除与训练来源 family 重叠的 `bblanchon___ArduinoJson` 和 `znc___znc` 后得到 203 个 C++ function 候选。源码准备 Job `94642` 完成 203/203；资格数组 `94643` 完成 203/203，176 条合格、27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。旧聚合 Job `94644` 暴露官方 prompt 双模板兼容问题后失败；提交 `3ea8a5f` 增加精确双后缀白名单并通过 234 项测试和 176 条真实 prompt 遍历，重提 Job `94925` 成功冻结 176 条。manifest/prompts SHA256 为 `0728c602...28631`、`b23663fc...5484f`；最终 LLVM 占 139/176，分布偏斜必须披露。正式 preflight Job `94927` 以 `COMPLETED 0:0` 通过 241 项测试和冻结身份核验；M0 Job `94928`、M1-R2 Job `94929` 分别用时 `00:40:40`、`00:38:08`，均以 `COMPLETED 0:0` 结束并冻结 176/176 预测。CPU 评分数组 `94930` 释放后，所有进入 rootfs runner 的样本均在约 1 秒内因未返回结果 JSON 而失败；仅 4 条在 parse/policy 阶段提前终止的样本写出有效检查点。为避免继续消耗资源，原数组及聚合 `94931`、readiness `94932` 已停止；预测和 4 个有效检查点保留。诊断 Job `95140` 证明 rootfs 内部缺少可见的 `/patchalign` Python 导入路径；提交 `bff21bc` 显式设置 `/patchalign/src:/patchalign` 并通过专项 11 项、全量 243 项测试。单样本 Job `95141` 用时 `00:05:17` 完成真实 apply/build 链；替换评分数组 `95144` 正在运行，聚合 `95150` 和 readiness `95151` 已按 `afterok` 排队。
 
 ## 后续执行清单
 
@@ -78,5 +78,5 @@
 6. **已完成**：Job `94580` 执行 M0→M1-R2 promotion comparison 与 M1→M1-R2 diagnostic comparison；内部门禁通过。
 7. **已完成**：冻结并评测未查看的 124 条新确认集；Job `94605` 判定确认集门禁失败。
 8. **已完成**：203 个 Defects4C 候选完成可恢复源码准备和离线双资格筛选，冻结 176 条外部成对评测集。
-9. **恢复中**：M0/M1-R2 外部推理 Job `94928`/`94929` 已完成 176/176；首轮 CPU 评分 `94930` 的 rootfs runner 统一快失败，原链已停止。先完成单样本诊断和修复，再复用 4 个有效检查点重提评分、聚合与 readiness。
+9. **执行中**：rootfs 导入路径已修复，单例 Job `95141` 完成；替换 CPU 评分数组 `95144` 正在复用有效检查点并执行剩余案例，聚合 `95150` 和 readiness `95151` 已依赖排队。
 10. readiness 必须忠实记录确认集失败与 `a4_ready=false`；账本完成后仅按 ADR-0006 以 `owner_authorized_exploratory` 口径进入 A4，不得表述为晋级或门禁通过。

@@ -82,6 +82,13 @@
 - 方法学意义：可编译、可应用并不保证补丁安全。对循环初值、循环边界和索引更新的错误单行修改可把快速程序变成死循环或复杂度爆炸；timeout 应保留为独立门禁，而不能并入普通 public failure 或为了主指标提升而事后放宽。
 - 证据路径：`artifacts/a3/diagnostics/timeouts-94342-repro-v1/reproduction.json`，SHA256 `d60940873639974eeec8d2015ad9b26a1a12146b8b6cc2436d9614f688c2ef7a`；正式 comparison SHA256 `13e1a0b39f74cae60fb633ea77c5d53f9573a622743dfe148c37f3b605396517`。
 
+### 10. 外部评分 rootfs 未继承可用的 Python 导入路径
+
+- 证据：M0/M1-R2 外部 GPU Job `94928`/`94929` 均完成 176/176；随后评分数组 `94930` 中，所有需要进入 rootfs 的案例均在约 1 秒内失败，只有 4 条可在 parse/policy 阶段提前终止的案例写出检查点。诊断 Job `95140` 保留了此前被丢弃的子进程输出，显示 `ModuleNotFoundError: No module named 'scripts'`。
+- 根因：外层 Slurm 的 `PYTHONPATH` 使用宿主机 `/mingli01/...` 路径，Bubblewrap 内只挂载为 `/patchalign`；runner 以 `scripts/external/*.py` 文件直接启动时，Python 默认搜索路径不包含 `/patchalign`，因此无法导入顶层 `scripts` 包。
+- 修正：rootfs 命令显式设置 `PYTHONPATH=/patchalign/src:/patchalign` 与 `PYTHONDONTWRITEBYTECODE=1`，并让解析异常保留最近 4,000 字符子进程输出。提交 `bff21bc` 通过专项 11 项和全量 243 项测试；单样本 Job `95141` 用时 5 分 17 秒完成，M1-R2 真实经历 apply、fixed build 和 patch build，最终正常分类为 `build_failed`。替换数组 `95144` 复用冻结预测和既有有效检查点。
+- 方法学意义：隔离运行时的路径命名空间也是实验契约的一部分。preflight 只证明环境可启动并不能覆盖每个实际 runner 的 import graph；失败包装必须保留子进程输出，否则基础设施错误会被压缩成无信息的“未返回结果”。此问题不构成模型失败，也不改变固定分母。
+
 ## 已冻结且未放宽的条件
 
 - 正式 holdout 仍为 400 function + 100 file_window。
