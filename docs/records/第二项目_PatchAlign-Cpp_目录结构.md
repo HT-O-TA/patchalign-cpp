@@ -527,3 +527,10 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0006 和 `scripts/preference`、`a4_data.sbatch`、`a4_generate.sbatch`，只允许在失败 readiness 已落盘且负责人显式授权后开展 exploratory A4；
 - 新增 `docs/项目全程总结与核心结论.md` 作为稳定项目叙事入口；`status.md` 继续独占实时状态，执行记录继续保存逐次证据；
 - 本次目录整理没有移动或删除运行中的代码、模型、数据、环境和 artifact。
+
+### 2026-09-06：A4 候选池可行性修正
+
+- 新增 `docs/decisions/0007-a4-testable-candidate-pool-correction.md`，记录固定输入下 27 个 file-window 备用候选与至少 5 条测试门槛不可同时满足；
+- `scripts/preference/build_a4_executable_candidates.py` 在排序前过滤测试覆盖，A4 机器配置的备用池修正为 600 function + 26 file-window，最终 256+8 组成不变；
+- `artifacts/a4/failed/95574-executable-candidates-v1/` 在集群保存首次失败作业的部分候选，当前有效大数据仍位于 `/mingli01/data/patchalign-cpp/a4/`；
+- A4 生成 finalizer 同时绑定 ADR-0006 的负责人授权、ADR-0007 的可行性修正和修正后数据配置哈希。

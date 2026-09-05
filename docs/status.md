@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-05 14:18 CST（2026-09-05T06:18Z）
+最后核验：2026-09-06 00:34 CST（2026-09-05T16:34Z）
 
-项目状态：**A3.4 Defects4C 外部成对 GPU 推理已完成，修复后的 CPU 评分数组正在运行；A4 不具备正式晋级条件**。内部冻结门禁通过，但 124 条新确认集门禁失败；外部评测仍按预注册协议完成，以形成完整负结果证据链。完整 pre-A4 账本落盘后，仅可依据 ADR-0006 以负责人授权的 exploratory 口径进入 A4，不得反向选择模型或表述为晋级。
+项目状态：**A3.4 全部 pre-A4 评测与 readiness 已完成；A4 仅以负责人授权的 exploratory 模式运行**。内部与 Defects4C 外部门禁通过，但 124 条新确认集门禁失败，因此正式晋级仍被阻断，账本保持 `a4_ready=false`。A4 修正后的 CPU 数据 Job `95586` 正在双重资格筛选，依赖式单 GPU 生成 Job `95587` 已排队；不得表述为晋级或门禁通过。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -18,7 +18,8 @@
 | A3.1 | 完成 | `a3-scoring-v2` 冻结并完成不可变预测重评分 |
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
-| A3.4 | 外部 CPU 评分中；确认集门禁失败 | Defects4C M0/M1-R2 已完成 176/176；rootfs 导入路径修复经单例闭环验证，替换数组 `95144` 运行中 |
+| A3.4 | 完成；最终 readiness 未通过 | Defects4C 176/176 评分完成，M0/M1-R2 均为 1/176；确认集失败使 `a4_ready=false` |
+| A4 | 负责人授权 exploratory 进行中 | 修正后 CPU 数据 Job `95586` 运行中；单 GPU Job `95587` 以 `afterok:95586` 依赖排队 |
 
 ## A3.3 当前有效链
 
@@ -49,8 +50,10 @@
 ## 当前边界与下一门禁
 
 - A3.3 的 M1 主修复率提升成立，但 timeout 超限，历史门禁结论保持未通过。
-- A3.4 的旧 500 条内部门禁通过，但未查看确认集门禁已经失败；无论 Defects4C 最终结果如何，M1-R2 都不能晋级 A4。
-- Defects4C 已按原协议从 203 个候选冻结 176 条外部 function 样本；M0/M1-R2 推理已经完成，仍须修复并完成执行评分和聚合，不得删除样本、改写评分或事后放宽阈值。
+- A3.4 的旧 500 条内部门禁通过，但未见确认集门禁已经失败；无论 Defects4C 最终结果如何，M1-R2 都不能晋级 A4。
+- Defects4C 已按原协议完成 176 条固定分母成对评测；M0/M1-R2 均为 1/176 Pass、0 timeout，外部门禁通过，但没有最终 Pass 提升。
+- pre-A4 readiness 已绑定内部、确认和外部三项 artifact；确认集是唯一 blocker，因此 `a4_ready=false`、`a4_started=false`。
+- ADR-0006 允许在该失败账本之后以 `owner_authorized_exploratory` 模式进入 A4；该授权不改变 A3.4 门禁结论。
 
 ## A3.4 当前状态
 
@@ -66,7 +69,7 @@
 - scores、summary、manifest SHA256 分别为 `f05b54a...50b8`、`23ee63ff...1c07`、`b6d72c85...bf2`，均已与 manifest 交叉核验。
 - CPU-only 正式比较 Job `94580` 完成。M0→M1-R2 的 function 提升为 `+2.75pp`，paired bootstrap 95% 区间为 `+1.25pp～+4.5pp`；parse/apply/compile、regression、timeout、file-window 和 validity 均满足冻结上限，因此 `internal_gate_passed=true`。promotion artifact SHA256 为 `5425feb2...1027`；完整门禁当时只因 Defects4C 分母为 0 而保持关闭。
 - 新确认集冻结为 124 条（100 function + 24 file-window），manifest/prompts SHA256 分别为 `7adf...917`、`cf141...58f`。M0 与 M1-R2 均为 0/124 Pass；R2 相对 M0 的 parse/apply/compile 分别增加 `+99.19pp/+83.87pp/+83.06pp`，但 regression 增加 `+2.42pp`、timeout 增加 `+3.23pp`，确认集门禁失败。比较 Job `94605` 的 artifact SHA256 为 `faca13cc...e6094`。
-- Defects4C 外部管线使用官方源提交 `aecc2cf...`，排除与训练来源 family 重叠的 `bblanchon___ArduinoJson` 和 `znc___znc` 后得到 203 个 C++ function 候选。源码准备 Job `94642` 完成 203/203；资格数组 `94643` 完成 203/203，176 条合格、27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。旧聚合 Job `94644` 暴露官方 prompt 双模板兼容问题后失败；提交 `3ea8a5f` 增加精确双后缀白名单并通过 234 项测试和 176 条真实 prompt 遍历，重提 Job `94925` 成功冻结 176 条。manifest/prompts SHA256 为 `0728c602...28631`、`b23663fc...5484f`；最终 LLVM 占 139/176，分布偏斜必须披露。正式 preflight Job `94927` 以 `COMPLETED 0:0` 通过 241 项测试和冻结身份核验；M0 Job `94928`、M1-R2 Job `94929` 分别用时 `00:40:40`、`00:38:08`，均以 `COMPLETED 0:0` 结束并冻结 176/176 预测。CPU 评分数组 `94930` 释放后，所有进入 rootfs runner 的样本均在约 1 秒内因未返回结果 JSON 而失败；仅 4 条在 parse/policy 阶段提前终止的样本写出有效检查点。为避免继续消耗资源，原数组及聚合 `94931`、readiness `94932` 已停止；预测和 4 个有效检查点保留。诊断 Job `95140` 证明 rootfs 内部缺少可见的 `/patchalign` Python 导入路径；提交 `bff21bc` 显式设置 `/patchalign/src:/patchalign` 并通过专项 11 项、全量 243 项测试。单样本 Job `95141` 用时 `00:05:17` 完成真实 apply/build 链；替换评分数组 `95144` 正在运行，聚合 `95150` 和 readiness `95151` 已按 `afterok` 排队。
+- Defects4C 外部管线使用官方源提交 `aecc2cf...`，排除与训练来源 family 重叠的 `bblanchon___ArduinoJson` 和 `znc___znc` 后得到 203 个 C++ function 候选。源码准备 Job `94642` 完成 203/203；资格数组 `94643` 完成 203/203，176 条合格、27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。旧聚合 Job `94644` 暴露官方 prompt 双模板兼容问题后失败；提交 `3ea8a5f` 增加精确双后缀白名单并通过 234 项测试和 176 条真实 prompt 遍历，重提 Job `94925` 成功冻结 176 条。manifest/prompts SHA256 为 `0728c602...28631`、`b23663fc...5484f`；最终 LLVM 占 139/176，分布偏斜必须披露。正式 preflight Job `94927` 以 `COMPLETED 0:0` 通过 241 项测试和冻结身份核验；M0 Job `94928`、M1-R2 Job `94929` 分别用时 `00:40:40`、`00:38:08`，均以 `COMPLETED 0:0` 结束并冻结 176/176 预测。CPU 评分数组 `94930` 释放后，所有进入 rootfs runner 的样本均在约 1 秒内因未返回结果 JSON 而失败；仅 4 条在 parse/policy 阶段提前终止的样本写出有效检查点。为避免继续消耗资源，原数组及聚合 `94931`、readiness `94932` 已停止；预测和 4 个有效检查点保留。诊断 Job `95140` 证明 rootfs 内部缺少可见的 `/patchalign` Python 导入路径；提交 `bff21bc` 显式设置 `/patchalign/src:/patchalign` 并通过专项 11 项、全量 243 项测试。单样本 Job `95141` 用时 `00:05:17` 完成真实 apply/build 链；替换评分数组 `95144` 完成 176/176，聚合 `95150` 以 `COMPLETED 0:0` 结束。M0 parse/apply/build/Pass 为 94/24/17/1，M1-R2 为 174/72/55/1，双方 timeout 均为 0；paired bootstrap 95% 区间为 `-1.7045pp～+1.7045pp`，外部门禁通过。comparison SHA256 为 `d8a1c14e...75f67e`。readiness Job `95151` 以 `COMPLETED 0:0` 结束，账本 SHA256 为 `c2a920bc...6c0fd0`，观测门禁为 internal=true、confirmation=false、external=true，最终 `a4_ready=false`，唯一 blocker 为 `supplementary_confirmation_passed`。
 
 ## 后续执行清单
 
@@ -78,5 +81,6 @@
 6. **已完成**：Job `94580` 执行 M0→M1-R2 promotion comparison 与 M1→M1-R2 diagnostic comparison；内部门禁通过。
 7. **已完成**：冻结并评测未查看的 124 条新确认集；Job `94605` 判定确认集门禁失败。
 8. **已完成**：203 个 Defects4C 候选完成可恢复源码准备和离线双资格筛选，冻结 176 条外部成对评测集。
-9. **执行中**：rootfs 导入路径已修复，单例 Job `95141` 完成；替换 CPU 评分数组 `95144` 正在复用有效检查点并执行剩余案例，聚合 `95150` 和 readiness `95151` 已依赖排队。
-10. readiness 必须忠实记录确认集失败与 `a4_ready=false`；账本完成后仅按 ADR-0006 以 `owner_authorized_exploratory` 口径进入 A4，不得表述为晋级或门禁通过。
+9. **已完成**：替换 CPU 评分数组 `95144` 完成 176/176，聚合 `95150` 固化外部 M0/M1-R2 均为 1/176，外部门禁通过。
+10. **已完成**：readiness Job `95151` 忠实记录确认集失败、`a4_ready=false` 和唯一 blocker，三项输入哈希已交叉核验。
+11. **执行中**：首次 CPU Job `95574` 因 27 个 `file_window` 备用候选与至少 5 条测试门槛不可同时满足而失败，失效 GPU Job `95575` 已取消；ADR-0007 保留测试门槛并将备用池修正为 26。新 CPU Job `95586` 已生成 600 function + 26 file_window 候选并开始双重资格筛选，单 GPU Job `95587` 依赖排队。A5 未授权。

@@ -972,3 +972,19 @@ CPU-only Job `94580` 完成 M0→M1-R2 promotion comparison 和 M1→M1-R2 diagn
 源码准备暴露了三个可复述的工程故障：首次下载遇到瞬时 DNS；LLVM checkout 的 120 秒硬上限误伤真实慢下载；取消旧作业后遗留四个 `.git/*.lock`。改进为有限退避重试、checkout 上限提高到 900 秒、以及在验证作业和进程均终止后只删除精确核实的锁文件。成功检查点原子复用，避免每次重跑已经完成的几十个大仓库提交。最终源码 Job `94642` 用时 1 小时 56 分 34 秒，203/203 全部完成、0 失败；下载 manifest SHA256 为 `6b7162f4a2ca2905893f38b74714b19e1149f738904f48c97493b5690a80ff6a`。资格数组 `94643` 随后按 4 路并发完成全部 203 条：176 条合格、27 条因 fixed 官方测试未通过被拒绝，0 timeout、0 infrastructure error，超过冻结下限 150。首次依赖聚合 Job `94644` 在消费第一个 infill 模板时以 `official prompt suffix changed` 失败；这证明单一 fixture 没有覆盖官方 `single_function_allinone` 中并存的两类任务后缀。对全部 176 条合格 prompt 统计后确认 44 条 complete-function、132 条 infill。提交 `3ea8a5f` 改为只接受这两条精确后缀、任何未知后缀继续 fail closed，专项测试 14 项、全量测试 234 项、真实 prompt 遍历 176/176 均通过。
 
 重提 CPU 聚合 Job `94925` 以 `COMPLETED 0:0` 在 11 秒内冻结 176 条。manifest SHA256 为 `0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631`，prompts SHA256 为 `b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f`，输入长度为 239～2,617 tokens，训练仓库族重叠为空。项目分布为 LLVM 139、cppcheck 31、EnTT 2、uncrustify 2、AtomicParsley 1、libzmq 1；该冻结集跨项目但高度偏向 LLVM，后续指标必须按自然分布解释。外部 M0/M1-R2 成对推理、执行评分和 readiness 账本尚待完成。
+
+## 31. Defects4C 外部终态、readiness 与 exploratory A4 启动
+
+2026-09-06，替换 CPU 评分数组 `95144` 完成 Defects4C 176/176 成对执行，0 个数组失败。聚合 Job `95150` 以 `COMPLETED 0:0` 结束：M0 parse/apply/build/Pass 为 94/24/17/1，M1-R2 为 174/72/55/1，双方 timeout 均为 0；最终 Pass 差为 0，paired-bootstrap 95% 区间为 `-1.7045pp～+1.7045pp`，`external_gate_passed=true`。comparison/artifact-manifest SHA256 分别为 `d8a1c14eb5ce7c5a19d59f159fc657dcdb0dee912e6b6124b934fe9cf975f67e`、`6520d3b8d97ea6ee537564b753b9344fa105d1a8346cd222bb493d718bfc9ad0`。
+
+Job `95151` 通过全量 243 项测试，将旧500条 internal comparison、新124条 confirmation comparison 和外部 comparison 的实际文件哈希绑定到 pre-A4 账本。结果为 internal=true、confirmation=false、external=true；账本保持 `a4_ready=false`、`a4_started=false`、`decision=stop_before_a4`，唯一 blocker 为 `supplementary_confirmation_passed`。config/ledger SHA256 分别为 `89d8982ffed0115ec21f6ccc3416a8e243c6a547f88025eb99c373abe8c70b0e`、`c2a920bc021b95040f3bc97a8367bb68942f491c626c93ea0c2ae39d996c0fd0`。
+
+完整哈希审计确认176个评分索引连续且唯一、两角色 case identity 一致、五项外部 artifact 与 manifest 一致、三项 readiness 输入与实际文件一致。随后依据 ADR-0006，而非 promotion success，启动 `owner_authorized_exploratory` A4。首次提交因集群工作树中三份文档内容已等同 origin 但 HEAD 尚未快进，被 clean-worktree 门禁拒绝，未产生作业；这些内容保存到可恢复 `stash@{0}` 后，分支快进至 `ac78c35`。CPU 数据 Job `95574` 与单 GPU 候选生成 Job `95575` 已按 `afterok` 关系提交。A5 DPO 仍未授权。
+
+## 32. A4 候选池可行性修正与重提
+
+CPU Job `95574` 先完成全量 243 项测试，随后在候选构建阶段以 `A4 test source missing` 失败。只读全量审计确认原配置要求 27 个 `file_window` 备用候选，但固定 train-only 输入中只有 26 个满足每题至少 5 条测试；唯一不满足者 `p04013` 只有 4 条。原选择结果还包含 75 个少于 5 条测试的 function 候选，因此不能只跳过首个失败样本。
+
+ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_window` 组成，只将 `file_window` 备用池从 27 修正为 26，并在排序前显式过滤至少 5 条测试的 family。修正后真实数据审计得到 2,571 个可用 function、26 个可用 file-window，确定性候选池为 600+26。配置/ADR SHA256 分别为 `1e6413b663dbc039ebbee17ca64125ea3d5f98a1d811837cebf1ca0c4bf6bb0d`、`a23b6be751c028beb5a7af7510138885e85fb92a07707609c7fb2d379336bb52`；提交 `a0caffc` 在集群通过 243 项测试。
+
+失效依赖 Job `95575` 已取消，Job `95574` 的 13 个部分候选目录完整移动至 `artifacts/a4/failed/95574-executable-candidates-v1`，未删除。新 CPU Job `95586` 已生成 626 条候选，manifest SHA256 为 `e0337a2afe160795a5e859aff8a9390090a84bdba58cd97e974c3b97b463e5e9`；首批 16 个 file-window 双重资格得到 8 个可选样本，已达到该层最终配额。Job `95587` 申请 1 GPU，以 `afterok:95586` 依赖等待。

@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：固定 500 条训练、推理、评分和正式比较已完成；新 124 条确认集门禁失败；Defects4C 已冻结 176 条，外部成对评测进入 pre-A4 闭环。由于确认集失败，A4 正式晋级已被阻断；完整 pre-A4 账本后仅允许 ADR-0006 定义的负责人授权 exploratory 续行。实时作业见[项目状态](status.md)。
+阶段状态：固定 500 条、新 124 条确认集和 Defects4C 176 条外部成对评测均已完成。内部与外部门禁通过，确认集门禁失败，因此 readiness 为 `a4_ready=false`；A4 正式晋级被阻断，仅按 ADR-0006 以负责人授权 exploratory 模式续行。实时作业见[项目状态](status.md)。
 
 ## 目标
 
@@ -78,3 +78,9 @@ A3.4 scoring 实现提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 在集群�
 工程准备中记录了三类非模型失败：首次源码作业遇到瞬时 DNS；LLVM 浅层 checkout 的 120 秒硬超时不足；取消旧下载作业后遗留精确 `.git/*.lock`。实现分别加入有限重试、把 checkout 上限提高到 900 秒，并在确认旧进程终止后只删除四个已核实的锁文件。Job `94638` 已通过 224 项测试及网络隔离、只读挂载探针；Job `94642` 以 `COMPLETED 0:0` 完成 203/203 个源码目标。资格数组 `94643` 随后完成全部 203 条：176 条满足 buggy-fail/fixed-pass，27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。首次聚合 Job `94644` 因代码只接受一种官方任务后缀而失败；真实合格集包含 44 条 complete-function 模板和 132 条 infill 模板。提交 `3ea8a5f` 将两种精确后缀加入白名单、未知模板仍 fail closed，并通过 234 项测试和全部 176 条 prompt 遍历；重提 Job `94925` 成功冻结外部集。manifest/prompts SHA256 分别为 `0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631`、`b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f`。冻结分布为 LLVM 139、cppcheck 31、EnTT 2、uncrustify 2、AtomicParsley 1、libzmq 1，必须披露 LLVM 偏斜。
 
 无论外部门禁最终结果如何，最终 pre-A4 readiness 必须同时绑定旧 500 条比较、新确认集比较和 Defects4C 比较。由于确认集已经失败，账本必须保持 `a4_ready=false` 并阻止正式晋级；只有账本完成并核验后，才能按 ADR-0006 以 `owner_authorized_exploratory` 模式续行 A4。
+
+外部正式 preflight Job `94927` 通过 241 项测试和冻结身份校验。M0/M1-R2 GPU 推理 Job `94928`/`94929` 均完成 176/176。首轮评分数组 `94930` 暴露 rootfs 内 `PYTHONPATH` 使用宿主路径的问题；诊断 Job `95140` 保存 `ModuleNotFoundError: No module named 'scripts'`，提交 `bff21bc` 改为 `/patchalign/src:/patchalign` 并通过全量 243 项测试，单例 Job `95141` 验证真实 apply/build 链。
+
+替换评分数组 `95144` 完成全部 176 条，聚合 Job `95150` 得到：M0 parse/apply/build/Pass 为 94/24/17/1，M1-R2 为 174/72/55/1，双方 timeout 均为 0。最终 Pass 差为 0，paired-bootstrap 95% 区间为 `-1.7045pp～+1.7045pp`，未超过冻结的最大退化 2pp，因此 `external_gate_passed=true`；这只能说明外部性能未退化，不能表述为外部提升。comparison SHA256 为 `d8a1c14eb5ce7c5a19d59f159fc657dcdb0dee912e6b6124b934fe9cf975f67e`。
+
+readiness Job `95151` 将 internal comparison `5425feb2...1027`、confirmation `faca13cc...e6094` 和 external comparison `d8a1c14e...75f67e` 逐文件验哈希后落盘。观测门禁为 internal=true、confirmation=false、external=true，输出保持 `a4_ready=false`、`a4_started=false`、`decision=stop_before_a4`，唯一 blocker 为 `supplementary_confirmation_passed`；账本 SHA256 为 `c2a920bc021b95040f3bc97a8367bb68942f491c626c93ea0c2ae39d996c0fd0`。此后才按 ADR-0006 提交 exploratory A4。首次 CPU Job `95574` 暴露冻结配置要求 27 个 `file_window` 备用候选、但固定输入只有 26 个满足至少 5 条测试的可行性矛盾；关联 GPU Job `95575` 未启动并已取消。ADR-0007 保留测试门槛与最终 256+8 组成，只把备用池修正为 600 function + 26 file_window。提交 `a0caffc` 通过集群全量 243 项测试和真实数据选择审计；新 CPU Job `95586` 已生成候选 manifest `e0337a2a...e5e9` 并进入双重资格筛选，单 GPU Job `95587` 以 `afterok:95586` 依赖排队。
