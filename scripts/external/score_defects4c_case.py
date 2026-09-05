@@ -61,6 +61,17 @@ def early_result(role: str, prediction: dict, classification: str, reason: str) 
     }
 
 
+def rootfs_environment_args() -> list[str]:
+    return [
+        "--setenv", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/host-conda/bin",
+        "--setenv", "PYTHONPATH", "/patchalign/src:/patchalign",
+        "--setenv", "PYTHONDONTWRITEBYTECODE", "1",
+        "--setenv", "HOME", "/tmp/home",
+        "--setenv", "PYTHONNOUSERSITE", "1",
+        "--setenv", "LC_ALL", "C.UTF-8",
+    ]
+
+
 def score_role(config: dict, case: dict, role: str, prediction: dict, repo: Path) -> dict:
     if prediction["status"] != "ok":
         return early_result(role, prediction, "generation_failed", prediction.get("error") or prediction["status"])
@@ -107,8 +118,7 @@ def score_role(config: dict, case: dict, role: str, prediction: dict, repo: Path
         "--ro-bind", runtime["conda_environment"], "/opt/host-conda",
         "--ro-bind", str(repo), "/patchalign",
         "--remount-ro", "/",
-        "--setenv", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/host-conda/bin",
-        "--setenv", "HOME", "/tmp/home", "--setenv", "PYTHONNOUSERSITE", "1", "--setenv", "LC_ALL", "C.UTF-8",
+        *rootfs_environment_args(),
         "--chdir", "/patchalign",
         "/opt/host-conda/bin/python", "scripts/external/run_defects4c_prediction_case.py",
         "--project", case["project"], "--sha", case["commit_after"],

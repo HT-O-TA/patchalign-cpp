@@ -8,7 +8,11 @@ import pytest
 
 from scripts.external import a3_defects4c_external_common as external
 from scripts.external.aggregate_defects4c_scores import summarize
-from scripts.external.score_defects4c_case import early_result, parse_result
+from scripts.external.score_defects4c_case import (
+    early_result,
+    parse_result,
+    rootfs_environment_args,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +22,18 @@ CONFIG_PATH = ROOT / "configs/external/a3_defects4c_external_v1.json"
 def test_external_parse_result_preserves_runner_output_on_failure() -> None:
     with pytest.raises(RuntimeError, match="bubblewrap failed before python"):
         parse_result("bubblewrap failed before python\n")
+
+
+def test_external_rootfs_pythonpath_uses_names_visible_inside_sandbox() -> None:
+    args = rootfs_environment_args()
+    entries = {
+        args[index + 1]: args[index + 2]
+        for index, token in enumerate(args)
+        if token == "--setenv"
+    }
+    assert entries["PYTHONPATH"] == "/patchalign/src:/patchalign"
+    assert entries["PYTHONDONTWRITEBYTECODE"] == "1"
+    assert "/mingli01/" not in entries["PYTHONPATH"]
 
 
 def test_external_early_result_preserves_raw_prediction_identity() -> None:
