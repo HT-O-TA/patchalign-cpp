@@ -24,16 +24,32 @@ def test_defects4c_qualification_contract_is_frozen() -> None:
     assert value["qualification"]["cleanup_build_directory"] is True
 
 
-def test_defects4c_prompt_adapter_requires_pure_diff() -> None:
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        "Please fix bugs in the function and tell me the complete fixed function.",
+        "Please provide the correct line following commit message at the infill location.",
+    ],
+)
+def test_defects4c_prompt_adapter_requires_pure_diff(suffix: str) -> None:
     source = {"prompt": [
         {"role": "system", "content": "You are a C++ repair expert"},
-        {"role": "user", "content": "buggy function and failing test\n\nPlease fix bugs in the function and tell me the complete fixed function."},
+        {"role": "user", "content": f"buggy function and failing test\n\n{suffix}"},
     ]}
     prompt = adapted_prompt(source, "lib/example.cpp")
     assert "--- a/lib/example.cpp" in prompt
     assert "+++ b/lib/example.cpp" in prompt
     assert prompt.endswith("Unified diff:\n")
-    assert "complete fixed function" not in prompt
+    assert suffix not in prompt
+
+
+def test_defects4c_prompt_adapter_rejects_unknown_suffix() -> None:
+    source = {"prompt": [
+        {"role": "system", "content": "You are a C++ repair expert"},
+        {"role": "user", "content": "buggy function and failing test\n\nReturn any answer."},
+    ]}
+    with pytest.raises(RuntimeError, match="official prompt suffix changed"):
+        adapted_prompt(source, "lib/example.cpp")
 
 
 @pytest.mark.parametrize(

@@ -13,7 +13,10 @@ from typing import Any
 from scripts.external.qualify_defects4c_case import validate_config
 from scripts.training.a3_formal_common import require
 
-SUFFIX = "Please fix bugs in the function and tell me the complete fixed function."
+SUPPORTED_SUFFIXES = (
+    "Please fix bugs in the function and tell me the complete fixed function.",
+    "Please provide the correct line following commit message at the infill location.",
+)
 
 
 def utc_now() -> str:
@@ -36,8 +39,9 @@ def adapted_prompt(source_record: dict[str, Any], source_file: str) -> str:
     messages = source_record["prompt"]
     require([item["role"] for item in messages] == ["system", "user"], "unexpected official prompt roles")
     user = messages[1]["content"].rstrip()
-    require(user.endswith(SUFFIX), "official prompt suffix changed")
-    evidence = user[:-len(SUFFIX)].rstrip()
+    matching_suffixes = [suffix for suffix in SUPPORTED_SUFFIXES if user.endswith(suffix)]
+    require(len(matching_suffixes) == 1, "official prompt suffix changed")
+    evidence = user[:-len(matching_suffixes[0])].rstrip()
     return (
         "Repair the localized C++ function described below.\n"
         "Return exactly one pure unified diff and nothing else.\n"
