@@ -13,6 +13,7 @@ from scripts.preference.build_a4_executable_candidates import (
     validate_config as validate_data_config,
 )
 from scripts.preference.run_a4_candidate_generation import candidate_seed
+from scripts.external import bind_pre_a4_readiness
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -95,3 +96,32 @@ def test_submit_script_queues_gpu_after_data() -> None:
     assert 'dependency="afterok:${DATA_JOB}"' in text
     assert "slurm/a4_generate.sbatch" in text
     assert MODE == "owner_authorized_exploratory"
+
+
+def test_readiness_binding_preserves_confirmation_gate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    external = tmp_path / "comparison.json"
+    external.write_text(json.dumps({
+        "version": "a3-defects4c-external-comparison-v1",
+        "denominator": 150,
+        "external_gate_passed": True,
+    }), encoding="utf-8")
+    output = tmp_path / "binding.json"
+    monkeypatch.setattr(bind_pre_a4_readiness, "EXTERNAL_PATH", str(external))
+    monkeypatch.setattr(bind_pre_a4_readiness, "OUTPUT_LEDGER", str(tmp_path / "ledger.json"))
+    monkeypatch.setattr(bind_pre_a4_readiness.subprocess, "check_output", lambda *args, **kwargs: "")
+    monkeypatch.setattr("sys.argv", ["bind", "--output-config", str(output)])
+    bind_pre_a4_readiness.main()
+    binding = json.loads(output.read_text(encoding="utf-8"))
+    assert binding["required_gates"]["supplementary_confirmation_passed"] is True
+    assert binding["inputs"]["confirmation"]["sha256"] == bind_pre_a4_readiness.CONFIRMATION_SHA
+    assert binding["inputs"]["external"]["sha256"].startswith("sha256:")
+
+
+def test_external_pipeline_queues_readiness_after_scoring() -> None:
+    text = (ROOT / "scripts/external/submit_defects4c_external_pipeline.sh").read_text(encoding="utf-8")
+    assert 'dependency="afterok:${M0_JOB}:${M1_JOB}"' in text
+    assert 'dependency="afterok:${SCORE_JOB}"' in text
+    assert 'dependency="afterok:${AGGREGATE_JOB}"' in text
+    assert "a3_4_finalize_pre_a4.sbatch" in text
