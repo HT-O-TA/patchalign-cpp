@@ -23,7 +23,8 @@
 │   │   │   ├── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
-│   │   │   └── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
+│   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
+│   │   │   └── a4_executable_preference_v1.json # A4 train-only 偏好数据契约
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
@@ -36,15 +37,21 @@
 │   │   ├── external/
 │   │   │   ├── a3_defects4c_sources_v1.json # 官方源与 203 候选计划
 │   │   │   ├── a3_defects4c_qualification_v1.json # 离线双资格契约
-│   │   │   └── a3_defects4c_external_v1.json # 资格冻结后生成的成对评测绑定
+│   │   │   └── a3_defects4c_external_v1.json # 176 条冻结外部成对评测绑定
 │   │   ├── model/
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
 │   │       ├── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
 │   │       └── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
 │   ├── docs/                               # 协议、状态、证据、复盘与历史记录
-│   │   └── interview_retrospective.md       # 面试复述：阶段经历、故障归因和诚实边界
-│   ├── schemas/                            # A0/A2 Schema 与 A3.1 run manifest v0.2
+│   │   ├── README.md                       # 文档职责、权威来源与防漂移规则
+│   │   ├── status.md                       # 唯一实时阶段与作业状态页
+│   │   ├── 项目全程总结与核心结论.md       # 稳定项目叙事和核心研究结论
+│   │   ├── interview_retrospective.md       # 面试复述：个人职责、故障归因和表达素材
+│   │   ├── decisions/                      # 不静默改写的架构/实验决策记录
+│   │   ├── evidence/                       # 可复核实验问题与论文证据
+│   │   └── records/                        # 历史执行记录和目录结构台账
+│   ├── schemas/                            # A0/A2/A3 与 A4 candidate Schema
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
@@ -67,6 +74,7 @@
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
 │   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
 │   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
+│   │   ├── preference/                      # A4 train-only 选择、资格、配置、生成与提交
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -94,6 +102,8 @@
 │   │   ├── a3_4_confirmation_*.sbatch      # 确认集构建、资格、推理、评分与比较
 │   │   ├── a3_4_defects4c_*.sbatch         # 外部源、资格、GPU 推理、CPU 评分与聚合
 │   │   ├── a3_4_finalize_pre_a4.sbatch     # 只生成 readiness；不启动 A4
+│   │   ├── a4_data.sbatch                   # exploratory A4 CPU 数据冻结与资格
+│   │   ├── a4_generate.sbatch               # readiness/owner override 后的单 GPU 候选生成
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -118,6 +128,7 @@
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3 各阶段 Slurm 原始日志
+│       ├── a4/                              # owner-authorized exploratory A4 数据与生成产物
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -162,7 +173,7 @@
 ├── runtime/out/                            # 每个提交的精确可写 checkout
 ├── runtime/qualification-progress-v1/      # 203 个资格结果的原子检查点
 ├── rootfs-cb4efcac/                        # 离线第三方构建 rootfs
-└── qualified-v1/                           # >=150 条冻结外部集（聚合后生成）
+└── qualified-v1/                           # 176 条冻结外部成对评测集
 
 /mingli01/models/
 └── Qwen2.5-Coder-7B/                       # 主训练 Base 模型，只读使用
@@ -174,17 +185,18 @@
 │   ├── NOTICE
 │   ├── THIRD_PARTY_NOTICES.md
 │   ├── pyproject.toml
-│   ├── configs/                            # data/model/training/evaluation 机器契约
+│   ├── configs/                            # data/model/training/evaluation/external 机器契约
 │   ├── docs/
 │   │   ├── README.md                       # 文档职责与防漂移规则
 │   │   ├── status.md                       # 唯一实时状态页
+│   │   ├── 项目全程总结与核心结论.md       # 从立项至当前的稳定总览
 │   │   ├── a0/                            # 索引、核心协议、Schema、实验、治理
 │   │   ├── decisions/
 │   │   ├── development/
 │   │   ├── evidence/                      # A0/G0 证据与 A3.3 论文问题材料
 │   │   └── records/                       # 执行记录与独立目录台账
 │   ├── schemas/
-│   ├── scripts/                            # data/baseline/training/smoke
+│   ├── scripts/                            # data/baseline/training/external/preference/smoke
 │   ├── slurm/
 │   ├── src/patchalign/
 │   └── tests/
@@ -507,3 +519,11 @@ HT-O-TA/patchalign-cpp
 - 新增 `scripts/data/build_a3_sft_r2_data.py`，只从冻结 RunBugRun/function train/validation 静态选择循环、边界和复杂度相关样本；
 - 新增 `tests/unit/test_a3_sft_r2.py` 与 `docs/a3_4_sft_r2.md`，覆盖选择信号、跨配置一致性和防泄漏边界；
 - 当前只建立 Git 跟踪协议和 CPU 数据入口，尚未新增集群数据目录、artifact 或 Slurm 作业。
+
+### 2026-09-05：冻结外部集并建立全程总览与 A4 结构
+
+- Defects4C 从 203 个候选完成离线双资格，冻结 176 条成对外部评测集；配置锁定分母、manifest 和 prompts 哈希；
+- 新增 `scripts/external`、外部评测 Slurm 链和 pre-A4 readiness 入口，GPU 推理与 CPU 评分解耦；
+- 新增 ADR-0006 和 `scripts/preference`、`a4_data.sbatch`、`a4_generate.sbatch`，只允许在失败 readiness 已落盘且负责人显式授权后开展 exploratory A4；
+- 新增 `docs/项目全程总结与核心结论.md` 作为稳定项目叙事入口；`status.md` 继续独占实时状态，执行记录继续保存逐次证据；
+- 本次目录整理没有移动或删除运行中的代码、模型、数据、环境和 artifact。

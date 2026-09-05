@@ -7,6 +7,7 @@
 | 信息类型 | 权威来源 | 说明 |
 |---|---|---|
 | 当前阶段与作业状态 | [`status.md`](status.md) | 带核验时间的状态快照；每次里程碑或正式作业状态变化时更新 |
+| 项目全程与稳定结论 | [项目全程总结与核心结论](项目全程总结与核心结论.md) | 从立项到当前里程碑的稳定叙事；不维护分钟级作业状态 |
 | 正式数据配额与路径 | [`configs/data/a3_formal_v1.json`](../configs/data/a3_formal_v1.json) | 机器读取的冻结配置；文档只解释，不另立一套数字 |
 | 正式训练与生成参数 | [`configs/training/a3_sft_formal_v1.json`](../configs/training/a3_sft_formal_v1.json) | 模型、数据、训练和评测输入模式的机器契约 |
 | 评分与质量门槛 | [`configs/evaluation/`](../configs/evaluation/) | 评分协议和 promotion gate 的机器配置 |
@@ -21,6 +22,7 @@
 
 ## 阅读入口
 
+- 全程总览：[项目全程总结与核心结论](项目全程总结与核心结论.md)
 - 当前进度：[项目状态](status.md)
 - A0 契约：[A0 索引](a0/README.md)
 - A1 数据 pilot：[数据来源与隔离](a1_data_sources.md)

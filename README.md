@@ -15,6 +15,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 当前入口
 
+- [项目全程总结与核心结论](docs/项目全程总结与核心结论.md)
 - [项目状态（唯一实时状态页）](docs/status.md)
 - [文档索引与防漂移规则](docs/README.md)
 - [A0 阶段索引](docs/a0/README.md)
