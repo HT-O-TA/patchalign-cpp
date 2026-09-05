@@ -19,6 +19,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [ADR-0003](../decisions/0003-dataset-composition-v1.md) | 第一版数据配额、语言、任务层级、修改类型和测试覆盖 | Accepted for A0 |
 | [ADR-0004](../decisions/0004-training-quality-gates-v1.md) | SFT/DPO 提升阈值、退化上限和 pilot 选择 | Accepted for A0 |
 | [ADR-0006](../decisions/0006-owner-authorized-exploratory-a4.md) | 确认集失败后的 owner-authorized exploratory A4 边界 | Accepted; pre-A4 完成后执行 |
+| [ADR-0007](../decisions/0007-a4-testable-candidate-pool-correction.md) | A4 可执行候选池的输入可行性修正 | Accepted implementation correction |
 
 自动验收、fixture 和质量门禁的合并证据见 [`a0-validation.md`](../evidence/a0-validation.md)。历史执行细节保留在[执行记录](../records/第二项目_PatchAlign-Cpp_执行记录.md)，不在本索引重复展开。
 

@@ -61,10 +61,16 @@ def test_train_only_selection_is_deterministic_and_family_unique(tmp_path: Path)
     first = select_train_rows(config)
     second = select_train_rows(config)
     assert [row["sample_id"] for row in first] == [row["sample_id"] for row in second]
-    assert len(first) == 627
+    assert len(first) == 626
     assert sum(row["task_level"] == "function" for row in first) == 600
-    assert sum(row["task_level"] == "file_window" for row in first) == 27
-    assert len({row["repo_family"] for row in first}) == 627
+    assert sum(row["task_level"] == "file_window" for row in first) == 26
+    assert len({row["repo_family"] for row in first}) == 626
+
+    testable = {row["repo_family"] for row in rows}
+    excluded = first[0]["repo_family"]
+    filtered = select_train_rows(config, testable - {excluded})
+    assert excluded not in {row["repo_family"] for row in filtered}
+    assert len(filtered) == 626
 
 
 def test_candidate_seed_is_stable_and_candidate_specific() -> None:

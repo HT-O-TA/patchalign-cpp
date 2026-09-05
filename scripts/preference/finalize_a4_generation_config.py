@@ -17,7 +17,8 @@ from scripts.training.a3_sft_r2_inference_common import verify_training_artifact
 
 VERSION = "a4-preference-generation-v1"
 ADR_SHA = "sha256:2b4c1ba07e297b5b58ac3c976527b42af842a05c364e3a3b2e94471f6fcb6d42"
-DATA_CONFIG_SHA = "sha256:503c65ffa43035d617bf88b056f75a5be82ca52aaade325a375c4c875b3a683e"
+DATA_CONFIG_SHA = "sha256:1e6413b663dbc039ebbee17ca64125ea3d5f98a1d811837cebf1ca0c4bf6bb0d"
+CORRECTION_ADR_SHA = "sha256:a23b6be751c028beb5a7af7510138885e85fb92a07707609c7fb2d379336bb52"
 READINESS_PATH = Path("/mingli01/project/ht/patchalign-cpp/artifacts/a3/pre-a4-readiness-v1.json")
 OUTPUT_CONFIG = Path("/mingli01/project/ht/patchalign-cpp/artifacts/a4/generation-config-v1.json")
 PROMPTS_PATH = Path("/mingli01/project/ht/patchalign-cpp/artifacts/a4/prompts-v1.jsonl")
@@ -38,6 +39,7 @@ def main() -> None:
     require(not subprocess.check_output(["git", "status", "--porcelain"], cwd=repo, text=True).strip(), "A4 finalization requires a clean worktree")
     require(sha256_file(args.data_config) == DATA_CONFIG_SHA, "A4 data config changed")
     require(sha256_file(repo / "docs/decisions/0006-owner-authorized-exploratory-a4.md") == ADR_SHA, "A4 owner authorization changed")
+    require(sha256_file(repo / "docs/decisions/0007-a4-testable-candidate-pool-correction.md") == CORRECTION_ADR_SHA, "A4 candidate-pool correction changed")
     config = json.loads(args.data_config.read_text(encoding="utf-8"))
     validate_config(config)
     require(READINESS_PATH.is_file(), "pre-A4 readiness ledger missing")
@@ -97,6 +99,12 @@ def main() -> None:
             "path": "docs/decisions/0006-owner-authorized-exploratory-a4.md",
             "sha256": ADR_SHA,
             "does_not_change_a3_gate": True,
+        },
+        "candidate_pool_correction": {
+            "path": "docs/decisions/0007-a4-testable-candidate-pool-correction.md",
+            "sha256": CORRECTION_ADR_SHA,
+            "preserves_required_composition": True,
+            "preserves_minimum_test_count": 5,
         },
         "readiness_override": {
             "path": str(READINESS_PATH),

@@ -47,10 +47,10 @@ def validate_config(config: dict[str, Any]) -> None:
         "source_dataset": "RunBugRun",
         "split": "train",
         "language": "cpp",
-        "candidate_counts": {"function": 600, "file_window": 27},
+        "candidate_counts": {"function": 600, "file_window": 26},
         "required_counts": {"function": 256, "file_window": 8},
         "maximum_samples_per_problem_family": 1,
-        "order": "sha256(seed, sample_id); file_window selected first, then function",
+        "order": "sha256(seed, sample_id) among problems with at least 5 tests; file_window selected first, then function",
     }, "A4 selection policy changed")
     qualification = config["qualification"]
     require(qualification["double_replay_required"] is True, "A4 double replay disabled")
@@ -61,15 +61,21 @@ def validate_config(config: dict[str, Any]) -> None:
         require(name in forbidden, f"missing forbidden A4 source: {name}")
 
 
-def select_train_rows(config: dict[str, Any]) -> list[dict[str, Any]]:
+def select_train_rows(
+    config: dict[str, Any], testable_families: set[str] | None = None
+) -> list[dict[str, Any]]:
     rows = read_jsonl(Path(config["source"]["formal_train"]))
-    eligible = [
+    all_eligible = [
         row for row in rows
         if row["source_dataset"] == "RunBugRun"
         and row["split"] == "train"
         and row["language"] == "cpp"
     ]
-    require(len(eligible) == 2956, "A3.3 train-only RunBugRun count changed")
+    require(len(all_eligible) == 2956, "A3.3 train-only RunBugRun count changed")
+    eligible = [
+        row for row in all_eligible
+        if testable_families is None or row["repo_family"] in testable_families
+    ]
     by_level = {
         level: sorted(
             (row for row in eligible if row["task_level"] == level),
@@ -91,6 +97,20 @@ def select_train_rows(config: dict[str, Any]) -> list[dict[str, Any]]:
         require(sum(item["task_level"] == level for item in selected) == target, f"cannot fill A4 {level} candidates")
     require(len(used_families) == len(selected), "A4 problem family overlap")
     return selected
+
+
+def load_testable_families(
+    raw_dir: Path, tests: dict[str, list[dict[str, Any]]]
+) -> set[str]:
+    """Return train problem families with the frozen minimum test coverage."""
+    families: set[str] = set()
+    for path in sorted(raw_dir.glob("cpp_train*.jsonl.gz")):
+        with gzip.open(path, "rt", encoding="utf-8") as stream:
+            for line in stream:
+                problem = str(json.loads(line)["problem_id"])
+                if len(tests.get(problem, [])) >= 5:
+                    families.add(f"RunBugRun:problem:{problem}")
+    return families
 
 
 def raw_records(raw_dir: Path, selected: list[dict[str, Any]]) -> tuple[dict[int, dict[str, Any]], dict[int, str]]:
@@ -125,9 +145,10 @@ def main() -> None:
     output = Path(config["paths"]["candidate_directory"])
     require(not output.exists(), "refusing to overwrite A4 candidate directory")
 
-    selected = select_train_rows(config)
-    raw_by_id, shards = raw_records(raw_dir, selected)
     tests = load_tests(raw_dir / "tests_all.jsonl.gz")
+    testable_families = load_testable_families(raw_dir, tests)
+    selected = select_train_rows(config, testable_families)
+    raw_by_id, shards = raw_records(raw_dir, selected)
     output.mkdir(parents=True)
     cases: list[dict[str, Any]] = []
     for order, train in enumerate(selected):
@@ -190,9 +211,13 @@ def main() -> None:
         },
         "cases": cases,
     }
+    testable_rows = [row for row in read_jsonl(Path(source["formal_train"])) if row.get("repo_family") in testable_families]
     report = {
         "version": CANDIDATE_VERSION,
         "eligible_train_runbugrun": 2956,
+        "testable_train_runbugrun": len(testable_rows),
+        "testable_task_levels": dict(Counter(row["task_level"] for row in testable_rows)),
+        "minimum_test_count": 5,
         "candidate_count": len(cases),
         "candidate_task_levels": dict(Counter(case["task_level"] for case in cases)),
         "problem_family_unique": len({case["problem_id"] for case in cases}) == len(cases),

@@ -17,14 +17,14 @@
     "language": "cpp",
     "candidate_counts": {
       "function": 600,
-      "file_window": 27
+      "file_window": 26
     },
     "required_counts": {
       "function": 256,
       "file_window": 8
     },
     "maximum_samples_per_problem_family": 1,
-    "order": "sha256(seed, sample_id); file_window selected first, then function"
+    "order": "sha256(seed, sample_id) among problems with at least 5 tests; file_window selected first, then function"
   },
   "paths": {
     "candidate_directory": "/mingli01/data/patchalign-cpp/a4/executable-candidates-v1",
