@@ -37,7 +37,10 @@ def parse_result(output: str) -> dict:
             continue
         if value.get("version") == "a3-defects4c-prediction-case-v1":
             return value
-    raise RuntimeError("rootfs prediction runner did not emit a case result")
+    raise RuntimeError(
+        "rootfs prediction runner did not emit a case result; "
+        f"output_tail={output[-4000:]!r}"
+    )
 
 
 def early_result(role: str, prediction: dict, classification: str, reason: str) -> dict:
