@@ -19,6 +19,9 @@ QUALITY_GATE_SHA = "sha256:6ba153f1ec3d56a41eab0048595a5169816df5e404a37c44c3097
 QUALIFICATION_CONFIG_SHA = "sha256:760f81a197a8265de1c76e9ec6b2b8679432cf04396c2fce153ddf796bf0cd0c"
 ROOTFS_SHA = "sha256:46d659c0f3dac1acb0849a17fd0cae2a18848f357847f3db2b61a5858f8f1bab"
 BWRAP_SHA = "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda"
+DATASET_MANIFEST_SHA = "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631"
+DATASET_PROMPTS_SHA = "sha256:b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f"
+DATASET_CASE_COUNT = 176
 
 
 def sha256_text(value: str) -> str:
@@ -49,12 +52,14 @@ def validate_config(config: dict[str, Any]) -> None:
     verify_training_artifact(config)
 
     dataset = config["dataset"]
-    require(dataset["root"] == "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1", "wrong external dataset root")
-    require(dataset["manifest"] == "manifest.json", "wrong external manifest name")
-    require(dataset["prompts"] == "prompts.jsonl", "wrong external prompts name")
-    require(150 <= dataset["case_count"] <= 203, "external denominator outside frozen bounds")
-    for key in ("manifest_sha256", "prompts_sha256"):
-        require(dataset[key].startswith("sha256:") and len(dataset[key]) == 71, f"missing dataset hash: {key}")
+    require(dataset == {
+        "root": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1",
+        "manifest": "manifest.json",
+        "prompts": "prompts.jsonl",
+        "manifest_sha256": DATASET_MANIFEST_SHA,
+        "prompts_sha256": DATASET_PROMPTS_SHA,
+        "case_count": DATASET_CASE_COUNT,
+    }, "external dataset identity changed")
 
     require(config["generation"] == {
         "do_sample": False,
