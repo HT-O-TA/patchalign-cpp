@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：固定 500 条训练、推理、评分和正式比较已完成；新 124 条确认集门禁失败；Defects4C 外部门禁执行中。由于确认集失败，A4 已确定不可进入。
+阶段状态：固定 500 条训练、推理、评分和正式比较已完成；新 124 条确认集门禁失败；Defects4C 已冻结 176 条，外部成对评测待执行。由于确认集失败，A4 正式晋级已被阻断；完整 pre-A4 账本后仅允许 ADR-0006 定义的负责人授权 exploratory 续行。
 
 ## 目标
 
@@ -69,12 +69,12 @@ A3.4 scoring 实现提交 `22efebfa27afdaad09d4f08e7c8bdebafb1e0e27` 在集群�
 
 确认集来自未用于 R2 checkpoint 选择的新冻结切片，共 124 条（100 function + 24 file-window）。M0 和 M1-R2 分别使用同一 prompt、greedy Pass@1 和 scoring v2；两个模型均为 0/124 Pass。M1-R2 显著改善格式和可执行前置阶段，但相对 M0 增加 3/124 regression failure 和 4/124 timeout，因此 Job `94605` 给出 `supplementary_confirmation_passed=false`，原因是主提升不足、回归退化超限和 timeout 退化超限。comparison artifact SHA256 为 `faca13cc9695c011e19ce1b30a28ce7a02c783b65eec4af07d71aecacf9e6094`。
 
-这项结果说明旧 500 条上的内部门禁通过不能外推为泛化成功。确认集是预注册的独立晋级条件，因此失败本身已足以阻止 A4；后续 Defects4C 不用于重新选择 checkpoint，只用于完成外部分布证据。
+这项结果说明旧 500 条上的内部门禁通过不能外推为泛化成功。确认集是预注册的独立晋级条件，因此失败本身已足以阻止 A4 正式晋级；后续 Defects4C 不用于重新选择 checkpoint，只用于完成外部分布证据。负责人授权的 exploratory A4 不改变该失败结论。
 
 ## Defects4C 外部门禁
 
 官方源固定在提交 `aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39`。在排除与训练来源 family 重叠的 ArduinoJson 和 znc 后，源码计划含 203 个 C++ function 候选、11 个项目，其中 LLVM 141 条、cppcheck 31 条、SPIRV-Tools 11 条、其余项目合计 20 条；外部集跨项目但明显偏向 LLVM，报告必须披露该局限。目标是以 buggy build/test 失败且 fixed build/test 通过的双资格规则冻结至少 150 条。构建与测试在固定 rootfs 和 Bubblewrap 中离线运行，官方元数据明确适用时才启用 sanitizer。
 
-工程准备中记录了三类非模型失败：首次源码作业遇到瞬时 DNS；LLVM 浅层 checkout 的 120 秒硬超时不足；取消旧下载作业后遗留精确 `.git/*.lock`。实现分别加入有限重试、把 checkout 上限提高到 900 秒，并在确认旧进程终止后只删除四个已核实的锁文件。Job `94638` 已通过 224 项测试及网络隔离、只读挂载探针；Job `94642` 已以 `COMPLETED 0:0` 完成 203/203 个源码目标且 0 失败，下载 manifest SHA256 为 `6b7162f4a2ca2905893f38b74714b19e1149f738904f48c97493b5690a80ff6a`；资格数组 `94643` 执行中，`94644` 等待聚合。
+工程准备中记录了三类非模型失败：首次源码作业遇到瞬时 DNS；LLVM 浅层 checkout 的 120 秒硬超时不足；取消旧下载作业后遗留精确 `.git/*.lock`。实现分别加入有限重试、把 checkout 上限提高到 900 秒，并在确认旧进程终止后只删除四个已核实的锁文件。Job `94638` 已通过 224 项测试及网络隔离、只读挂载探针；Job `94642` 以 `COMPLETED 0:0` 完成 203/203 个源码目标。资格数组 `94643` 随后完成全部 203 条：176 条满足 buggy-fail/fixed-pass，27 条因 fixed 官方测试未通过而拒绝，0 timeout、0 infrastructure error。首次聚合 Job `94644` 因代码只接受一种官方任务后缀而失败；真实合格集包含 44 条 complete-function 模板和 132 条 infill 模板。提交 `3ea8a5f` 将两种精确后缀加入白名单、未知模板仍 fail closed，并通过 234 项测试和全部 176 条 prompt 遍历；重提 Job `94925` 成功冻结外部集。manifest/prompts SHA256 分别为 `0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631`、`b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f`。冻结分布为 LLVM 139、cppcheck 31、EnTT 2、uncrustify 2、AtomicParsley 1、libzmq 1，必须披露 LLVM 偏斜。
 
-无论外部门禁最终结果如何，最终 pre-A4 readiness 必须同时绑定旧 500 条比较、新确认集比较和 Defects4C 比较。由于确认集已经失败，合法结论只能是停止在 A4 之前。
+无论外部门禁最终结果如何，最终 pre-A4 readiness 必须同时绑定旧 500 条比较、新确认集比较和 Defects4C 比较。由于确认集已经失败，账本必须保持 `a4_ready=false` 并阻止正式晋级；只有账本完成并核验后，才能按 ADR-0006 以 `owner_authorized_exploratory` 模式续行 A4。

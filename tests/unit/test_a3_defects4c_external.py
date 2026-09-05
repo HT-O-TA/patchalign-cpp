@@ -1,5 +1,18 @@
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+
+import pytest
+
+from scripts.external import a3_defects4c_external_common as external
 from scripts.external.aggregate_defects4c_scores import summarize
 from scripts.external.score_defects4c_case import early_result
+
+
+ROOT = Path(__file__).resolve().parents[2]
+CONFIG_PATH = ROOT / "configs/external/a3_defects4c_external_v1.json"
 
 
 def test_external_early_result_preserves_raw_prediction_identity() -> None:
@@ -56,3 +69,51 @@ def test_external_summary_counts_only_executed_apply_stage() -> None:
         "test_pass_at_1": 1,
         "timeouts": 0,
     }
+
+
+def load_config() -> dict:
+    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+
+
+def validate_without_cluster_artifacts(monkeypatch: pytest.MonkeyPatch, config: dict) -> None:
+    monkeypatch.setattr(external, "verify_training_artifact", lambda _: {})
+    external.validate_config(config)
+
+
+def test_defects4c_external_config_is_frozen(monkeypatch: pytest.MonkeyPatch) -> None:
+    config = load_config()
+    validate_without_cluster_artifacts(monkeypatch, config)
+    assert config["dataset"] == {
+        "root": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1",
+        "manifest": "manifest.json",
+        "prompts": "prompts.jsonl",
+        "manifest_sha256": "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+        "prompts_sha256": "sha256:b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f",
+        "case_count": 176,
+    }
+    assert config["scoring"]["apply_command"] == ["git", "apply", "--recount"]
+    assert config["scoring"]["sanitizer"] == "only_if_official_metadata_applies"
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [
+        (("dataset", "case_count"), 175),
+        (("dataset", "manifest_sha256"), "sha256:" + "0" * 64),
+        (("generation", "do_sample"), True),
+        (("scoring", "apply_command"), ["git", "apply"]),
+        (("scoring", "sanitizer"), "always"),
+        (("quality_gates", "external_pass_at_1_maximum_degradation"), 0.03),
+    ],
+)
+def test_defects4c_external_config_rejects_drift(
+    monkeypatch: pytest.MonkeyPatch, path: tuple[str, ...], value: object
+) -> None:
+    config = copy.deepcopy(load_config())
+    target = config
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    monkeypatch.setattr(external, "verify_training_artifact", lambda _: {})
+    with pytest.raises(RuntimeError):
+        external.validate_config(config)

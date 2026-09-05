@@ -1,0 +1,77 @@
+{
+  "dataset": {
+    "case_count": 176,
+    "manifest": "manifest.json",
+    "manifest_sha256": "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+    "prompts": "prompts.jsonl",
+    "prompts_sha256": "sha256:b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f",
+    "root": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1"
+  },
+  "generation": {
+    "do_sample": false,
+    "max_input_tokens": 4096,
+    "max_new_tokens": 512,
+    "num_return_sequences": 1,
+    "temperature": null,
+    "top_p": null
+  },
+  "inference": {
+    "m0": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/inference-m0",
+    "m1_r2": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/inference-m1_r2"
+  },
+  "input_mode": "raw_completion",
+  "model": {
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02"
+  },
+  "prompt_version": "a3-defects4c-unified-diff-v1",
+  "qualification": {
+    "checkout_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",
+    "config": "configs/external/a3_defects4c_qualification_v1.json",
+    "config_sha256": "sha256:760f81a197a8265de1c76e9ec6b2b8679432cf04396c2fce153ddf796bf0cd0c",
+    "official_directory": "/mingli01/data/patchalign-cpp/external/defects4c/source/defectsc_tpl"
+  },
+  "quality_gates": {
+    "external_pass_at_1_maximum_degradation": 0.02,
+    "path": "configs/evaluation/quality_gates_v1.json",
+    "sha256": "sha256:6ba153f1ec3d56a41eab0048595a5169816df5e404a37c44c3097b7f375f5af1"
+  },
+  "run_id": "a34_defects4c_s20260830",
+  "runtime": {
+    "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+    "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
+    "conda_environment": "/mingli01/project/ht/.conda_envs/patchalign-cpp",
+    "rootfs_archive_sha256": "sha256:46d659c0f3dac1acb0849a17fd0cae2a18848f357847f3db2b61a5858f8f1bab",
+    "rootfs_directory": "/mingli01/data/patchalign-cpp/external/defects4c/rootfs-cb4efcac"
+  },
+  "scoring": {
+    "apply_command": [
+      "git",
+      "apply",
+      "--recount"
+    ],
+    "cpu_count_per_case": 8,
+    "network": "unshared",
+    "output_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/external-v1",
+    "progress_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/scoring-progress-v1",
+    "protocol": "a3-scoring-v2",
+    "sanitizer": "only_if_official_metadata_applies",
+    "timeout_seconds": 5400
+  },
+  "seed": 20260830,
+  "source_training": {
+    "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+    "best_checkpoint_sha256": "sha256:86258a8d5529d59b100648ed1e339e04be16aa4400a57568b55f887c14768c8c",
+    "checkpoint": "checkpoints/checkpoint-step-000150-epoch-1",
+    "config_sha256": "sha256:e088976699f481e3760eb4a0c4e5afeebc74050f3bce8dace264c656c6a04c23",
+    "directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training",
+    "git_commit": "8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c",
+    "manifest_sha256": "sha256:b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884",
+    "selection_manifest_sha256": "sha256:7492a3732e3b0a6546e6b733a7fbb0314a63abd1f9069220b605e96061f630ac",
+    "source_adapter_sha256": "sha256:807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f",
+    "summary_sha256": "sha256:4cab1f118ebddc90e69e5f3d202b96906c5ab399d00906adc842c6f378cf2f4d"
+  },
+  "version": "a3-defects4c-external-v1"
+}

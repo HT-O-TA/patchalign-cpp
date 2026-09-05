@@ -101,8 +101,8 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 
 - 正式比较 Job `94580` 在旧 500 条上给出 function `+2.75pp`、paired-bootstrap 95% 区间 `+1.25pp～+4.5pp`，因此内部冻结门通过；与 M1 的诊断则显示成功样本新增 5 条、丢失 6 条。
 - 新确认集固定 124 条且不参与 checkpoint 选择。M0/M1-R2 都是 0/124 Pass；R2 虽改善 parse/apply/compile，却新增 3 条 regression failure 和 4 条 timeout，确认集门禁明确失败。
-- 外部 Defects4C 从官方源筛出 203 个 C++ function 候选，并排除两个训练 family 重叠项目；其中 LLVM 占 141/203，必须披露外部集明显偏向单一大型项目。目标是以离线 Bubblewrap 双资格冻结至少 150 条，再对 M0/R2 做成对推理与执行。
-- 大仓库准备阶段先后遇到 DNS 抖动、LLVM checkout 120 秒误超时和取消作业遗留 Git lock。通过有限退避、900 秒 checkout、原子检查点和精确锁清理恢复，且不删除样本、不放宽质量阈值。
+- 外部 Defects4C 从官方源筛出 203 个 C++ function 候选，并排除两个训练 family 重叠项目；Bubblewrap 双资格最终保留 176 条、拒绝 27 条，0 timeout、0 infrastructure error。冻结集 LLVM 占 139/176，必须披露外部集明显偏向单一大型项目。
+- 大仓库准备阶段先后遇到 DNS 抖动、LLVM checkout 120 秒误超时和取消作业遗留 Git lock。通过有限退避、900 秒 checkout、原子检查点和精确锁清理恢复，且不删除样本、不放宽质量阈值。首次聚合又暴露官方数据同列混有 complete-function 与 infill 两种后缀；改为精确双模板白名单、未知模板 fail closed，并在重提聚合前遍历全部 176 个合格 prompt。
 
 面试要点：晋级条件是合取而非择优展示。即便旧测试集通过，只要独立确认集失败，就必须停止；外部评测仍应跑完以形成完整证据，而不是用失败结果反向调参。
 
@@ -115,6 +115,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 5. 配置与独立验证器常量漂移：让测试直接调用 fail-closed 验证器，跨组件核对冻结值。
 6. prompt 输入模式曾是隐式常量：将 `raw_completion` 写入可哈希配置，由 preflight 和推理共同读取。
 7. Slurm 任务出现秒退或空日志：区分调度/入口错误与模型实验失败，保留 Job 证据但不把无效运行计入模型结论。
+8. 第三方数据集同一字段存在两种官方 prompt 模板：先统计全量真实变体，再使用精确白名单适配；未知模板继续 fail closed，并把全量遍历加入提交前验证，避免只凭单个 fixture 误判兼容性。
 
 详细证据见 [`evidence/a3_3_pipeline_findings.md`](evidence/a3_3_pipeline_findings.md)。
 
@@ -132,7 +133,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 4. 主动说明门禁未通过及三个 timeout，不回避负结果。
 5. 讲清 CPU 对照如何排除集群噪声。
 6. 说明 SFT-R2 如何避免利用 holdout 答案。
-7. 最后说明新确认集已经失败、Defects4C 外部门禁正在闭环，因此 A4 不可进入，避免过度宣称。
+7. 最后说明新确认集已经失败、Defects4C 外部门禁正在闭环，因此 A4 不可正式晋级；后续即使负责人授权 exploratory 续行，也不能称为门禁通过。
 
 ## 可以诚实声称与不能声称的内容
 
