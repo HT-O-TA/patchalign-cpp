@@ -11,6 +11,7 @@
 
 set -euo pipefail
 umask 077
+export PYTHONNOUSERSITE=1
 
 REPO=/mingli01/project/ht/patchalign-cpp
 ENV=/mingli01/project/ht/.conda_envs/patchalign-cpp
