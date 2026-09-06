@@ -29,6 +29,34 @@ ADR-0008 在看到执行结果前冻结以下规则：
 
 评分按 264 个案例拆分为 Slurm 数组，每个任务一次评分同题四候选并原子写入 checkpoint。preflight 同时检查干净工作树、完整测试、输入/配置/ADR/Schema/环境/Bubblewrap 哈希；聚合只有在 264 个 checkpoint 和 1,056 个唯一候选完整时才运行。
 
-## 结果解释
+## 最终结果
 
-GPU 生成成功只证明候选完整、格式与 seed replay，不证明补丁正确。A4 最终需报告各终态分布、实际偏好对数、function/file-window 组成、chosen/rejected 终态以及 success 对数量。结果不得回写 A3.4 readiness，也不会自动启动 A5。
+CPU-only preflight Job `95651` 在排除异常节点后于 `gpu25` 用 18 秒完成 `249 passed` 和全部身份检查。评分数组 `95670` 完成 264/264 个案例 checkpoint，聚合 Job `95671` 用 2 秒完成，均为 `COMPLETED 0:0`。
+
+- 1,056 个候选：parse 1,055、apply 805、compile 780、public 136、最终 Pass 123；regression failure 4、timeout 11。
+- function 1,024 个候选中 Pass 112（10.94%）；file-window 32 个中 Pass 11（34.38%）。file-window 只有 8 个案例，不能据此宣称任务层优势。
+- 77/264 个案例至少有一个成功候选，经验 Pass@4 为 29.17%；成功候选数为 0/1/2/3/4 的案例分别有 187/45/20/10/2 个。
+- 182 个案例形成偏好对，82 个无严格差异而放弃；function/file-window 为 175/7。
+- 75 对 chosen 为完整 success；其余 107 对只表示到达更晚执行阶段或同终态无 timeout。175 对由终止阶段区分，7 对仅由 timeout 区分。
+
+最终 artifact：
+
+- scores SHA256：`c218cd58ab05a8b7fa59188163cbfaabdf206b4482185cf297e1f63ff2e1cee2`；
+- preferences SHA256：`5e6b56e4417d49d0a9fcf85e2ec37d3a4b1e358fda870737adea5ae8c0f578bf`；
+- pair audit SHA256：`bcaf461d09e2f54f5b68e30e9a17025ada1c6827b9cb1829556445519b8b6ad2`；
+- summary SHA256：`302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8`；
+- run manifest SHA256：`03c61f0e3a376d4879274880634d8d12f4359d03775aa4b7c726cb3d844c7cbe`。
+
+独立审计确认 1,056 个 candidate ID、182 个 pair ID 均唯一；所有 pair 通过 Schema，训练文件未出现 gold、fixed、测试路径或终态字段，manifest 内各文件哈希与实际字节一致。
+
+## 工程观察
+
+首次 preflight `95651` 和原数组 `95652` 被调度到 `gpu16` 后均出现零日志、零 checkpoint；将同一 preflight 重排、并以排除 `gpu16` 的替换数组运行后，分别在 18 秒内通过并快速产生 checkpoint，证明问题在节点侧而非代码。原数组与未运行聚合 `95653` 被取消，未产生可用评分，也未删除数据。
+
+大部分案例为秒级，少数 timeout 补丁形成显著长尾。最慢的 case index 50 有 18 个 public tests，四个候选均为 `public_test_failed`，其中三个候选在 18 项上全部 timeout；完整记录使任务用时 54 分 6 秒。项目保持冻结的完整 outcomes 语义，没有看见长尾后改为 fail-fast 或删除该案例。
+
+## 结果解释与下一门禁
+
+候选级 11.65% Pass 和经验 Pass@4 29.17% 说明同题多次采样能产生可用执行差异，但数据来自训练分布且经过可执行资格筛选，不能与独立确认集或 Defects4C 的 greedy Pass@1 直接比较，也不能证明泛化。182 对中只有 75 对含完整 success，另外 107 对是较弱的阶段排序信号；是否足以进行 DPO 需要负责人结合规模、信号强度、timeout 风险与验证设计审阅。
+
+A4 结果不得回写 A3.4 readiness。run manifest 保持 `a5_started=false`，A5 不会自动启动。

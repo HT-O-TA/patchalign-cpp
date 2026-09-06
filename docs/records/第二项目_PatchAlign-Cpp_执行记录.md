@@ -997,4 +997,10 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 
 提交 `d2968335536326b1a4e06628125ee59b383c936e` 新增 A4 scoring v1、ADR-0008、训练专用偏好对 Schema、案例级原子 checkpoint 和 CPU-only Slurm 链。排序只在同一 case 内按终止阶段和 timeout 比较，不使用 gold 相似度；每例最多一对，训练文件不含测试或执行标签。集群按正式环境设置 `PYTHONNOUSERSITE=1` 后全量测试为 `249 passed`，真实冻结输入核验为 264 cases / 1,056 candidates / 264 prompts。
 
-CPU-only preflight Job `95651`、264 项评分数组 `95652` 和聚合/偏好对 Job `95653` 已按 `afterok` 依赖提交。A5 未自动授权，必须等待最终 A4 质量报告和负责人复核。
+首次 preflight `95651` 在 `gpu16` 运行约 11 分钟仍为零日志；保留同一 Job ID、排除该节点重排后，在 `gpu25` 用 18 秒完成 `249 passed` 和全部冻结输入核验。原数组 `95652` 的首批 16 个任务再次落到 `gpu16`，近 2 分钟零日志、零 checkpoint，因此原数组和未运行聚合 `95653` 被取消；没有删除或覆盖数据。排除该节点的替换数组 `95670` 随即正常生成 checkpoint，264/264 任务均以 `COMPLETED 0:0` 结束。
+
+多数案例为秒级，少数危险补丁触发逐测试 timeout。最慢的 index 50 在 18 个 public tests 上评估四候选，用时 `00:54:06`；index 262 用时 `00:12:06`。这些拖尾没有被删出固定分母。聚合 `95671` 首次也落到 `gpu16` 并零日志，保留 Job ID 排除该节点重排后在 `gpu25` 用 2 秒完成。
+
+最终 1,056 个候选 parse/apply/compile/Pass 为 1,055/805/780/123，regression failure 为 4，timeout 为 11；function Pass 112/1,024，file-window Pass 11/32。77/264 个案例至少有一个 success，成功候选数 0/1/2/3/4 的案例分别为 187/45/20/10/2。构造 182 对偏好数据，另 82 例无严格差异；function/file-window 为 175/7，75 对 chosen 为 success，175 对按终止阶段区分、7 对只按 timeout 区分。
+
+独立审计确认 1,056 个 candidate ID、182 个 pair ID 唯一，pair Schema 全部通过，训练文件不含 gold/fixed/测试路径/终态字段，manifest 哈希与实际字节一致。scores/preferences/pair-audit/summary/run-manifest SHA256 为 `c218cd58ab05a8b7fa59188163cbfaabdf206b4482185cf297e1f63ff2e1cee2`、`5e6b56e4417d49d0a9fcf85e2ec37d3a4b1e358fda870737adea5ae8c0f578bf`、`bcaf461d09e2f54f5b68e30e9a17025ada1c6827b9cb1829556445519b8b6ad2`、`302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8`、`03c61f0e3a376d4879274880634d8d12f4359d03775aa4b7c726cb3d844c7cbe`。run manifest 为 `a5_started=false`；A5 仍待负责人复核。
