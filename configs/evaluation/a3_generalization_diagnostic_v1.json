@@ -23,9 +23,9 @@
     "m0_scores": "artifacts/a3/formal/m0-inference/scoring-v2/scores.jsonl",
     "m0_scores_sha256": "92ceb428df80ed772a2c9ce4dfaefd0f3d9b36fd7d96cc74e5cafd538fd6df3d",
     "r2_predictions": "artifacts/a3/formal/sft-inference/predictions.jsonl",
-    "r2_predictions_sha256": "c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a",
+    "r2_predictions_sha256": "e688dd57909866ca8f39c4675554842fca08fab1805374995aa169b33b3077cc",
     "r2_scores": "artifacts/a3/formal/sft-inference/scoring-v2/scores.jsonl",
-    "r2_scores_sha256": "f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8",
+    "r2_scores_sha256": "2191dd1d5f93839dccb36fd8e10e23242bb56eb9853b793c895c64435359d7f8",
     "expected_cases": 500,
     "expected_r2_successes": 14
   },
