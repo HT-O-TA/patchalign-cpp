@@ -1046,3 +1046,7 @@ Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COM
 项目随后实现 GitHub C++ issue/PR metadata-only pilot：固定查询、API 版本、最多 25 个 PR 详情请求、最多 15 个不同仓库目标、许可证 allowlist、评测仓库 denylist 和最小字段投影。采集器禁止保存 patch、源码、标题/正文、用户身份与 LICENSE 原文，只保存必要公开身份、统计、内容哈希和拒绝原因；内容准入 denylist 仍显式标记为不完整。
 
 本步骤只授权集群 CPU/网络试采。父提交、C++ 文件变更、测试重放、许可证全文审计、完整 benchmark 去污染、Data-v2 构造与 GPU 训练仍未获准。
+
+首次 metadata v1 Job `96406` 在 `gpu18` 用时 2 秒，10 项测试通过，但 GitHub 查询为 0 条、0/15 仓库。后续只返回计数的四组查询确认 `archived:false` 不是原因；移除 PR 级 `label:bug` 后同时间窗与 stars 门槛出现 48 条。说明 bug 标签通常属于 linked issue，原查询把合法候选提前滤空。
+
+项目没有覆盖 v1，而是新增 v1.1：去掉 PR 标签条件，要求 PR 正文显式关闭同仓库 issue，再调用 issue 元数据核验 bug/defect 标签；最多检查 18 个 PR，使无令牌时 PR detail、issue、license 最坏为 54 个 core 请求。v1 空 artifact、日志与哈希已本地化保留。

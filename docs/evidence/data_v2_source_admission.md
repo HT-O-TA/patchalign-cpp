@@ -1,6 +1,6 @@
 # Data-v2 新来源准入与污染审计
 
-> 证据日期：2026-09-06。官方资料桌面审计已完成，负责人随后接受 ADR-0010 的分层 family 契约；GitHub metadata-only pilot 已实现、待集群实测。未下载补丁或源码内容，未构造 Data-v2，未提交 GPU 作业。机器口径见 `configs/data/data_v2_source_admission_v1.json` 与 `configs/data/data_v2_contract_v2_1.json`。
+> 证据日期：2026-09-06。官方资料桌面审计已完成，负责人随后接受 ADR-0010 的分层 family 契约；GitHub metadata-only v1 实测为零候选，v1.1 已按诊断修正、待集群实测。未下载补丁或源码内容，未构造 Data-v2，未提交 GPU 作业。机器口径见 `configs/data/data_v2_source_admission_v1.json` 与 `configs/data/data_v2_contract_v2_1.json`。
 
 ## 审计问题与边界
 
@@ -41,8 +41,8 @@
 契约已决定，下一步优先实施 CPU/网络元数据 pilot，不申请 GPU：
 
 1. 固定完整评测仓库 denylist，包括当前 Defects4C 6 项目以及 Multi-SWE-bench、BugsCpp、LLVM APR、DebugBench 的保留身份；只消费仓库/实例 ID，不读取 gold。
-2. 首轮对最多 25 个候选 PR 详情请求形成最多 15 个不同 C++ 仓库的可复现查询快照；只存公开身份、统计、响应哈希和 LICENSE 内容哈希，不保存源码 blob、patch、标题/正文或许可证原文。
-3. 用 changed files/lines、显式 issue 关联、仓库主语言、stars、时间和 SPDX allowlist 做元数据预筛；GitHub 详情响应不提供不含 patch 的文件类型证明，因此 C++ 文件变更与测试修改留到受控内容阶段核验。
+2. v1.1 对最多 18 个候选 PR 形成最多 15 个不同 C++ 仓库的可复现查询快照；只存公开身份、统计、响应哈希和 LICENSE 内容哈希，不保存源码 blob、patch、标题/正文或许可证原文。
+3. 用 changed files/lines、同仓库显式 issue 关联、linked issue 的 bug/defect 标签、仓库主语言、stars、时间和 SPDX allowlist 做元数据预筛；GitHub 详情响应不提供不含 patch 的文件类型证明，因此 C++ 文件变更与测试修改留到受控内容阶段核验。
 4. 并行做 Multi-SWE-RL C++ 的 revision、行数、repo/日期/文件数投影，量化其对结构性样本的补充价值；任何 patch 正文落盘前再次检查与 Multi-SWE-bench 的实例和仓库重叠。
 5. RunBugRun v2 只先核验 release 体积、版本 SHA、C++ problem ID 与 legacy 的集合差；若没有足够新 problem family，停止下载完整 dump。
 6. 只有元数据报告证明修订后的容量门槛可达，才授权受控内容下载、Schema 转换和 CPU 资格重放；GPU 仍要等 Data-v2 manifest、三 seed 消融和评测门禁预注册完成。
@@ -54,9 +54,11 @@
 - one-off 全量 Job `96327` 因 `sbatch --wrap` 使用 `/bin/sh`、不支持 Bash `set -o pipefail`，在 pytest 前失败；
 - POSIX 兼容替换 Job `96328` 用时 15 秒，得到 `265 passed in 13.50s`；
 - 三个作业均未申请 GPU；失败 Job 没有被删除或写成测试失败。
+- metadata pilot v1 Job `96406` 在 `gpu18` 用时 2 秒，10 项专项测试通过，但冻结查询返回 0 条、`target_met=false`。四组只返回总数的诊断显示：原查询 0、去掉 `archived:false` 仍为 0、再去掉 PR 级 `label:bug` 后为 48、再去掉 stars 后为 1,625,953；因此原因是 PR 标签筛选语义，不是网络、限流或采集器崩溃。
+- v1.1 保留 v1 artifact，不覆盖原结果；改为核验被显式关闭的同仓库 issue 是否有 bug/defect 标签，并将最多 PR 详情请求从 25 收紧为 18，以保证无令牌时详情、issue、license 三类核心 API 请求最坏不超过 54 次。
 
 ## 当前决定
 
 桌面准入审计已闭环，共 9 条候选：3 条进入元数据 pilot、4 条冻结为评测保留、2 条因语言不符拒绝。推荐主路线是自建 issue/PR 关联的真实 C++ 修复池，Multi-SWE-RL 仅作结构性补充，RunBugRun v2 只做 legacy 差量核验。当前没有来源获得“可直接进入训练”的许可。
 
-负责人已接受分层 family 契约。下一实际动作不是提交训练，而是在集群运行 GitHub metadata-only pilot，记录真实仓库供给、许可证预筛、denylist 命中和 API 可复现性；任何补丁内容准入仍需新的显式门禁。
+负责人已接受分层 family 契约。下一实际动作不是提交训练，而是在集群运行 GitHub metadata-only v1.1，记录真实仓库供给、linked issue 标签、许可证预筛、denylist 命中和 API 可复现性；任何补丁内容准入仍需新的显式门禁。

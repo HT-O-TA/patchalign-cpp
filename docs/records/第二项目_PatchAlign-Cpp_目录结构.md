@@ -24,7 +24,8 @@
 │   │   │   ├── data_v2_supply_audit_v1.json # Data-v2 原始供给、隔离与容量探针
 │   │   │   ├── data_v2_source_admission_v1.json # 新 C++ 来源准入、评测保留与下载门禁
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
-│   │   │   ├── data_v2_metadata_pilot_v1.json # GitHub metadata-only 试采查询与输出边界
+│   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
+│   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
 │   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
@@ -604,4 +605,5 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0010、`data_v2_contract_v2_1.json` 和 fail-closed validator，分离仓库 split group 与细粒度 sampling family；
 - 新增 `data_v2_metadata_pilot_v1.json`、GitHub 元数据采集器、专项测试和 CPU-only Slurm 入口；
 - pilot 输出目录为 `artifacts/data-v2/metadata-pilot-v1/`，只允许公开身份、统计、哈希与拒绝原因，不保存 patch、源码、标题/正文、用户身份或许可证原文；
-- 本次未建立训练数据或模型目录，也未授权 GPU、内容下载或 A5。
+- Job `96406` 形成 `artifacts/data-v2/metadata-pilot-v1/` 空结果证据；v1.1 另用 `metadata-pilot-v1.1/`，不覆盖首次结果；
+- 本次未建立训练数据或模型目录，也未授权 GPU、补丁内容下载或 A5。

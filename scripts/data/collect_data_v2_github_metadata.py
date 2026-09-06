@@ -22,9 +22,9 @@ from typing import Any
 from scripts.data.check_data_v2_contract import canonical_repository, validate_contract
 
 
-VERSION = "data-v2-github-metadata-pilot-v1"
+VERSION = "data-v2-github-metadata-pilot-v1.1"
 ISSUE_PATTERN = re.compile(
-    r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+(?:[\w.-]+/[\w.-]+)?#(\d+)\b",
+    r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+(?:(?P<repository>[\w.-]+/[\w.-]+))?#(?P<number>\d+)\b",
     re.IGNORECASE,
 )
 
@@ -51,8 +51,23 @@ def stable_id(*values: object) -> str:
     return "ghmeta-" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:24]
 
 
-def linked_issue_numbers(body: str | None) -> list[int]:
-    return sorted({int(value) for value in ISSUE_PATTERN.findall(body or "")})
+def linked_issue_numbers(body: str | None, repository_full_name: str | None = None) -> list[int]:
+    numbers: set[int] = set()
+    for match in ISSUE_PATTERN.finditer(body or ""):
+        referenced_repository = (match.group("repository") or "").lower()
+        if referenced_repository and repository_full_name and referenced_repository != repository_full_name.lower():
+            continue
+        numbers.add(int(match.group("number")))
+    return sorted(numbers)
+
+
+def has_bug_label(issue_document: dict[str, Any], config: dict[str, Any]) -> bool:
+    allowed = set(config["pilot"]["linked_issue_bug_label_tokens"])
+    for label in issue_document.get("labels", []):
+        name = str(label.get("name") or "").lower()
+        if allowed.intersection(re.findall(r"[a-z0-9]+", name)):
+            return True
+    return False
 
 
 def is_denied_repository(canonical: str, config: dict[str, Any]) -> bool:
@@ -79,16 +94,24 @@ def validate_config(config: dict[str, Any]) -> None:
     require(api["base_url"] == "https://api.github.com", "unexpected API base")
     require(api["timeout_seconds"] == 30, "API timeout changed")
     require(api["maximum_attempts"] == 3, "retry policy changed")
+    require(api["unauthenticated_core_request_budget"] == 60, "unauthenticated API budget changed")
     search = config["search"]
     require(search["per_page"] == 100 and search["page"] == 1, "search page changed")
     require("is:pr" in search["query"] and "is:merged" in search["query"], "search no longer selects merged PRs")
     pilot = config["pilot"]
     require(pilot["target_unique_repositories"] == 15, "pilot repository target changed")
-    require(pilot["maximum_candidate_details"] == 25, "candidate detail request cap changed")
+    require(pilot["maximum_candidate_details"] == 18, "candidate detail request cap changed")
+    maximum_core_requests = pilot["maximum_candidate_details"] * 3
+    require(api["planned_maximum_core_requests"] == maximum_core_requests, "planned API request bound changed")
+    require(maximum_core_requests <= api["unauthenticated_core_request_budget"], "pilot can exceed unauthenticated core API budget")
     require(pilot["maximum_records_per_repository"] == 1, "per-repository pilot cap changed")
     require(pilot["require_explicit_linked_issue"] is True, "issue-link requirement disabled")
+    require(pilot["require_linked_issue_in_same_repository"] is True, "same-repository issue requirement disabled")
+    require(pilot["maximum_linked_issues_checked_per_candidate"] == 1, "linked-issue request cap changed")
+    require(pilot["require_linked_issue_bug_label"] is True, "linked-issue bug-label requirement disabled")
+    require("label:bug" not in search["query"], "PR-label query regression reintroduced")
     projection = config["projection"]
-    for key in ("store_patch", "store_source_code", "store_title_or_body", "store_user_identity", "store_license_text"):
+    for key in ("store_patch", "store_source_code", "store_title_or_body", "store_user_identity", "store_license_text", "store_linked_issue_title_or_body"):
         require(projection[key] is False, f"forbidden projection enabled: {key}")
     require(projection["store_title_and_body_sha256"] is True, "text hash projection disabled")
     require(config["denylist"]["complete_for_patch_content_admission"] is False, "pilot denylist falsely marked content-complete")
@@ -138,6 +161,7 @@ class GitHubClient:
 
 def evaluate_candidate(
     detail: dict[str, Any],
+    linked_issue_document: dict[str, Any] | None,
     license_document: dict[str, Any] | None,
     config: dict[str, Any],
     response_hashes: dict[str, str],
@@ -166,16 +190,24 @@ def evaluate_candidate(
         return None, "changed_files_out_of_range"
     if not pilot["minimum_changed_lines"] <= changed_lines <= pilot["maximum_changed_lines"]:
         return None, "changed_lines_out_of_range"
-    issues = linked_issue_numbers(detail.get("body"))
+    issues = linked_issue_numbers(detail.get("body"), full_name)
     if pilot["require_explicit_linked_issue"] and not issues:
-        return None, "no_explicit_linked_issue"
+        return None, "no_explicit_same_repository_linked_issue"
+    if not linked_issue_document:
+        return None, "linked_issue_metadata_unavailable"
+    if linked_issue_document.get("pull_request"):
+        return None, "linked_reference_is_pull_request"
+    if int(linked_issue_document.get("number") or 0) not in issues:
+        return None, "linked_issue_identity_mismatch"
+    if pilot["require_linked_issue_bug_label"] and not has_bug_label(linked_issue_document, config):
+        return None, "linked_issue_without_bug_label"
     if not license_document:
         return None, "license_document_unavailable"
     license_meta = license_document.get("license") or {}
     spdx = license_meta.get("spdx_id")
     if spdx not in set(pilot["allowed_spdx"]):
         return None, "license_not_allowlisted"
-    encoded = str(license_document.get("content") or "").replace("\n", "")
+    encoded = "".join(str(license_document.get("content") or "").split())
     try:
         license_bytes = base64.b64decode(encoded, validate=True)
     except ValueError:
@@ -206,7 +238,15 @@ def evaluate_candidate(
         "additions": int(detail.get("additions") or 0),
         "deletions": int(detail.get("deletions") or 0),
         "explicit_linked_issue_numbers": issues,
-        "labels": sorted(str(item.get("name")) for item in detail.get("labels", []) if item.get("name")),
+        "linked_issue": {
+            "number": int(linked_issue_document["number"]),
+            "html_url": linked_issue_document.get("html_url"),
+            "state": linked_issue_document.get("state"),
+            "labels": sorted(str(item.get("name")) for item in linked_issue_document.get("labels", []) if item.get("name")),
+            "title_sha256": sha256_text(str(linked_issue_document.get("title") or "")),
+            "body_sha256": sha256_text(str(linked_issue_document.get("body") or "")),
+        },
+        "pr_labels": sorted(str(item.get("name")) for item in detail.get("labels", []) if item.get("name")),
         "title_sha256": sha256_text(title),
         "body_sha256": sha256_text(body),
         "license": {
@@ -223,6 +263,7 @@ def evaluate_candidate(
             "title_or_body_stored": False,
             "user_identity_stored": False,
             "license_text_stored": False,
+            "linked_issue_title_or_body_stored": False,
         },
         "training_admitted": False,
     }
@@ -261,16 +302,32 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
         if canonical in selected_repositories:
             rejects["repository_pilot_cap"] += 1
             continue
-        license_document = None
-        license_hash = ""
-        if not is_denied_repository(canonical, config):
-            try:
-                license_document = client.get("/repos/" + full_name + "/license")
-                license_hash = client.response_hashes[-1]["sha256"]
-            except RuntimeError:
-                license_document = None
-        detail_hash = client.response_hashes[-2 if license_hash else -1]["sha256"]
-        record, reason = evaluate_candidate(detail, license_document, config, {"pull": detail_hash, "license": license_hash})
+        detail_hash = client.response_hashes[-1]["sha256"]
+        response_hashes = {"pull": detail_hash, "linked_issue": "", "license": ""}
+        _, reason = evaluate_candidate(detail, None, None, config, response_hashes)
+        if reason != "linked_issue_metadata_unavailable":
+            rejects[reason] += 1
+            continue
+
+        issue_number = linked_issue_numbers(detail.get("body"), full_name)[0]
+        try:
+            linked_issue_document = client.get(f"/repos/{full_name}/issues/{issue_number}")
+            response_hashes["linked_issue"] = client.response_hashes[-1]["sha256"]
+        except RuntimeError:
+            rejects["linked_issue_metadata_unavailable"] += 1
+            continue
+        _, reason = evaluate_candidate(detail, linked_issue_document, None, config, response_hashes)
+        if reason != "license_document_unavailable":
+            rejects[reason] += 1
+            continue
+
+        try:
+            license_document = client.get("/repos/" + full_name + "/license")
+            response_hashes["license"] = client.response_hashes[-1]["sha256"]
+        except RuntimeError:
+            rejects["license_document_unavailable"] += 1
+            continue
+        record, reason = evaluate_candidate(detail, linked_issue_document, license_document, config, response_hashes)
         if record is None:
             rejects[reason] += 1
             continue
@@ -305,7 +362,7 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
         "git_commit": git_commit,
         "slurm_job_id": os.environ.get("SLURM_JOB_ID", ""),
         "collected_at_utc": datetime.now(timezone.utc).isoformat(),
-        "config_sha256": sha256_file(Path("configs/data/data_v2_metadata_pilot_v1.json")),
+        "config_sha256": sha256_file(Path("configs/data/data_v2_metadata_pilot_v1_1.json")),
         "contract_sha256": config["contract"]["sha256"],
         "decision_sha256": config["decision"]["sha256"],
         "authenticated_api": client.authenticated,
@@ -317,6 +374,7 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
             "patch_requested_or_stored": False,
             "source_code_requested_or_stored": False,
             "license_text_requested_for_hash_only": True,
+            "linked_issue_title_or_body_requested_for_hash_only": True,
             "evaluation_gold_consumed": False,
         },
     }
@@ -325,7 +383,7 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_metadata_pilot_v1.json"))
+    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_metadata_pilot_v1_1.json"))
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     validate_config(config)

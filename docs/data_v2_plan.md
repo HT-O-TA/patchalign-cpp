@@ -90,7 +90,9 @@ artifacts/data-v2/supply-audit-v1/
 
 版本化机器契约为 `configs/data/data_v2_contract_v2_1.json`，决策依据为 [ADR-0010](decisions/0010-data-v2-hierarchical-family-contract.md)。`scripts/data/check_data_v2_contract.py` 以 fail-closed 方式检查 split、sampling、仓库上限、容量目标和防泄漏边界。
 
-首轮 GitHub pilot 由 `configs/data/data_v2_metadata_pilot_v1.json` 与 `scripts/data/collect_data_v2_github_metadata.py` 固定，目标是对最多 25 个候选 PR 详情请求形成最多 15 个不同 C++ 仓库的元数据投影。它只允许保存仓库/PR/commit 身份、公开统计、许可证标识与哈希、查询响应哈希和拒绝原因；禁止保存 patch、源码 blob、标题正文、用户身份和 LICENSE 原文。评测仓库 denylist 在内容准入前仍标记为不完整，因此本阶段只能判断供给与治理可行性，不能产生训练样本。
+首轮 GitHub pilot v1 由 `configs/data/data_v2_metadata_pilot_v1.json` 固定，但 Job `96406` 的真实查询为 0 条：诊断证明 `label:bug` 挂在 PR 上的搜索条件过窄，去掉该条件后同一冻结时间窗有 48 条。v1 的空 artifact 和日志按原样保留。
+
+修正版 `configs/data/data_v2_metadata_pilot_v1_1.json` 不把质量门槛降成关键词猜测，而是要求 PR 显式关闭同仓库 issue，并读取该 issue 的元数据核验 `bug/defect` 标签。为适配无令牌 GitHub 核心 API 配额，最多检查 18 个候选 PR，目标仍为最多 15 个不同仓库。它只允许保存仓库/PR/issue/commit 身份、公开统计、许可证标识与哈希、查询响应哈希和拒绝原因；禁止保存 patch、源码 blob、标题正文、用户身份和 LICENSE 原文。评测仓库 denylist 在内容准入前仍标记为不完整，因此本阶段只能判断供给与治理可行性，不能产生训练样本。
 
 该 pilot 使用 CPU 和网络，不申请 GPU。即使达到 15 仓库目标，也只说明发现链和筛选链可运行；父提交核验、变更文件类型、测试重放、许可证原文审计、时间边界和完整 benchmark 去污染仍必须在受控内容阶段另行闭环。
 

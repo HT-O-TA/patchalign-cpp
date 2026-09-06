@@ -34,6 +34,6 @@ date -Is
 
 python -m pytest -q tests/unit/test_data_v2_contract.py tests/unit/test_data_v2_metadata_pilot.py
 python scripts/data/check_data_v2_contract.py
-python scripts/data/collect_data_v2_github_metadata.py
+python scripts/data/collect_data_v2_github_metadata.py --config configs/data/data_v2_metadata_pilot_v1_1.json
 sha256sum artifacts/data-v2/metadata-pilot-v1/repositories.jsonl artifacts/data-v2/metadata-pilot-v1/summary.json artifacts/data-v2/metadata-pilot-v1/run-manifest.json
 date -Is
