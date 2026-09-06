@@ -24,6 +24,7 @@
 │   │   │   ├── data_v2_supply_audit_v1.json # Data-v2 原始供给、隔离与容量探针
 │   │   │   ├── data_v2_source_admission_v1.json # 新 C++ 来源准入、评测保留与下载门禁
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
+│   │   │   ├── data_v2_exploratory_replay_v0_1.json # 安全增量 + formal replay 消融数据契约
 │   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
 │   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
 │   │   │   ├── data_v2_metadata_pilot_v1_2.json # 倒序、仓库去重的限流内分段续扫
@@ -82,6 +83,7 @@
 │   │   │   ├── check_data_v2_source_admission.py # 新来源桌面清单 fail-closed 校验
 │   │   │   ├── check_data_v2_contract.py # Data-v2.1 分层 family 契约校验
 │   │   │   ├── collect_data_v2_github_metadata.py # 不落 patch/源码的 GitHub 元数据采集器
+│   │   │   ├── build_data_v2_exploratory_replay.py # 复现安全增量并构造 function replay 混合
 │   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
@@ -126,6 +128,7 @@
 │   │   ├── data_v2_supply_audit.sbatch     # CPU-only 新数据容量与防泄漏审计
 │   │   ├── data_v2_source_admission.sbatch # CPU-only 新来源清单专项验收
 │   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
+│   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -609,3 +612,9 @@ HT-O-TA/patchalign-cpp
 - Jobs `96406`、`96412`、`96417` 分别形成 `metadata-pilot-v1/`、`v1.1/`、`v1.2/`，三个版本均保留且互不覆盖；
 - 新增 `docs/evidence/data_v2_github_metadata_pilot.md`，汇总三次作业、拒绝分布、artifact 哈希和“34 < 100”的容量结论；
 - 本次未建立训练数据或模型目录，也未授权 GPU、补丁内容下载或 A5。
+
+### 2026-09-06：新增 Data-v2 exploratory replay 构建入口
+
+- 新增 ADR-0011 和 `data_v2_exploratory_replay_v0_1.json`，明确该消融不满足正式 Data-v2.1 容量门；
+- 新增重放混合构建器、4 项基础单测和 CPU-only Slurm 入口；
+- 计划数据根为 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1/`，GPU preflight 通过前不建立训练 artifact。

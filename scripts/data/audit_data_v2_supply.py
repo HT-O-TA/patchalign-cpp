@@ -409,6 +409,8 @@ def base_metrics(
 
 def audit(
     config: dict[str, Any],
+    *,
+    include_samples: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
     validate_config(config)
     frozen = load_frozen_state(config)
@@ -556,7 +558,7 @@ def audit(
                     f"{candidate['source']}:{candidate['split']}:sequence_over_limit"
                 ] += 1
                 continue
-            available.append({
+            projected = {
                 "candidate_id": f"dv2-{candidate['stable_id'][:24]}",
                 "stable_id": candidate["stable_id"],
                 "source_dataset": candidate["source_dataset"],
@@ -577,7 +579,10 @@ def audit(
                 "prompt_tokens": encoded["prompt_tokens"],
                 "target_tokens": encoded["target_tokens"],
                 "sequence_tokens": encoded["sequence_tokens"],
-            })
+            }
+            if include_samples:
+                projected["_sample"] = sample
+            available.append(projected)
             chosen += 1
 
     proposals = {

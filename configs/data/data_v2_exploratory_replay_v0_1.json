@@ -1,0 +1,83 @@
+{
+  "version": "data-v2-exploratory-replay-v0.1",
+  "seed": 20260906,
+  "decision": {
+    "path": "docs/decisions/0011-data-v2-exploratory-replay-mix.md",
+    "sha256": "sha256:0d32b1bfd165dd4166b0a35417e9e97eee21a03b586f882ba3b5261d627cdc7e"
+  },
+  "scope": {
+    "exploratory_only": true,
+    "satisfies_data_v2_1_capacity_contract": false,
+    "a5_dpo_started": false,
+    "evaluation_gold_consumed": false,
+    "gpu_training_allowed_only_after_passed_preflight": true
+  },
+  "supply_audit": {
+    "config_path": "configs/data/data_v2_supply_audit_v1.json",
+    "config_sha256": "sha256:5dfe89feea69ebb97fe1a7bd681056fa40df335556516410cabfafd8c82ec6b5",
+    "candidate_audit_path": "artifacts/data-v2/supply-audit-v1/candidate-audit.jsonl",
+    "candidate_audit_sha256": "sha256:cbe5f2fa910535be57458c5ca43483b21b3e92f17c3badaeef3847d308938e96",
+    "run_manifest_path": "artifacts/data-v2/supply-audit-v1/run-manifest.json",
+    "run_manifest_sha256": "sha256:cc34dec8b4ac4b21e4cae81a380d489bff57927f0700365e86cc7cb74b138cf9",
+    "expected_available_increment": {
+      "train": 260,
+      "validation": 131
+    }
+  },
+  "frozen_formal": {
+    "root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
+    "train": {
+      "count": 5000,
+      "sha256": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400"
+    },
+    "validation": {
+      "count": 500,
+      "sha256": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980"
+    },
+    "formal_data_lock_sha256": "sha256:f37eef03ce0a96ad1fa14622b8b7ef6f30c3f6bcc8dad85addbb1e4c53d12a12"
+  },
+  "selection": {
+    "increment": {
+      "train": "all_260_reproduced_safe_candidates",
+      "validation": "all_131_reproduced_safe_candidates"
+    },
+    "replay_train": {
+      "source": "frozen_formal_train_only",
+      "stable_rank": "sha256(seed,task_level,sample_id)",
+      "task_level_counts": {
+        "function": 416,
+        "file_window": 104
+      },
+      "total": 520
+    },
+    "combined_counts": {
+      "train": 780,
+      "validation": 131
+    },
+    "combined_task_level_counts": {
+      "train": {
+        "function": 416,
+        "file_window": 364
+      },
+      "validation": {
+        "function": 74,
+        "file_window": 57
+      }
+    },
+    "maximum_samples_per_family_across_v1_plus_increment": 2,
+    "require_train_validation_sample_overlap": 0,
+    "require_train_validation_payload_overlap": 0,
+    "require_train_validation_repo_family_overlap": 0
+  },
+  "output": {
+    "root": "/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1",
+    "files": [
+      "train.jsonl",
+      "validation.jsonl",
+      "selection-manifest.json",
+      "schema-validation-report.json",
+      "sha256sums.txt"
+    ],
+    "overwrite_allowed": false
+  }
+}

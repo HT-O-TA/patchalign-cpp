@@ -109,3 +109,11 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 5. 训练方案预注册至少 3 个 seed 的小规模对照，评测继续使用冻结 greedy Pass@1 和真实执行评分。
 
 当前 GitHub 单查询已证明容量不足。下一步应先设计多查询/多时间窗的仓库发现层，并并行完成 Multi-SWE-RL C++ 与 RunBugRun v2 legacy 差量元数据审计；在任一路线满足仓库和 sampling-family 容量前，不下载补丁、不冻结 Data-v2，也不直接在 v1 上重复 SFT。
+
+## 第四阶段：容量失败后的 exploratory replay 消融
+
+当前 GitHub 查询容量失败后，负责人授权由执行方选择后续方案直至合理 GPU 作业排队。项目据此接受 [ADR-0011](decisions/0011-data-v2-exploratory-replay-mix.md)，建立明确不满足 Data-v2.1 正式容量门的 `data-v2-exploratory-replay-v0.1`：train 使用 260 条已审计安全增量和 520 条冻结 formal-train replay，focused validation 使用 131 条安全增量。
+
+混合 train 固定为 416 function + 364 file-window，避免 260 条全 file-window 增量单独 continuation；训练从 M1-R2 adapter 以 NF4、单轮、低学习率继续。数据构建器必须重新生成候选并与冻结 candidate-audit 精确一致，同时验证 Schema、formal lock、sample/payload/family 隔离和输入哈希。只有 CPU 数据构建、全仓回归和 token/adapter/environment preflight 全部通过，才提交单 GPU 的 98-step exploratory 消融。
+
+该路线不把旧来源包装成正式 Data-v2，不改变 A3.4/A5 状态；GPU 结果之后仍须在 formal、confirmation 和 Defects4C 上按原协议评测才能讨论泛化。

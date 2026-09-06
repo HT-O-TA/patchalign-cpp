@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-06 23:33 CST（2026-09-06T15:33Z）
+最后核验：2026-09-06；ADR-0011 已冻结，exploratory replay 数据待 CPU 构建
 
 项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only v1 Job `96406` 已完成但因 PR 级 `label:bug` 查询过窄得到 0 条；v1.1 已核验前 18 条并按治理规则全部拒绝；v1.2 已倒序按仓库去重检查 12 条且仍为 0。冻结查询只有 34 个不同仓库，低于 100 个 train 新仓库门槛，故当前查询容量判定失败并结束本轮试采。尚未下载补丁或源码、构造训练集或提交 GPU 训练。
 
@@ -22,7 +22,8 @@
 | A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
 | 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
-| Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁、未用 GPU |
+| Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
+| Data-v2 exploratory replay | ADR-0011 已冻结；CPU 数据构建待运行 | 计划为 260 安全增量 + 520 formal-train replay，780/131；preflight 前不授权 GPU |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链

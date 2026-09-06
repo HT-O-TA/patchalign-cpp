@@ -1058,3 +1058,11 @@ Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COM
 v1.2 Job `96417` 用时 13 秒，11 项测试通过，12 个详情仍全部拒绝：文件数 4、行数 1、fork 1、stars 2、无同仓库显式 issue 3、许可证 1。由于整个查询全集只有 34 个仓库，已经在数学上低于 train 100 个新仓库门槛，本轮容量判定在无需扫描中段的情况下闭环为失败。三个 pilot 均未请求 GPU、patch 或源码。
 
 全仓 Job `96418` 因 one-off 包装遗漏 `PYTHONNOUSERSITE=1`，误加载 `/persist_data/home/mingli/.local` 中缺少 `jmespath` 的 boto3，继而触发 accelerate 循环导入，在 pytest 收集阶段失败。隔离用户 site-packages 后的替换 Job `96419` 用时 15 秒，得到 `276 passed in 13.27s`；环境内 `transformers 4.57.6`、`accelerate 1.13.0` 可正常导入且 `pip check` 无损坏依赖。
+
+## 39. Data-v2 exploratory replay 消融准备
+
+2026-09-06，负责人授权后续方案由执行方决定直至一项合理 GPU 作业排队。由于 GitHub 冻结查询只有 34 个仓库、无法满足 Data-v2.1 train 100 个新仓库门，项目没有放宽来源准入，而是接受 ADR-0011 建立独立 exploratory 消融。
+
+冻结方案使用全部 260 条安全 train 增量、全部 131 条安全 validation 增量，并从 formal train 确定性选择 416 function + 104 file-window replay。最终 train 为 780 条（416 function + 364 file-window），focused validation 为 131 条（74 function + 57 file-window）。它不满足 Data-v2.1 正式容量目标，不改变 A3.4 readiness 或 A5 延后状态。
+
+新增构建器通过原始 CommitPackFT/RunBugRun 重新生成候选，并与 Job `96256` candidate-audit 精确对照；任何 Schema、formal lock、sample/payload/repo-family 隔离、计数或哈希漂移均 fail closed。CPU 构建和独立 preflight 通过前不提交 GPU。
