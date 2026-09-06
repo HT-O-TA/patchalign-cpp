@@ -1065,4 +1065,8 @@ v1.2 Job `96417` 用时 13 秒，11 项测试通过，12 个详情仍全部拒�
 
 冻结方案使用全部 260 条安全 train 增量、全部 131 条安全 validation 增量，并从 formal train 确定性选择 416 function + 104 file-window replay。最终 train 为 780 条（416 function + 364 file-window），focused validation 为 131 条（74 function + 57 file-window）。它不满足 Data-v2.1 正式容量目标，不改变 A3.4 readiness 或 A5 延后状态。
 
-新增构建器通过原始 CommitPackFT/RunBugRun 重新生成候选，并与 Job `96256` candidate-audit 精确对照；任何 Schema、formal lock、sample/payload/repo-family 隔离、计数或哈希漂移均 fail closed。CPU 构建和独立 preflight 通过前不提交 GPU。
+新增构建器通过原始 CommitPackFT/RunBugRun 重新生成候选，并与 Job `96256` candidate-audit 精确对照；任何 Schema、formal lock、sample/payload/repo-family 隔离、计数或哈希漂移均 fail closed。
+
+CPU-only Job `96423` 在提交 `080b82f87ade210ecc23b1f6ac429a8be9f8bcd0` 上用时 57 秒并以 `COMPLETED 0:0` 结束，9 项专项测试通过。正式输出根为 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1`；train/validation 分别为 780/131，任务层级、replay/increment 角色和三类隔离均与 ADR-0011 一致。train、validation、selection-manifest、schema-report、SHA256SUMS 的哈希依次为 `009abf88d7c1aa6b832d11d2763069c5efc427ba02daedb9621c0a0ce8725ae1`、`fb0cf553572a48024c3925458ce2b1f90d4668dd726ff68038074be5f98b44d4`、`5852bf9b6bfa091af7dd5b3cfb6ef2bfaa84d1aed07478454af9978ba79f083c`、`1a1f66bd7cb6a8c3834cc7fcb923d357fd071d4733815e6b02c4bddb9564ee4f`、`b1bf6fcb5d6034cf637319682f8f70737c0647b22cb7420f8954e8c105bcffab`。
+
+随后冻结单 seed 训练配置：从 M1-R2 adapter `8437acca...425a` 继续，NF4 QLoRA、1 epoch、学习率 `1e-5`、gradient accumulation 8，共 98 optimizer steps；formal 500 只报告遗忘 loss，focused validation 用于 checkpoint 选择。正式 GPU 仍须等待同一提交上的全量测试和 CPU preflight。

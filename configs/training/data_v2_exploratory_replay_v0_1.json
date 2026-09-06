@@ -1,0 +1,132 @@
+{
+  "version": "data-v2-exploratory-replay-training-v0.1",
+  "seed": 20260906,
+  "scope": {
+    "exploratory_only": true,
+    "satisfies_data_v2_1_capacity_contract": false,
+    "a5_dpo_started": false,
+    "promotion_authorized_before_full_evaluation": false
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "initialization": {
+    "kind": "adapter_continuation",
+    "source_run_id": "a34_sft_r2_nf4_s20260830",
+    "source_checkpoint": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/checkpoints/checkpoint-step-000150-epoch-1/adapter",
+    "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+    "adapter_config_sha256": "sha256:acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69",
+    "source_training_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/training-manifest.json",
+    "source_training_manifest_sha256": "sha256:b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884",
+    "source_training_summary": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/training-summary.json",
+    "source_training_summary_sha256": "sha256:4cab1f118ebddc90e69e5f3d202b96906c5ab399d00906adc842c6f378cf2f4d"
+  },
+  "data": {
+    "root": "/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1",
+    "selection_manifest": "selection-manifest.json",
+    "selection_manifest_sha256": "sha256:5852bf9b6bfa091af7dd5b3cfb6ef2bfaa84d1aed07478454af9978ba79f083c",
+    "selection_config": "configs/data/data_v2_exploratory_replay_v0_1.json",
+    "selection_config_sha256": "sha256:435cab573a1a328f50b772f7e7fca7086304d25ef2417576f9528ef1a478ba54",
+    "expected_counts": {
+      "train": 780,
+      "validation": 131
+    },
+    "expected_task_levels": {
+      "train": {
+        "function": 416,
+        "file_window": 364
+      },
+      "validation": {
+        "function": 74,
+        "file_window": 57
+      }
+    },
+    "expected_roles": {
+      "train": {
+        "formal_train_replay": 520,
+        "safe_increment": 260
+      },
+      "validation": {
+        "safe_increment": 131
+      }
+    },
+    "file_sha256": {
+      "train.jsonl": "sha256:009abf88d7c1aa6b832d11d2763069c5efc427ba02daedb9621c0a0ce8725ae1",
+      "validation.jsonl": "sha256:fb0cf553572a48024c3925458ce2b1f90d4668dd726ff68038074be5f98b44d4"
+    },
+    "reference_validation_root": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1",
+    "reference_validation_count": 500,
+    "reference_validation_sha256": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980"
+  },
+  "training": {
+    "mode": "nf4_qlora_adapter_continuation",
+    "epochs": 1,
+    "max_sequence_tokens": 4096,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.00001,
+    "warmup_steps": 10,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "gradient_checkpointing": true,
+    "reset_optimizer_state": true,
+    "checkpoint_every_optimizer_steps": 49,
+    "validation_policy": "focused_validation_at_epoch_end",
+    "reference_validation_policy": "report_only_before_and_after",
+    "best_checkpoint_rule": "lowest_finite_focused_validation_loss_then_earliest_step",
+    "lora": {
+      "r": 8,
+      "alpha": 16,
+      "dropout": 0.0,
+      "bias": "none",
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj"
+      ]
+    }
+  },
+  "evaluation": {
+    "holdout_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "holdout_manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+    "required_task_levels": {
+      "function": 400,
+      "file_window": 100
+    },
+    "prompt_version": "a3-cpp-repair-v1",
+    "input_mode": "raw_completion",
+    "allowed_path": "main.cpp",
+    "scoring_protocol": "a3-scoring-v2",
+    "generation": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "num_return_sequences": 1,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 512
+    }
+  },
+  "preregistered_evaluation": {
+    "promotion_requires_separate_owner_decision": true,
+    "formal_500": {
+      "minimum_pass": 14,
+      "maximum_timeout": 2
+    },
+    "confirmation_124": {
+      "minimum_pass": 1,
+      "maximum_timeout": 4,
+      "maximum_regression_failure": 3
+    },
+    "defects4c_176": {
+      "minimum_pass": 1,
+      "maximum_timeout": 0
+    }
+  }
+}

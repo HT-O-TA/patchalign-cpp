@@ -51,7 +51,8 @@
 │   │   └── training/
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
 │   │       ├── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
-│   │       └── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
+│   │       ├── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
+│   │       └── data_v2_exploratory_replay_v0_1.json # M1-R2 单 seed、98-step 探索性 continuation
 │   ├── docs/                               # 协议、状态、证据、复盘与历史记录
 │   │   ├── README.md                       # 文档职责、权威来源与防漂移规则
 │   │   ├── status.md                       # 唯一实时阶段与作业状态页
@@ -88,7 +89,7 @@
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
-│   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
+│   │   ├── training/                        # A3.2/A3.3/A3.4 与 Data-v2 exploratory preflight、训练和绑定验证
 │   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
 │   │   ├── preference/                      # A4 train-only 选择、资格、生成、评分、配对与提交
 │   │   ├── diagnostics/                     # 冻结 artifact 的只读泛化诊断与逐例审计
@@ -129,6 +130,8 @@
 │   │   ├── data_v2_source_admission.sbatch # CPU-only 新来源清单专项验收
 │   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
 │   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
+│   │   ├── data_v2_exploratory_replay_preflight.sbatch # CPU-only 全量测试与身份预检
+│   │   ├── data_v2_exploratory_replay_train.sbatch # 单 GPU 探索性 adapter continuation
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -197,6 +200,9 @@
     ├── formal-sft-v1-pre-prompt-token-gate-94304/
     ├── formal-sft-v1-preflight-config-drift-94320/
     └── formal-sft-v1-preflight-input-mode-94328/
+
+/mingli01/data/patchalign-cpp/data-v2/
+└── exploratory-replay-v0.1/                # Job 96423 冻结的 train 780 + validation 131
 
 /mingli01/data/patchalign-cpp/external/defects4c/
 ├── source/                                 # 官方仓库固定提交，只读输入
@@ -617,4 +623,4 @@ HT-O-TA/patchalign-cpp
 
 - 新增 ADR-0011 和 `data_v2_exploratory_replay_v0_1.json`，明确该消融不满足正式 Data-v2.1 容量门；
 - 新增重放混合构建器、4 项基础单测和 CPU-only Slurm 入口；
-- 计划数据根为 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1/`，GPU preflight 通过前不建立训练 artifact。
+- 数据根 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1/` 已由 CPU Job `96423` 冻结为 780/131；新增训练配置、CPU preflight、单 GPU continuation 和专项契约测试入口。
