@@ -1054,3 +1054,7 @@ Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COM
 修正版 Job `96412` 用时 18 秒，11 项测试通过并发现 48 条搜索结果，但前 18 条全部被既有治理条件拒绝：文件数越界 6、行数越界 3、无同仓库显式 issue 7、stars 回落 1、许可证不在 allowlist 1。manifest 绑定提交 `40430360cbb06651d97eb3f293ca1742c0121dfb`、21 次 API 响应，结束时 core 余额 40/60，且确认没有请求或落盘 patch/源码。
 
 聚合搜索元数据表明 48 条覆盖 34 个仓库，剩余 30 条仍覆盖 23 个仓库。项目据此冻结 v1.2：创建时间倒序、请求详情前按仓库去重、最多检查 12 个仓库，最坏 36 个 core 请求；系列目标仍是 15 个通过筛选的仓库。
+
+v1.2 Job `96417` 用时 13 秒，11 项测试通过，12 个详情仍全部拒绝：文件数 4、行数 1、fork 1、stars 2、无同仓库显式 issue 3、许可证 1。由于整个查询全集只有 34 个仓库，已经在数学上低于 train 100 个新仓库门槛，本轮容量判定在无需扫描中段的情况下闭环为失败。三个 pilot 均未请求 GPU、patch 或源码。
+
+全仓 Job `96418` 因 one-off 包装遗漏 `PYTHONNOUSERSITE=1`，误加载 `/persist_data/home/mingli/.local` 中缺少 `jmespath` 的 boto3，继而触发 accelerate 循环导入，在 pytest 收集阶段失败。隔离用户 site-packages 后的替换 Job `96419` 用时 15 秒，得到 `276 passed in 13.27s`；环境内 `transformers 4.57.6`、`accelerate 1.13.0` 可正常导入且 `pip check` 无损坏依赖。

@@ -606,5 +606,6 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0010、`data_v2_contract_v2_1.json` 和 fail-closed validator，分离仓库 split group 与细粒度 sampling family；
 - 新增 `data_v2_metadata_pilot_v1.json`、GitHub 元数据采集器、专项测试和 CPU-only Slurm 入口；
 - pilot 输出目录为 `artifacts/data-v2/metadata-pilot-v1/`，只允许公开身份、统计、哈希与拒绝原因，不保存 patch、源码、标题/正文、用户身份或许可证原文；
-- Job `96406` 形成 `artifacts/data-v2/metadata-pilot-v1/` 空结果证据；v1.1 另用 `metadata-pilot-v1.1/`，不覆盖首次结果；
+- Jobs `96406`、`96412`、`96417` 分别形成 `metadata-pilot-v1/`、`v1.1/`、`v1.2/`，三个版本均保留且互不覆盖；
+- 新增 `docs/evidence/data_v2_github_metadata_pilot.md`，汇总三次作业、拒绝分布、artifact 哈希和“34 < 100”的容量结论；
 - 本次未建立训练数据或模型目录，也未授权 GPU、补丁内容下载或 A5。

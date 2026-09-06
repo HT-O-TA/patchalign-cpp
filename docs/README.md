@@ -42,6 +42,7 @@
 - 泛化失败诊断：[M1-R2 六项诊断](evidence/generalization_failure_diagnostic.md)
 - 下一研究轮次：[Data-v2 泛化增强计划](data_v2_plan.md)
 - 新来源准入：[Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)
+- GitHub 试采结果：[Data-v2 GitHub C++ 元数据 pilot](evidence/data_v2_github_metadata_pilot.md)
 - Data-v2.1 family 契约：[ADR-0010：仓库隔离与采样 family 分层](decisions/0010-data-v2-hierarchical-family-contract.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)

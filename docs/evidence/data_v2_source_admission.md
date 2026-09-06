@@ -1,6 +1,6 @@
 # Data-v2 新来源准入与污染审计
 
-> 证据日期：2026-09-06。官方资料桌面审计已完成，负责人随后接受 ADR-0010 的分层 family 契约；GitHub metadata-only v1 实测为零查询结果，v1.1 检查前 18 条后仍为零准入，v1.2 分段续扫已冻结、待集群实测。未下载补丁或源码内容，未构造 Data-v2，未提交 GPU 作业。机器口径见 `configs/data/data_v2_source_admission_v1.json` 与 `configs/data/data_v2_contract_v2_1.json`。
+> 证据日期：2026-09-06。官方资料桌面审计已完成，负责人随后接受 ADR-0010 的分层 family 契约；GitHub metadata-only v1 实测为零查询结果，v1.1 与 v1.2 共检查 30 个 PR 详情后仍为零准入；当前查询总共只有 34 个仓库，容量门失败。未下载补丁或源码内容，未构造 Data-v2，未提交 GPU 作业。机器口径见 `configs/data/data_v2_source_admission_v1.json` 与 `configs/data/data_v2_contract_v2_1.json`。
 
 ## 审计问题与边界
 
@@ -56,10 +56,11 @@
 - 三个作业均未申请 GPU；失败 Job 没有被删除或写成测试失败。
 - metadata pilot v1 Job `96406` 在 `gpu18` 用时 2 秒，10 项专项测试通过，但冻结查询返回 0 条、`target_met=false`。四组只返回总数的诊断显示：原查询 0、去掉 `archived:false` 仍为 0、再去掉 PR 级 `label:bug` 后为 48、再去掉 stars 后为 1,625,953；因此原因是 PR 标签筛选语义，不是网络、限流或采集器崩溃。
 - v1.1 保留 v1 artifact，不覆盖原结果；改为核验被显式关闭的同仓库 issue 是否有 bug/defect 标签，并将最多 PR 详情请求从 25 收紧为 18。Job `96412` 用时 18 秒、11 项测试通过，共记录 21 次 API 响应；18 条分别因文件数 6、行数 3、无同仓库 issue 7、stars 1、许可证 1 被拒绝，0 条准入。
-- 搜索页 48 条覆盖 34 个仓库，前 18 条只有 13 个仓库、剩余 30 条仍有 23 个仓库。v1.2 改为创建时间倒序并在详情前按仓库去重，最多再查 12 个仓库，最坏 36 次核心 API 请求，不超过 `96412` 结束时的 40 次余额。
+- 搜索页 48 条覆盖 34 个仓库，前 18 条只有 13 个仓库、剩余 30 条仍有 23 个仓库。v1.2 Job `96417` 创建时间倒序并在详情前按仓库去重，检查 12 个仓库后仍为 0 条准入；即使未查项全部通过，34 个仓库也小于 train 100 个新仓库门槛，因此当前查询容量判定完成且失败。
+- 全仓 Job `96418` 因 one-off 入口未设 `PYTHONNOUSERSITE=1`，误加载用户目录中缺依赖的 boto3 而在收集期失败；隔离用户 site-packages 的替换 Job `96419` 得到 `276 passed in 13.27s`，conda 环境 `pip check` 正常。
 
 ## 当前决定
 
 桌面准入审计已闭环，共 9 条候选：3 条进入元数据 pilot、4 条冻结为评测保留、2 条因语言不符拒绝。推荐主路线是自建 issue/PR 关联的真实 C++ 修复池，Multi-SWE-RL 仅作结构性补充，RunBugRun v2 只做 legacy 差量核验。当前没有来源获得“可直接进入训练”的许可。
 
-负责人已接受分层 family 契约。下一实际动作不是提交训练，而是在集群运行 GitHub metadata-only v1.2，记录真实仓库供给、linked issue 标签、许可证预筛、denylist 命中和 API 可复现性；任何补丁内容准入仍需新的显式门禁。
+负责人已接受分层 family 契约，但当前 GitHub 单查询容量门已失败。下一实际动作不是提交训练，而是版本化设计多查询/多时间窗的仓库发现层，并行量化 Multi-SWE-RL C++ 与 RunBugRun v2 的真实差量；任何补丁内容准入仍需新的显式门禁。完整结果见 [GitHub C++ 元数据 pilot](data_v2_github_metadata_pilot.md)。
