@@ -117,15 +117,17 @@ def classify_edit(old: str, new: str, changed: int) -> str:
 
 def diff_changed_lines(old: str, new: str, filename: str) -> int:
     """Exact max(additions, deletions) convention used by A1/A2/A3."""
-    patch = difflib.unified_diff(
-        old.splitlines(keepends=True),
-        new.splitlines(keepends=True),
-        fromfile=f"a/{filename}",
-        tofile=f"b/{filename}",
-        lineterm="\n",
+    patch = "".join(
+        difflib.unified_diff(
+            old.splitlines(keepends=True),
+            new.splitlines(keepends=True),
+            fromfile=f"a/{filename}",
+            tofile=f"b/{filename}",
+            lineterm="\n",
+        )
     )
     additions = deletions = 0
-    for line in patch:
+    for line in patch.splitlines():
         if line.startswith("+") and not line.startswith("+++"):
             additions += 1
         elif line.startswith("-") and not line.startswith("---"):
