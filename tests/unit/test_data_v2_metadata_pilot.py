@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def load_config() -> dict:
-    return json.loads((ROOT / "configs/data/data_v2_metadata_pilot_v1_1.json").read_text(encoding="utf-8"))
+    return json.loads((ROOT / "configs/data/data_v2_metadata_pilot_v1_2.json").read_text(encoding="utf-8"))
 
 
 def detail(**updates: object) -> dict:
@@ -134,7 +134,14 @@ def test_collect_fetches_issue_before_license_and_projects_one_record(monkeypatc
             self.urls.append(url)
             self.response_hashes.append({"url": url, "sha256": f"sha256:{len(self.urls)}", "etag": ""})
             if url.startswith("/search/issues?"):
-                return {"total_count": 1, "incomplete_results": False, "items": [{"pull_request": {"url": "https://api.github.com/repos/good/project/pulls/17"}}]}
+                return {
+                    "total_count": 2,
+                    "incomplete_results": False,
+                    "items": [
+                        {"repository_url": "https://api.github.com/repos/good/project", "pull_request": {"url": "https://api.github.com/repos/good/project/pulls/17"}},
+                        {"repository_url": "https://api.github.com/repos/good/project", "pull_request": {"url": "https://api.github.com/repos/good/project/pulls/18"}},
+                    ],
+                }
             if url.endswith("/pulls/17"):
                 return detail()
             if url.endswith("/issues/12"):
@@ -149,6 +156,7 @@ def test_collect_fetches_issue_before_license_and_projects_one_record(monkeypatc
     assert len(records) == 1
     assert summary["selected_unique_repositories"] == 1
     assert summary["training_admitted"] is False
+    assert summary["rejections"] == {"search_repository_duplicate": 1}
     assert client.urls[1:] == [
         "https://api.github.com/repos/good/project/pulls/17",
         "/repos/good/project/issues/12",

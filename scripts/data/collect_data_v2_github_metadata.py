@@ -22,7 +22,7 @@ from typing import Any
 from scripts.data.check_data_v2_contract import canonical_repository, validate_contract
 
 
-VERSION = "data-v2-github-metadata-pilot-v1.1"
+VERSION = "data-v2-github-metadata-pilot-v1.2"
 ISSUE_PATTERN = re.compile(
     r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+(?:(?P<repository>[\w.-]+/[\w.-]+))?#(?P<number>\d+)\b",
     re.IGNORECASE,
@@ -99,17 +99,20 @@ def validate_config(config: dict[str, Any]) -> None:
     require(search["per_page"] == 100 and search["page"] == 1, "search page changed")
     require("is:pr" in search["query"] and "is:merged" in search["query"], "search no longer selects merged PRs")
     pilot = config["pilot"]
-    require(pilot["target_unique_repositories"] == 15, "pilot repository target changed")
-    require(pilot["maximum_candidate_details"] == 18, "candidate detail request cap changed")
+    require(pilot["target_unique_repositories"] == 12, "segment repository target changed")
+    require(pilot["overall_series_target_unique_repositories"] == 15, "overall pilot repository target changed")
+    require(pilot["maximum_candidate_details"] == 12, "candidate detail request cap changed")
     maximum_core_requests = pilot["maximum_candidate_details"] * 3
     require(api["planned_maximum_core_requests"] == maximum_core_requests, "planned API request bound changed")
     require(maximum_core_requests <= api["unauthenticated_core_request_budget"], "pilot can exceed unauthenticated core API budget")
     require(pilot["maximum_records_per_repository"] == 1, "per-repository pilot cap changed")
+    require(pilot["deduplicate_search_items_by_repository_before_detail"] is True, "search-result repository dedup disabled")
     require(pilot["require_explicit_linked_issue"] is True, "issue-link requirement disabled")
     require(pilot["require_linked_issue_in_same_repository"] is True, "same-repository issue requirement disabled")
     require(pilot["maximum_linked_issues_checked_per_candidate"] == 1, "linked-issue request cap changed")
     require(pilot["require_linked_issue_bug_label"] is True, "linked-issue bug-label requirement disabled")
     require("label:bug" not in search["query"], "PR-label query regression reintroduced")
+    require(search["order"] == "desc", "v1.2 segment order changed")
     projection = config["projection"]
     for key in ("store_patch", "store_source_code", "store_title_or_body", "store_user_identity", "store_license_text", "store_linked_issue_title_or_body"):
         require(projection[key] is False, f"forbidden projection enabled: {key}")
@@ -284,9 +287,16 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
     target = config["pilot"]["target_unique_repositories"]
     maximum_details = config["pilot"]["maximum_candidate_details"]
     details_requested = 0
+    seen_search_repositories: set[str] = set()
     for item in search_response.get("items", []):
         if len(selected_repositories) >= target or details_requested >= maximum_details:
             break
+        search_repository = str(item.get("repository_url") or "")
+        if search_repository and config["pilot"]["deduplicate_search_items_by_repository_before_detail"]:
+            if search_repository in seen_search_repositories:
+                rejects["search_repository_duplicate"] += 1
+                continue
+            seen_search_repositories.add(search_repository)
         pull_url = str((item.get("pull_request") or {}).get("url") or "")
         if not pull_url:
             rejects["search_item_missing_pull_url"] += 1
@@ -362,7 +372,7 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
         "git_commit": git_commit,
         "slurm_job_id": os.environ.get("SLURM_JOB_ID", ""),
         "collected_at_utc": datetime.now(timezone.utc).isoformat(),
-        "config_sha256": sha256_file(Path("configs/data/data_v2_metadata_pilot_v1_1.json")),
+        "config_sha256": sha256_file(Path("configs/data/data_v2_metadata_pilot_v1_2.json")),
         "contract_sha256": config["contract"]["sha256"],
         "decision_sha256": config["decision"]["sha256"],
         "authenticated_api": client.authenticated,
@@ -383,7 +393,7 @@ def collect(config: dict[str, Any], client: GitHubClient) -> tuple[list[dict[str
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_metadata_pilot_v1_1.json"))
+    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_metadata_pilot_v1_2.json"))
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     validate_config(config)

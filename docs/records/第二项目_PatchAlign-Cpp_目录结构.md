@@ -26,6 +26,7 @@
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
 │   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
 │   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
+│   │   │   ├── data_v2_metadata_pilot_v1_2.json # 倒序、仓库去重的限流内分段续扫
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
 │   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
