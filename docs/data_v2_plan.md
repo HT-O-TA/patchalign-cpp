@@ -84,6 +84,8 @@ artifacts/data-v2/supply-audit-v1/
 
 本轮同时发现 family 契约冲突：当前 `repo_family` 既是 split 隔离键，又受每 family 最多 2 条限制。train 最低 1,600 条 new-family 样本在 repository-family 解释下至少需要 800 个未见仓库，现有候选不可能直接满足。内容试采前必须通过新版本配置选择“保留规则并缩小目标”或“分离 repository split group 与 sampling family”；本轮未替负责人决定，也未修改第一轮冻结配置。
 
+集群 CPU-only 专项 Job `96326` 完成 `5 passed in 0.03s`；替换全量回归 Job `96328` 完成 `265 passed in 13.50s`。首次 one-off 全量 Job `96327` 因 `/bin/sh` 不支持 Bash `pipefail`，在 pytest 前退出；失败被保留并由 POSIX 兼容的 `set -eu` 重提修正。
+
 ## 审计后的决策门
 
 只有以下条件同时满足，才进入 Data-v2 构造：

@@ -49,6 +49,14 @@
 5. RunBugRun v2 只先核验 release 体积、版本 SHA、C++ problem ID 与 legacy 的集合差；若没有足够新 problem family，停止下载完整 dump。
 6. 只有元数据报告证明修订后的容量门槛可达，才授权受控内容下载、Schema 转换和 CPU 资格重放；GPU 仍要等 Data-v2 manifest、三 seed 消融和评测门禁预注册完成。
 
+## 验收证据
+
+- 提交 `b93084c38d18e1254ae1111751124c5cdbce6f79` 已同步到集群；
+- CPU-only 专项 Job `96326` 在 `gpu18` 用时 1 秒，得到 `5 passed in 0.03s`，registry validator 输出 3/4/2 决策计数与 800 仓库下界；
+- one-off 全量 Job `96327` 因 `sbatch --wrap` 使用 `/bin/sh`、不支持 Bash `set -o pipefail`，在 pytest 前失败；
+- POSIX 兼容替换 Job `96328` 用时 15 秒，得到 `265 passed in 13.50s`；
+- 三个作业均未申请 GPU；失败 Job 没有被删除或写成测试失败。
+
 ## 当前决定
 
 桌面准入审计已闭环，共 9 条候选：3 条进入元数据 pilot、4 条冻结为评测保留、2 条因语言不符拒绝。推荐主路线是自建 issue/PR 关联的真实 C++ 修复池，Multi-SWE-RL 仅作结构性补充，RunBugRun v2 只做 legacy 差量核验。当前没有来源获得“可直接进入训练”的许可。

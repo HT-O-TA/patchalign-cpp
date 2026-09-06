@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-06 21:55 CST（2026-09-06T13:55Z）
+最后核验：2026-09-06 22:04 CST（2026-09-06T14:04Z）
 
 项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，尚未下载新来源内容、构造训练集或提交 GPU 训练。
 
@@ -90,6 +90,8 @@ CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；�
 2026-09-06 已完成只读官方资料审计，并用 `configs/data/data_v2_source_admission_v1.json` 固化 9 个候选：自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2 进入元数据 pilot；Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ 作为评测保留；FixEval 与 PatchEval-Verified 因当前发布无 C++ 而拒绝。
 
 本轮没有下载 JSONL、SQLite、仓库源码或容器，`content_downloaded=false`、`training_data_frozen=false`、`gpu_job_authorized=false`。当前新 blocker 是 family 契约：若 repository 就是 family 且每 family 最多 2 条，要满足 train 至少 1,600 条 new-family 样本，理论下界是 800 个未见仓库；现有公开候选无法直接满足。进入网络元数据 pilot 前需版本化决定“缩小增量目标”或“分离 repository split group 与细粒度 sampling family”，不得静默放宽。完整证据见 [Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)。
+
+CPU-only 专项 Job `96326` 在提交 `b93084c` 上以 `5 passed in 0.03s` 完成；全量回归 Job `96328` 为 `265 passed in 13.50s`。首次 one-off 回归 Job `96327` 因 `sbatch --wrap` 的 `/bin/sh` 不支持 Bash `pipefail` 而在进入 pytest 前失败，已由 POSIX 兼容命令替代，不计为测试失败。
 
 ## A4 最终状态
 

@@ -1033,6 +1033,8 @@ Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COM
 
 2026-09-06，项目按许可证、可获得性、真实修复对、family 多样性、长/多行供给、可执行测试和评测污染七项，对 9 个方向完成官方资料桌面审计。`data_v2_source_admission_v1.json` 将自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2 标为 metadata pilot；将 Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ 标为 evaluation reserve；FixEval 与 PatchEval-Verified 因当前发布无 C++ 而拒绝。
 
-机器校验器确认 source ID 唯一、评测保留集合完整、所有内容下载授权为 false、evaluation gold 消费为 false，并显式计算当前规则下的 800 个未见仓库下界。本地 base Python 缺少 pytest，因此本记录点只完成 validator 直接运行；专项 pytest 将由项目集群环境做 CPU-only 验收。
+机器校验器确认 source ID 唯一、评测保留集合完整、所有内容下载授权为 false、evaluation gold 消费为 false，并显式计算当前规则下的 800 个未见仓库下界。本地 base Python 缺少 pytest，故正式验收转到集群环境：CPU-only 专项 Job `96326` 在提交 `b93084c38d18e1254ae1111751124c5cdbce6f79` 上用时 1 秒，得到 `5 passed in 0.03s`；替换全量 Job `96328` 用时 15 秒，得到 `265 passed in 13.50s`。
+
+首次 one-off 全量 Job `96327` 在进入 pytest 前失败，日志为 `/bin/sh: set: Illegal option -o pipefail`。原因是 `sbatch --wrap` 默认 shell 与 Bash 专属选项不兼容，不是测试失败；随后使用 POSIX `set -eu` 重提并通过。该失败作业和日志均保留。
 
 审计没有下载任何候选 JSONL、SQLite dump、源代码或容器，也没有生成 Data-v2 或提交 GPU。新的决策门是：若继续保持 repository 等于 family 且每 family 最多 2 条，需缩小 1,600 条 new-family 目标；若保持规模目标，则必须用新版本契约分离 repository split group 与细粒度 sampling family，并另设每仓库上限。不得静默修改第一轮冻结配置。

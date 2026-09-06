@@ -591,4 +591,5 @@ HT-O-TA/patchalign-cpp
 - 新增 `data_v2_source_admission_v1.json`、只读校验器、5 项专项测试和 `docs/evidence/data_v2_source_admission.md`；
 - 9 个候选被固定为 3 个 metadata pilot、4 个 evaluation reserve、2 个 reject，尚无来源直接准入训练；
 - 显式记录 repository-family 解释下 1,600 条 new-family 目标需要至少 800 个未见仓库，后续必须版本化修订目标或 family 分层；
+- CPU-only 专项 Job `96326` 与替换全量 Job `96328` 分别通过 5 项和 265 项测试；首次 one-off Job `96327` 的 `/bin/sh`/`pipefail` 包装错误按原日志保留；
 - 本次增加 Git 跟踪的清单、代码、测试、文档和 CPU-only 验收入口；没有新增数据目录、正式 artifact 或 GPU 请求。
