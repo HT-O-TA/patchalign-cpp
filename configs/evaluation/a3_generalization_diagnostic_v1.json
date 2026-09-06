@@ -1,0 +1,69 @@
+{
+  "version": "a3-generalization-diagnostic-v1",
+  "description": "Read-only, fail-closed diagnosis of M1-R2 generalization failure.",
+  "checks": [
+    "holdout_confirmation_distribution_shift",
+    "confirmation_terminal_funnel",
+    "confirmation_regression_and_timeout_audit",
+    "formal_success_concentration",
+    "external_success_representativeness",
+    "protocol_style_vs_repair_semantics"
+  ],
+  "bins": {
+    "code_lines": [0, 50, 100, 150, 200, 257],
+    "prompt_tokens": [0, 512, 1024, 2048, 4097],
+    "test_count": [0, 10, 25, 50, 100, 1000000]
+  },
+  "internal": {
+    "case_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "manifest": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1/a2-manifest.json",
+    "manifest_sha256": "5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+    "prompts": "artifacts/a3/formal/sft-inference/prompts.jsonl",
+    "prompts_sha256": "1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f",
+    "m0_scores": "artifacts/a3/formal/m0-inference/scoring-v2/scores.jsonl",
+    "m0_scores_sha256": "92ceb428df80ed772a2c9ce4dfaefd0f3d9b36fd7d96cc74e5cafd538fd6df3d",
+    "r2_predictions": "artifacts/a3/formal/sft-inference/predictions.jsonl",
+    "r2_predictions_sha256": "c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a",
+    "r2_scores": "artifacts/a3/formal/sft-inference/scoring-v2/scores.jsonl",
+    "r2_scores_sha256": "f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8",
+    "expected_cases": 500,
+    "expected_r2_successes": 14
+  },
+  "confirmation": {
+    "case_root": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1",
+    "manifest": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1/confirmation-manifest.json",
+    "manifest_sha256": "7adf960fff4e7f1ee3ca95539ffa1196c3421805659c94bb46a29d0022690917",
+    "prompts": "artifacts/a3/confirmation/m1_r2/prompts.jsonl",
+    "prompts_sha256": "cf141a9d4f90c8fd9f1a8f9cd03509cc2b2fd48905a3c1e533e93cad702ad58f",
+    "m0_scores": "artifacts/a3/confirmation/m0/scoring-v2/scores.jsonl",
+    "m0_scores_sha256": "9fedaa96b0fe9d4c32980d8f6d228d9aae46a4036421ff9961d2b53109c9e7a9",
+    "r2_predictions": "artifacts/a3/confirmation/m1_r2/predictions.jsonl",
+    "r2_predictions_sha256": "0a1427447dd5eee2e3d5ce7d58f98acaaf4cdac47a39afa09d090e81500c9d78",
+    "r2_scores": "artifacts/a3/confirmation/m1_r2/scoring-v2/scores.jsonl",
+    "r2_scores_sha256": "12809161d00335748b80d5370dc3a0cafaea9b39ac77dbfb61884bc3de31108e",
+    "expected_cases": 124,
+    "expected_regressions": 3,
+    "expected_timeouts": 4
+  },
+  "external": {
+    "case_root": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1",
+    "manifest": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1/manifest.json",
+    "manifest_sha256": "0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+    "prompts": "artifacts/a3/defects4c/inference-m1_r2/prompts.jsonl",
+    "prompts_sha256": "b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f",
+    "m0_scores": "artifacts/a3/defects4c/external-v1/scores-m0.jsonl",
+    "m0_scores_sha256": "9d4e63c034af18c52beb380ca66df0935d6193d75442276693a6452d0da5d75e",
+    "r2_predictions": "artifacts/a3/defects4c/inference-m1_r2/predictions.jsonl",
+    "r2_predictions_sha256": "0b9b2288c4e4b9617f7743c92d7359bd46806eae6cb07edbe7fe596d191a1887",
+    "r2_scores": "artifacts/a3/defects4c/external-v1/scores-m1_r2.jsonl",
+    "r2_scores_sha256": "39b06ff2362be8f24c409c07a6f817d0cdfe0f06c122fedefe6ff7bccd1526ed",
+    "runtime_root": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",
+    "expected_cases": 176,
+    "expected_r2_successes": 1
+  },
+  "a4": {
+    "summary": "artifacts/a4/preference-scoring-v1/summary.json",
+    "summary_sha256": "302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8"
+  },
+  "output_dir": "artifacts/a3/diagnostics/generalization-v1"
+}
