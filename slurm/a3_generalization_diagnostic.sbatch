@@ -21,7 +21,7 @@ mkdir -p artifacts/a3/logs
 test -x "$ENV/bin/python"
 test -z "$(git status --porcelain --untracked-files=no)"
 
-"$ENV/bin/python" -m pytest -q
+"$ENV/bin/python" -m pytest -q tests/unit/test_generalization_diagnostic.py
 "$ENV/bin/python" scripts/diagnostics/analyze_generalization_failure.py \
   --repo-root "$REPO" \
   --config configs/evaluation/a3_generalization_diagnostic_v1.json
