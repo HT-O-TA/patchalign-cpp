@@ -27,7 +27,7 @@
     "r2_scores": "artifacts/a3/formal/sft-inference/scoring-v2/scores.jsonl",
     "r2_scores_sha256": "2191dd1d5f93839dccb36fd8e10e23242bb56eb9853b793c895c64435359d7f8",
     "expected_cases": 500,
-    "expected_r2_successes": 14
+    "expected_r2_successes": 15
   },
   "confirmation": {
     "case_root": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1",
