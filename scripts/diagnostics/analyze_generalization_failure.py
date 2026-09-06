@@ -592,6 +592,7 @@ def main() -> None:
             "r2_scores": r2_scores,
             "predictions": predictions,
         }
+        print(f"loaded {name}: {len(cases)} cases", flush=True)
 
     a4_path = verify_input(repo, config["a4"], "summary")
     input_hashes[str(a4_path)] = sha256_file(a4_path)
@@ -601,9 +602,11 @@ def main() -> None:
     formal_features = internal_features(
         formal_root, loaded["internal"]["cases"], loaded["internal"]["prompts"]
     )
+    print(f"formal features complete: {len(formal_features)}", flush=True)
     confirm_features = internal_features(
         confirm_root, loaded["confirmation"]["cases"], loaded["confirmation"]["prompts"]
     )
+    print(f"confirmation features complete: {len(confirm_features)}", flush=True)
     shift = distribution_shift(formal_features, confirm_features, config["bins"])
     formal_m0 = terminal_summary(loaded["internal"]["m0_scores"])
     formal_r2 = terminal_summary(loaded["internal"]["r2_scores"])
@@ -611,12 +614,14 @@ def main() -> None:
     confirm_r2 = terminal_summary(loaded["confirmation"]["r2_scores"])
     external_m0 = terminal_summary(loaded["external"]["m0_scores"], external=True)
     external_r2 = terminal_summary(loaded["external"]["r2_scores"], external=True)
+    print("distribution and funnels complete", flush=True)
     audits, audit_summary = confirmation_audit(
         indexed(confirm_features, "case_id"),
         loaded["confirmation"]["r2_scores"],
         loaded["confirmation"]["predictions"],
         confirm_root,
     )
+    print(f"confirmation audit complete: {len(audits)} cases", flush=True)
     concentration = formal_success_concentration(
         formal_features,
         loaded["internal"]["r2_scores"],
@@ -624,9 +629,11 @@ def main() -> None:
         formal_root,
         config["bins"],
     )
+    print("formal success concentration complete", flush=True)
     representativeness = external_representativeness(
         loaded["external"]["cases"], loaded["external"]["r2_scores"]
     )
+    print("external representativeness complete", flush=True)
     if concentration["success_count"] != config["internal"]["expected_r2_successes"]:
         raise RuntimeError("formal success-count drift")
     if audit_summary["regression_case_count"] != config["confirmation"]["expected_regressions"]:
