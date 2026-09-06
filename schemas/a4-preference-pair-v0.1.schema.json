@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patchalign.local/schemas/a4-preference-pair-v0.1.schema.json",
+  "title": "PatchAlign A4 execution-ranked preference pair",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "pair_id", "case_id", "source_train_sample_id",
+    "task_level", "prompt_version", "prompt_sha256", "prompt",
+    "chosen", "rejected"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "pair_id": {"type": "string", "pattern": "^a4-pair-[0-9a-f]{20}$"},
+    "case_id": {"type": "string", "minLength": 1},
+    "source_train_sample_id": {"type": "string", "minLength": 1},
+    "task_level": {"enum": ["function", "file_window"]},
+    "prompt_version": {"const": "a4-cpp-repair-v1"},
+    "prompt_sha256": {"$ref": "#/$defs/sha256"},
+    "prompt": {"type": "string", "minLength": 1},
+    "chosen": {"$ref": "#/$defs/response"},
+    "rejected": {"$ref": "#/$defs/response"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_id", "candidate_index", "response_sha256", "response"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "candidate_index": {"type": "integer", "minimum": 0, "maximum": 3},
+        "response_sha256": {"$ref": "#/$defs/sha256"},
+        "response": {"type": "string"}
+      }
+    }
+  }
+}

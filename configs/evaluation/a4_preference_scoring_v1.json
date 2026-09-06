@@ -1,0 +1,77 @@
+{
+  "version": "a4-preference-scoring-v1",
+  "mode": "owner_authorized_exploratory",
+  "contract": {
+    "adr": "docs/decisions/0008-a4-execution-ranked-preference-pairs.md",
+    "adr_sha256": "sha256:33e45a585817b352fc6137bd267210464d398ecf9f8632aec054a5353259f42e",
+    "pair_schema": "schemas/a4-preference-pair-v0.1.schema.json",
+    "pair_schema_sha256": "sha256:28db5fae2f759466987fc0630156cb9003c007a070e541ffb4a91dc43724d8e3"
+  },
+  "source": {
+    "generation_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-generation-v1",
+    "candidates": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-generation-v1/candidates.jsonl",
+    "candidates_sha256": "sha256:ca497dbdd4a989c889d48d2fd9db7b77b4de4d3c327796665a1bde54e7ef0c67",
+    "generation_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-generation-v1/run-manifest.json",
+    "generation_manifest_sha256": "sha256:b0a001c3458a16dc07949a60a2b152813c955aa1bc625fe883af6011ca1edef7",
+    "generation_summary": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-generation-v1/generation-summary.json",
+    "generation_summary_sha256": "sha256:95631a06acdb08106e7fd243c1fd4b910090aa2357435383cdddcf80c85607b2",
+    "generation_config": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/generation-config-v1.json",
+    "generation_config_sha256": "sha256:45b06c69e3bae492118fdb4002ce1ae5be1bf2831f8232ded1afe8e1b7be5f8d",
+    "prompts": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/prompts-v1.jsonl",
+    "prompts_sha256": "sha256:a0e8bd0e8f62a9c7530dc942707bd1d19bcc555430dc698e77055a084a1bc273",
+    "dataset_directory": "/mingli01/data/patchalign-cpp/a4/executable-source-v1",
+    "dataset_manifest": "/mingli01/data/patchalign-cpp/a4/executable-source-v1/preference-source-manifest.json",
+    "dataset_manifest_sha256": "sha256:8cba1ec5472a4f4443b766c8fa136f6e928d3911feec9e06457a377775095495",
+    "source_generation_git_commit": "a0caffcb2b8796cd0b543c40bc33fce6a6613f06"
+  },
+  "scoring": {
+    "protocol": "a3-scoring-v2",
+    "config": "/mingli01/project/ht/patchalign-cpp/configs/evaluation/a3_scoring_v2.json",
+    "config_sha256": "sha256:b8d9507ec7fc97c370e52230759e0b2b84591d6fb4200a50944add19ebe859e8",
+    "sandbox": "bubblewrap-rootless-v1",
+    "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+    "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
+    "environment_lock": "/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/pip-freeze.txt",
+    "environment_sha256": "sha256:bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4",
+    "case_count": 264,
+    "candidate_count": 1056,
+    "candidates_per_case": 4,
+    "allowed_paths": [
+      "main.cpp"
+    ],
+    "sanitizer": "not_applicable_for_all_frozen_cases"
+  },
+  "ranking": {
+    "terminal_order_worst_to_best": [
+      "generation_failed",
+      "parse_failed",
+      "policy_violation",
+      "apply_failed",
+      "build_failed",
+      "public_test_failed",
+      "hidden_test_failed",
+      "regression_failed",
+      "sanitizer_failed",
+      "success"
+    ],
+    "timeout_tiebreak": "non_timeout_preferred_within_same_terminal",
+    "pair_policy": "one_strongest_contrast_per_case",
+    "candidate_index_tiebreak": "lowest_index_for_deterministic_selection_only",
+    "require_strictly_better_key": true,
+    "maximum_pairs_per_case": 1,
+    "uses_gold_patch_similarity": false
+  },
+  "output": {
+    "directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-scoring-v1",
+    "checkpoint_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a4/preference-scoring-v1/checkpoints",
+    "preferences": "preferences.jsonl",
+    "pair_audit": "pair-audit.jsonl",
+    "scores": "scores.jsonl",
+    "summary": "summary.json",
+    "manifest": "run-manifest.json"
+  },
+  "a5": {
+    "automatically_authorized": false,
+    "decision": "owner_review_required_after_a4_quality_report"
+  }
+}
