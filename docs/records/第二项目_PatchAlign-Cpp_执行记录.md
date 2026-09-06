@@ -1070,3 +1070,14 @@ v1.2 Job `96417` 用时 13 秒，11 项测试通过，12 个详情仍全部拒�
 CPU-only Job `96423` 在提交 `080b82f87ade210ecc23b1f6ac429a8be9f8bcd0` 上用时 57 秒并以 `COMPLETED 0:0` 结束，9 项专项测试通过。正式输出根为 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1`；train/validation 分别为 780/131，任务层级、replay/increment 角色和三类隔离均与 ADR-0011 一致。train、validation、selection-manifest、schema-report、SHA256SUMS 的哈希依次为 `009abf88d7c1aa6b832d11d2763069c5efc427ba02daedb9621c0a0ce8725ae1`、`fb0cf553572a48024c3925458ce2b1f90d4668dd726ff68038074be5f98b44d4`、`5852bf9b6bfa091af7dd5b3cfb6ef2bfaa84d1aed07478454af9978ba79f083c`、`1a1f66bd7cb6a8c3834cc7fcb923d357fd071d4733815e6b02c4bddb9564ee4f`、`b1bf6fcb5d6034cf637319682f8f70737c0647b22cb7420f8954e8c105bcffab`。
 
 随后冻结单 seed 训练配置：从 M1-R2 adapter `8437acca...425a` 继续，NF4 QLoRA、1 epoch、学习率 `1e-5`、gradient accumulation 8，共 98 optimizer steps；formal 500 只报告遗忘 loss，focused validation 用于 checkpoint 选择。正式 GPU 仍须等待同一提交上的全量测试和 CPU preflight。
+
+
+## 40. Data-v2 exploratory replay 训练终态
+
+2026-09-07，提交 `53329624ddc2ce764b8b7acbf133d6e12682be16` 新增 fail-closed 训练配置、CPU preflight、可恢复 M1-R2 adapter continuation 和专项漂移测试。CPU-only Job `96426` 在 `gpu18` 用时 23 秒，以 `COMPLETED 0:0` 完成 `287 passed in 12.63s`；报告核对 780/131 数据、三类零交叉、模型 revision、M1-R2 adapter、环境 lock、formal validation 500 和 holdout 500 token，最大输入均不超过 4,096。preflight 报告 SHA256 为 `4a6f44169554cd24a73deb8b7b3b2dfb0a1541c4794080ce81cd101689d879f3`。
+
+单 GPU Job `96427` 随后在 `gpu06` 运行 `00:11:41` 并以 `COMPLETED 0:0` 结束，申请 1 GPU、8 CPU、48 GiB，完成 1 epoch、780 micro-steps 和 98 optimizer steps；loss 与 grad norm 全程有限，无 OOM、NaN 或 timeout。峰值 allocated GPU memory 为 14,453,680,640 bytes（约 13.46 GiB），Slurm MaxRSS 为 17,978,444 KiB。
+
+最佳 checkpoint 为 `checkpoints/checkpoint-step-000098-epoch-1`，focused validation loss 为 `0.2120499949`；formal SFT validation 的 report-only loss 从源 M1-R2 的 `0.1310540061` 降到 `0.1293390337`，差值 `-0.0017149724`。新 adapter、adapter config、training summary、training manifest、best-checkpoint SHA256 分别为 `d01dc411a2e67b9ad1e796433bce3836f07c2aa4d754e6976f47d1ab94421323`、`8e02f058d459339b36d3ed43ec348f7874f753cf34f794e0a06341f7651c7483`、`23df309cab3b6cbebb41f6afed1b075114e0f9cdeaf56bac96ee7e6edd20ac5a`、`3feb8f6c8b3e1b8a61bfe15f61ae16f7abc34da52c8698312a8c0f710ef60a8b`、`5dff61e8f1d76cd0ed32197b04ebde7ebf5e83493e450d0fc70c8bd41626f6c9`；反向绑定核验通过。
+
+本终态只证明训练稳定、checkpoint 可追溯以及 formal validation loss 未恶化。它不是 Pass 提升证据，不满足正式 Data-v2.1 容量契约，不改变 A3.4 readiness 失败或 A5 延后状态。下一步应为新 adapter 建立不可变推理绑定，依次完成 formal 500、confirmation 124 和 Defects4C 176 的真实执行评测。

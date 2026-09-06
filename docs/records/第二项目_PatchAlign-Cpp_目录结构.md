@@ -157,7 +157,7 @@
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3 各阶段 Slurm 原始日志
-│       ├── data-v2/                         # 后续研究轮次供给审计；不含训练数据
+│       ├── data-v2/                         # 供给审计、metadata pilot、exploratory preflight 与训练 artifact
 │       ├── a4/                              # owner-authorized exploratory A4 产物
 │       │   ├── preference-generation-v1/    # 1,056 个冻结 GPU 候选与生成 manifest
 │       │   ├── preference-scoring-v1/       # 评分 checkpoints、scores、pairs、audit 与汇总
@@ -624,3 +624,10 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0011 和 `data_v2_exploratory_replay_v0_1.json`，明确该消融不满足正式 Data-v2.1 容量门；
 - 新增重放混合构建器、4 项基础单测和 CPU-only Slurm 入口；
 - 数据根 `/mingli01/data/patchalign-cpp/data-v2/exploratory-replay-v0.1/` 已由 CPU Job `96423` 冻结为 780/131；新增训练配置、CPU preflight、单 GPU continuation 和专项契约测试入口。
+
+
+### 2026-09-07：Data-v2 exploratory replay 训练完成
+
+- CPU preflight Job `96426` 与单 GPU Job `96427` 均成功，运行提交为 `53329624`；
+- 训练 artifact 位于 `artifacts/data-v2/exploratory-replay-training/`，含 step 49/98 checkpoint、best checkpoint、training summary 和 run manifest；
+- 该目录继续由 `.gitignore` 排除并留在集群，Git 只同步配置、代码、Slurm 入口和文档。
