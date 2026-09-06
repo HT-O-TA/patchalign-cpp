@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-06 16:45 CST（2026-09-06T08:45Z）
+最后核验：2026-09-06 19:08 CST（2026-09-06T11:08Z）
 
-项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。
+项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成第一轮供给审计，尚未构造训练集或提交 GPU 训练。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -21,6 +21,7 @@
 | A3.4 | 完成；最终 readiness 未通过 | Defects4C 176/176 评分完成，M0/M1-R2 均为 1/176；确认集失败使 `a4_ready=false` |
 | A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
 | 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
+| Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
@@ -70,6 +71,18 @@ CPU-only Job `96197` 在提交 `6f1b453` 上完成 6 个专项测试和六项只
 - 综合结论为 `protocol_learning_without_demonstrated_semantic_generalization`：协议、apply 和 build 能力跨集合改善，但最终正确性未稳定迁移。
 
 正式产物位于 `artifacts/a3/diagnostics/generalization-v1/`；summary/case-audit/run-manifest SHA256 分别为 `bbca0502...5eba`、`c7e61a4e...f721`、`1587a8b5...7243`。本诊断不改变既有 readiness 和收尾决策。
+
+## Data-v2 供给审计
+
+CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；扫描 CommitPackFT 4,992 条和 RunBugRun 237,516 条原始记录，并完成所有 shard、冻结评测 manifest 和模型 tokenizer 身份校验。
+
+- 在 v1+增量每 family 最多 2 条、formal/confirmation family 排除和 Defects4C 项目别名排除后，只剩 `260 train + 131 validation`。
+- Train 可用增量中仅 20 条代码不少于 100 行、14 条 prompt 不少于 1,024 tokens、20 条结构性修改；validation 对应为 4、4、12。
+- 精确 tokenizer 拒绝为 0，短缺不是 4,096-token 门槛造成，而是现有 family 容量、评测隔离和原始来源组成共同决定。
+- Train 剩余 260 条全部为 file-window，不能在保持“函数级为主”的同时直接并入；validation 仍有 74 function + 57 file-window。
+- 暂定 2,000/200 增量的同步门槛在两个 split 均失败，因此没有生成训练 JSONL、没有启动 SFT，也没有改写现有评测集。
+
+正式结果位于 `artifacts/data-v2/supply-audit-v1/`；candidate-audit/summary/run-manifest SHA256 分别为 `cbe5f2fa...8e96`、`a7f117a9...b753`、`cc34dec8...8cf9`。下一步是引入经过许可证、family 和评测污染审计的新 C++ 修复来源，见 [Data-v2 泛化增强计划](data_v2_plan.md)。
 
 ## A4 最终状态
 

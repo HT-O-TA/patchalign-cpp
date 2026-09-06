@@ -21,6 +21,7 @@
 │   │   │   ├── a1_pilot_v1.json            # 旧 pilot artifact 重放
 │   │   │   ├── a1_pilot_v2.json            # 隔离后的 A1 pilot
 │   │   │   ├── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
+│   │   │   ├── data_v2_supply_audit_v1.json # Data-v2 原始供给、隔离与容量探针
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
 │   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
@@ -49,6 +50,7 @@
 │   │   ├── README.md                       # 文档职责、权威来源与防漂移规则
 │   │   ├── status.md                       # 唯一实时阶段与作业状态页
 │   │   ├── 项目全程总结与核心结论.md       # 稳定项目叙事和核心研究结论
+│   │   ├── data_v2_plan.md                 # 后续泛化增强、供给审计与决策门
 │   │   ├── interview_retrospective.md       # 面试复述：个人职责、故障归因和表达素材
 │   │   ├── a4_preference_data.md            # A4 输入、执行排序、配对与解释边界
 │   │   ├── delivery/                       # 最终报告、M1-R2 模型卡与交付验证入口
@@ -113,6 +115,7 @@
 │   │   ├── a4_score_array.sbatch            # A4 CPU-only 264 项可恢复执行评分
 │   │   ├── a4_preference_finalize.sbatch    # A4 CPU-only 聚合、配对和 manifest
 │   │   ├── a3_generalization_diagnostic.sbatch # CPU-only M1-R2 六项诊断
+│   │   ├── data_v2_supply_audit.sbatch     # CPU-only 新数据容量与防泄漏审计
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -138,6 +141,7 @@
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3 各阶段 Slurm 原始日志
+│       ├── data-v2/                         # 后续研究轮次供给审计；不含训练数据
 │       ├── a4/                              # owner-authorized exploratory A4 产物
 │       │   ├── preference-generation-v1/    # 1,056 个冻结 GPU 候选与生成 manifest
 │       │   ├── preference-scoring-v1/       # 评分 checkpoints、scores、pairs、audit 与汇总
@@ -571,3 +575,10 @@ HT-O-TA/patchalign-cpp
 - 新增 `scripts/diagnostics/`、`slurm/a3_generalization_diagnostic.sbatch` 和 `docs/evidence/generalization_failure_diagnostic.md`；
 - 集群与本地 `artifacts/a3/diagnostics/generalization-v1/` 保存聚合、逐例审计和 run manifest；错误绑定的 M1 运行仅保留在 `diagnostics/history/`；
 - 本次没有移动或改写训练、推理、评分、模型和数据 artifact。
+
+### 2026-09-06：新增 Data-v2 供给审计
+
+- 新增 `data_v2_supply_audit_v1.json`、`audit_data_v2_supply.py`、专项测试、CPU-only Slurm 入口和计划文档；
+- `artifacts/data-v2/supply-audit-v1/` 只保存候选身份哈希、聚合与 run manifest，不保存评测 gold 或新训练 JSONL；
+- Job `96256` 证明现有来源只剩 260 train + 131 validation，故没有建立 Data-v2 训练目录或 GPU 作业；
+- 本次没有移动、覆盖或重新标注 v1、confirmation、Defects4C、模型和 A4 artifact。

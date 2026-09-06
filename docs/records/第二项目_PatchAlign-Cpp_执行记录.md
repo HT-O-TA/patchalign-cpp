@@ -1020,3 +1020,11 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 运行过程中 Job `96147` 的 14 条计数门禁发现错误绑定了 M1 的 15-success 目录；Job `96186` 虽完成，但其 M1 结果被归档至 `artifacts/a3/diagnostics/history/m1-path-misbinding-96186` 并从正式结论排除。最终实现同时校验目录文件哈希、run/score manifest、prediction/execution 反向绑定和 adapter SHA，避免相似目录名造成模型身份漂移。
 
 正式目录为 `artifacts/a3/diagnostics/generalization-v1/`。summary、case-audit、run-manifest SHA256 分别为 `bbca050250020783746e5efb09af060bd2f44b3aa2a321fb30b2059996d85eba`、`c7e61a4eaf4330f5e7a4804062bffee870c4a3257d0cd006740765bf4033f721`、`1587a8b5ecdc4fddad74362f7560f239d5930048a66df3fbe26eb999124a7243`。诊断只读，不改变 `a4_ready=false`、exploratory A4 或 A5 延后状态。
+
+## 36. Data-v2 真实供给审计
+
+2026-09-06，提交 `3b1fa42d9bddf2bc58f5fde37d06430d6baa2fed` 建立 Data-v2 只读供给审计配置、实现、5 项专项测试和 CPU-only Slurm 入口。配置绑定 CommitPackFT C++ 文件、RunBugRun 6 个 C++ shard、formal SFT 5,500 条、formal holdout 500 条、confirmation 124 条、Defects4C 176 条及 Qwen2.5-Coder-7B tokenizer 身份；评测 manifest 只消费 problem/project 身份，明确不读取 confirmation/external gold。
+
+Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COMPLETED 0:0` 结束，专项测试 `5 passed`。扫描 4,992 条 CommitPackFT 和 237,516 条 RunBugRun 记录后，在合并 family 上限与三套评测隔离下只剩 260 train + 131 validation。Train 中长代码、长 prompt、结构性修改分别为 20/14/20，且全部 260 条为 file-window；validation 对应 4/4/12，另有 74 function。token rejection 为 0。
+
+暂定 2,000/200 增量及其同步覆盖门槛均失败。项目没有生成训练 JSONL、没有放宽 family 上限、没有使用评测答案、没有提交 GPU 训练。candidate-audit、summary、run-manifest SHA256 分别为 `cbe5f2fa910535be57458c5ca43483b21b3e92f17c3badaeef3847d308938e96`、`a7f117a9d8a78c50d2dda17939ff80aeefbeff8bd889b993aece747dcfe6b753`、`cc34dec8b4ac4b21e4cae81a380d489bff57927f0700365e86cc7cb74b138cf9`。下一步转为新数据来源准入与污染审计。
