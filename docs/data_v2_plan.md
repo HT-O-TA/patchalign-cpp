@@ -44,7 +44,7 @@ CommitPackFT 当前仍缺少仓库级可执行复现，因此可作为 SFT 监�
 
 ## 第一轮真实结果
 
-CPU-only Job `96256` 在 `gpu18` 用时 `00:06:14` 完成，5 项专项测试为 `5 passed`。正式扫描看到 CommitPackFT 4,992 条、RunBugRun 237,516 条原始记录；所有原始 shard、v1 数据、formal holdout、confirmation、Defects4C manifest 和模型 config 哈希均匹配。
+CPU-only Job `96256` 在 `gpu18` 用时 `00:06:14` 完成，5 项专项测试为 `5 passed`。同步结果文档后，CPU-only 全量回归 Job `96263` 为 `260 passed in 14.31s`。正式扫描看到 CommitPackFT 4,992 条、RunBugRun 237,516 条原始记录；所有原始 shard、v1 数据、formal holdout、confirmation、Defects4C manifest 和模型 config 哈希均匹配。
 
 | 指标 | Train 可用增量 | Validation 可用增量 |
 |---|---:|---:|

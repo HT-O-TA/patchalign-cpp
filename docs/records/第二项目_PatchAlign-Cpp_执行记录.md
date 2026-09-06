@@ -1025,6 +1025,6 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 
 2026-09-06，提交 `3b1fa42d9bddf2bc58f5fde37d06430d6baa2fed` 建立 Data-v2 只读供给审计配置、实现、5 项专项测试和 CPU-only Slurm 入口。配置绑定 CommitPackFT C++ 文件、RunBugRun 6 个 C++ shard、formal SFT 5,500 条、formal holdout 500 条、confirmation 124 条、Defects4C 176 条及 Qwen2.5-Coder-7B tokenizer 身份；评测 manifest 只消费 problem/project 身份，明确不读取 confirmation/external gold。
 
-Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COMPLETED 0:0` 结束，专项测试 `5 passed`。扫描 4,992 条 CommitPackFT 和 237,516 条 RunBugRun 记录后，在合并 family 上限与三套评测隔离下只剩 260 train + 131 validation。Train 中长代码、长 prompt、结构性修改分别为 20/14/20，且全部 260 条为 file-window；validation 对应 4/4/12，另有 74 function。token rejection 为 0。
+Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COMPLETED 0:0` 结束，专项测试 `5 passed`。结果文档同步后，CPU-only 全量回归 Job `96263` 用时 `00:00:16`，得到 `260 passed in 14.31s`。扫描 4,992 条 CommitPackFT 和 237,516 条 RunBugRun 记录后，在合并 family 上限与三套评测隔离下只剩 260 train + 131 validation。Train 中长代码、长 prompt、结构性修改分别为 20/14/20，且全部 260 条为 file-window；validation 对应 4/4/12，另有 74 function。token rejection 为 0。
 
 暂定 2,000/200 增量及其同步覆盖门槛均失败。项目没有生成训练 JSONL、没有放宽 family 上限、没有使用评测答案、没有提交 GPU 训练。candidate-audit、summary、run-manifest SHA256 分别为 `cbe5f2fa910535be57458c5ca43483b21b3e92f17c3badaeef3847d308938e96`、`a7f117a9d8a78c50d2dda17939ff80aeefbeff8bd889b993aece747dcfe6b753`、`cc34dec8b4ac4b21e4cae81a380d489bff57927f0700365e86cc7cb74b138cf9`。下一步转为新数据来源准入与污染审计。

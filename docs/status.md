@@ -74,7 +74,7 @@ CPU-only Job `96197` 在提交 `6f1b453` 上完成 6 个专项测试和六项只
 
 ## Data-v2 供给审计
 
-CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；扫描 CommitPackFT 4,992 条和 RunBugRun 237,516 条原始记录，并完成所有 shard、冻结评测 manifest 和模型 tokenizer 身份校验。
+CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；结果文档同步后，全量回归 Job `96263` 为 `260 passed in 14.31s`；扫描 CommitPackFT 4,992 条和 RunBugRun 237,516 条原始记录，并完成所有 shard、冻结评测 manifest 和模型 tokenizer 身份校验。
 
 - 在 v1+增量每 family 最多 2 条、formal/confirmation family 排除和 Defects4C 项目别名排除后，只剩 `260 train + 131 validation`。
 - Train 可用增量中仅 20 条代码不少于 100 行、14 条 prompt 不少于 1,024 tokens、20 条结构性修改；validation 对应为 4、4、12。
