@@ -1010,3 +1010,13 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 2026-09-06，负责人审阅 A4 的 182 对规模、75 对 success 信号、107 对非 success 阶段信号、11 个 timeout 和 train-only 泛化边界后，决定暂不进入 A5/DPO，按“完成 SFT 与探索性研究”收尾。该决定由 ADR-0009 固化，不改变 A3.4 的 `a4_ready=false`、确认集失败或 A4 run manifest 的 `a5_started=false`。
 
 交付新增 `docs/delivery/final_report.md`、`docs/delivery/model_card_m1_r2.md` 和 `docs/delivery/README.md`。M1-R2 adapter、训练/推理/评分和 A4 artifact 的集群路径及完整 SHA256 已逐项列入交付说明；模型卡将 M1-R2 标为内部研究 checkpoint，而不是通过全部 promotion gate 的发布模型。adapter、数据、完整预测和日志没有移动或公开发布。
+
+## 35. M1-R2 泛化失败诊断完成
+
+2026-09-06，CPU-only Job `96197` 在提交 `6f1b4535723efbf580b10cb3e2befa4a7447da15` 上完成 6 个专项测试与六项正式诊断，固定消费 formal 500、confirmation 124、Defects4C 176 的 manifest、prompt、M1-R2 prediction 和 score artifact。run manifest 绑定 M1-R2 adapter SHA256 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a` 及 22 个输入哈希。
+
+诊断判定为 `protocol_learning_without_demonstrated_semantic_generalization`：R2 的 diff 协议、apply 和 build 能力跨集合改善，但 confirmation 最终为 0/124，外部集最终相对 Base 净增为 0。确认集 103 个可构建补丁中 97 个在 public 阶段终止；3 个 regression 和 4 个 timeout case 全部逐例审计。Formal 14 个成功中 13 个代码少于 100 行；Defects4C 唯一成功位于占样本 79.0% 的 LLVM，均不足以证明广泛语义泛化。
+
+运行过程中 Job `96147` 的 14 条计数门禁发现错误绑定了 M1 的 15-success 目录；Job `96186` 虽完成，但其 M1 结果被归档至 `artifacts/a3/diagnostics/history/m1-path-misbinding-96186` 并从正式结论排除。最终实现同时校验目录文件哈希、run/score manifest、prediction/execution 反向绑定和 adapter SHA，避免相似目录名造成模型身份漂移。
+
+正式目录为 `artifacts/a3/diagnostics/generalization-v1/`。summary、case-audit、run-manifest SHA256 分别为 `bbca050250020783746e5efb09af060bd2f44b3aa2a321fb30b2059996d85eba`、`c7e61a4eaf4330f5e7a4804062bffee870c4a3257d0cd006740765bf4033f721`、`1587a8b5ecdc4fddad74362f7560f239d5930048a66df3fbe26eb999124a7243`。诊断只读，不改变 `a4_ready=false`、exploratory A4 或 A5 延后状态。

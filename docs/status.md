@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-06 09:57 CST（2026-09-06T01:57Z）
+最后核验：2026-09-06 16:45 CST（2026-09-06T08:45Z）
 
 项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。
 
@@ -20,6 +20,7 @@
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
 | A3.4 | 完成；最终 readiness 未通过 | Defects4C 176/176 评分完成，M0/M1-R2 均为 1/176；确认集失败使 `a4_ready=false` |
 | A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
+| 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
@@ -56,6 +57,19 @@
 - pre-A4 readiness 已绑定内部、确认和外部三项 artifact；确认集是唯一 blocker，因此该账本保持 `a4_ready=false`、`a4_started=false`。
 - ADR-0006 允许在该失败账本之后以 `owner_authorized_exploratory` 模式进入 A4；该授权不改变 A3.4 门禁结论。
 - ADR-0009 记录负责人在 A4 质量结果完成后决定本轮不启动 A5/DPO，并以最终报告、模型卡和集群 artifact 索引交付。
+
+## 收尾后泛化失败诊断
+
+CPU-only Job `96197` 在提交 `6f1b453` 上完成 6 个专项测试和六项只读诊断。正式结果见 [M1-R2 泛化失败诊断](evidence/generalization_failure_diagnostic.md)。
+
+- Formal 500 与 confirmation 124 使用同一 prompt 版本，任务层级与测试覆盖近似；确认集主要在全新 problem family、source shard 集中度、代码/prompt 长度和 multi-line 比例上发生偏移。
+- Confirmation 的 M1-R2 漏斗为 parse/apply/build/public/hidden/final = `123/104/103/6/3/0`；97 条在 public 阶段终止，主瓶颈是修复语义而非 diff 格式。
+- 3 个 regression 和 4 个 timeout case 已全部逐例审计；即使乐观移除 4 个 timeout case，也不能解释 `0/124`。
+- Formal 的 14 个成功中 13 个代码少于 100 行、7 个与参考 fixed source 完全一致；成功偏向短输入和 single-line，但不集中于单一任务层级或 source shard。
+- Defects4C 唯一成功来自 LLVM，且 LLVM 占外部集 `139/176`；它证明一次端到端成功，不能证明跨项目代表性。
+- 综合结论为 `protocol_learning_without_demonstrated_semantic_generalization`：协议、apply 和 build 能力跨集合改善，但最终正确性未稳定迁移。
+
+正式产物位于 `artifacts/a3/diagnostics/generalization-v1/`；summary/case-audit/run-manifest SHA256 分别为 `bbca0502...5eba`、`c7e61a4e...f721`、`1587a8b5...7243`。本诊断不改变既有 readiness 和收尾决策。
 
 ## A4 最终状态
 

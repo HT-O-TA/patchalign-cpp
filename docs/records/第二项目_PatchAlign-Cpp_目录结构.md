@@ -31,6 +31,7 @@
 │   │   │   ├── a3_scoring_v2.json          # A3.1 终止 LF 规范化评分协议
 │   │   │   ├── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
 │   │   │   ├── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
+│   │   │   ├── a3_generalization_diagnostic_v1.json # M1-R2 六项泛化诊断输入与身份契约
 │   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
 │   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
 │   │   │   ├── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
@@ -52,7 +53,7 @@
 │   │   ├── a4_preference_data.md            # A4 输入、执行排序、配对与解释边界
 │   │   ├── delivery/                       # 最终报告、M1-R2 模型卡与交付验证入口
 │   │   ├── decisions/                      # 不静默改写的架构/实验决策记录
-│   │   ├── evidence/                       # 可复核实验问题与论文证据
+│   │   ├── evidence/                       # 可复核实验问题、论文证据与泛化失败诊断
 │   │   └── records/                        # 历史执行记录和目录结构台账
 │   ├── schemas/                            # A0/A2/A3、A4 candidate 与 preference-pair Schema
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
@@ -78,6 +79,7 @@
 │   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
 │   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
 │   │   ├── preference/                      # A4 train-only 选择、资格、生成、评分、配对与提交
+│   │   ├── diagnostics/                     # 冻结 artifact 的只读泛化诊断与逐例审计
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -110,6 +112,7 @@
 │   │   ├── a4_score_preflight.sbatch        # A4 CPU-only 全量测试与冻结输入预检
 │   │   ├── a4_score_array.sbatch            # A4 CPU-only 264 项可恢复执行评分
 │   │   ├── a4_preference_finalize.sbatch    # A4 CPU-only 聚合、配对和 manifest
+│   │   ├── a3_generalization_diagnostic.sbatch # CPU-only M1-R2 六项诊断
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -130,6 +133,7 @@
 │       │   │   └── history/                 # 不完整 M0 等失败正式产物，只读归档
 │       │   ├── confirmation/                # 124 条确认集 M0/R2 与失败门禁
 │       │   ├── defects4c/                   # 外部 preflight、推理、评分与比较
+│       │   ├── diagnostics/                 # 泛化诊断正式结果、失败运行归档与日志
 │       │   ├── pre-a4-readiness-v1.json     # 最终只读晋级账本（生成后存在）
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
@@ -560,3 +564,10 @@ HT-O-TA/patchalign-cpp
 - 更新 README、状态页、全程总结、面试复盘和第三方清单，使“实验完成”“正式晋级”和“公开发布”三个状态分离；
 - 大型 adapter、checkpoint、数据、完整预测、逐例评分和日志没有移动、删除或纳入 Git，仍按原路径保留在集群；
 - 本次目录变化只增加 Git 跟踪的报告目录，不改变模型、环境、Slurm 入口或既有 artifact 引用。
+
+### 2026-09-06：新增收尾后泛化诊断目录
+
+- 新增 `configs/evaluation/a3_generalization_diagnostic_v1.json`，冻结 formal、confirmation、Defects4C 及 M1-R2 adapter/run/score manifest 身份；
+- 新增 `scripts/diagnostics/`、`slurm/a3_generalization_diagnostic.sbatch` 和 `docs/evidence/generalization_failure_diagnostic.md`；
+- 集群与本地 `artifacts/a3/diagnostics/generalization-v1/` 保存聚合、逐例审计和 run manifest；错误绑定的 M1 运行仅保留在 `diagnostics/history/`；
+- 本次没有移动或改写训练、推理、评分、模型和数据 artifact。
