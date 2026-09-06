@@ -1,0 +1,106 @@
+{
+  "version": "data-v2-supply-audit-v1",
+  "seed": 20260830,
+  "raw": {
+    "commitpackft_cpp": {
+      "path": "/mingli01/data/patchalign-cpp/a1/raw/commitpackft/data/c++/data.jsonl",
+      "sha256": "sha256:ee59eb0dca07dadb74bde829134e0d3c42176e198773f125a14554a5547df4f2"
+    },
+    "runbugrun": {
+      "directory": "/mingli01/data/patchalign-cpp/a1/raw/runbugrun_data",
+      "source_record_sha256": "sha256:047305c1b01cbe4e00e700b5ad053cfcceed0df0fea6605c47aeaddb353940fa",
+      "files": {
+        "cpp_train0.jsonl.gz": "sha256:998087ce98985876bd0a9b93058b33f2fabce55ca4c90438a9ff95951d0ad259",
+        "cpp_train1.jsonl.gz": "sha256:b5b799a4af554986e48d2d02e326901979cce37ee466adff1d9e44332b913edf",
+        "cpp_train2.jsonl.gz": "sha256:3ccb5cb7f2b013ac097538c7ac1fc024d1216554d23f3cda6040f91bf8f71128",
+        "cpp_train3.jsonl.gz": "sha256:30a25aa924bbcf63cf1fd65b0a8434f7be34e8344e994d19f99f06f882a1f9f6",
+        "cpp_train4.jsonl.gz": "sha256:d770ad411032c21c6480d4465fb78bf5dd01c46adab095354f470bb0298a31e8",
+        "cpp_valid0.jsonl.gz": "sha256:5d578ace2abe96b8c81a16d504023451f64d9654cefcd44c2da3dc7bce5e9af7"
+      }
+    }
+  },
+  "frozen_inputs": {
+    "formal_train": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/train.jsonl",
+      "sha256": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400",
+      "count": 5000
+    },
+    "formal_validation": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/validation.jsonl",
+      "sha256": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980",
+      "count": 500
+    },
+    "formal_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/dataset-manifest.json",
+      "sha256": "sha256:50b0dd1b49a7f14297e2e70871be910673b725ece8de4795938548d256384c02"
+    },
+    "formal_holdout_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1/a2-manifest.json",
+      "sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+      "count": 500
+    },
+    "confirmation_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1/confirmation-manifest.json",
+      "sha256": "sha256:7adf960fff4e7f1ee3ca95539ffa1196c3421805659c94bb46a29d0022690917",
+      "count": 124
+    },
+    "external_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1/manifest.json",
+      "sha256": "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+      "count": 176
+    }
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "isolation": {
+    "maximum_samples_per_family_across_v1_plus_increment": 2,
+    "commitpack_validation_percent_for_new_families": 10,
+    "exclude_formal_holdout_problem_families": true,
+    "exclude_confirmation_problem_families": true,
+    "exclude_external_repository_aliases": [
+      "cppcheck", "llvm", "llvm-project", "entt",
+      "uncrustify", "atomicparsley", "zeromq", "libzmq"
+    ],
+    "evaluation_fields_consumed": {
+      "formal_holdout": ["problem_id"],
+      "confirmation": ["problem_id"],
+      "external": ["project"]
+    },
+    "confirmation_or_external_gold_consumed": false,
+    "prefilter_candidates_per_family": 8
+  },
+  "candidate_policy": {
+    "max_sequence_tokens": 4096,
+    "long_code_min_lines": 100,
+    "long_prompt_min_tokens": 1024,
+    "complex_edit_types": ["multi_line_local", "add_helper", "localized_refactor"],
+    "structural_edit_types": ["add_helper", "localized_refactor"]
+  },
+  "provisional_increment": {
+    "train": {
+      "total": 2000,
+      "minimum_new_family": 1600,
+      "minimum_code_lines_ge_100": 800,
+      "minimum_prompt_tokens_ge_1024": 700,
+      "minimum_complex_edit": 1200,
+      "minimum_structural_edit": 250,
+      "minimum_file_window": 400,
+      "minimum_commitpackft": 400
+    },
+    "validation": {
+      "total": 200,
+      "minimum_new_family": 160,
+      "minimum_code_lines_ge_100": 80,
+      "minimum_prompt_tokens_ge_1024": 70,
+      "minimum_complex_edit": 120,
+      "minimum_structural_edit": 25,
+      "minimum_file_window": 40,
+      "minimum_commitpackft": 40
+    }
+  },
+  "output_dir": "artifacts/data-v2/supply-audit-v1"
+}
