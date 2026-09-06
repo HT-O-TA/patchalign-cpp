@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-06 00:34 CST（2026-09-05T16:34Z）
+最后核验：2026-09-06（A4 CPU 评分链提交后）
 
-项目状态：**A3.4 全部 pre-A4 评测与 readiness 已完成；A4 仅以负责人授权的 exploratory 模式运行**。内部与 Defects4C 外部门禁通过，但 124 条新确认集门禁失败，因此正式晋级仍被阻断，账本保持 `a4_ready=false`。A4 修正后的 CPU 数据 Job `95586` 正在双重资格筛选，依赖式单 GPU 生成 Job `95587` 已排队；不得表述为晋级或门禁通过。
+项目状态：**A3.4 全部 pre-A4 评测与 readiness 已完成；A4 仅以负责人授权的 exploratory 模式运行**。内部与 Defects4C 外部门禁通过，但 124 条新确认集门禁失败，因此正式晋级仍被阻断，账本保持 `a4_ready=false`。A4 的 264 条可执行数据和 1,056 个 GPU 候选已经完成；当前 CPU-only 评分链为 preflight `95651` → 264 项数组 `95652` → 聚合/配对 `95653`。A5/DPO 尚未授权。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -19,7 +19,7 @@
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
 | A3.4 | 完成；最终 readiness 未通过 | Defects4C 176/176 评分完成，M0/M1-R2 均为 1/176；确认集失败使 `a4_ready=false` |
-| A4 | 负责人授权 exploratory 进行中 | 修正后 CPU 数据 Job `95586` 运行中；单 GPU Job `95587` 以 `afterok:95586` 依赖排队 |
+| A4 | 负责人授权 exploratory 进行中 | 264 条数据与 1,056 个候选生成完成；CPU 评分/偏好对作业链 `95651`→`95652`→`95653` 已提交 |
 
 ## A3.3 当前有效链
 
@@ -55,6 +55,14 @@
 - pre-A4 readiness 已绑定内部、确认和外部三项 artifact；确认集是唯一 blocker，因此 `a4_ready=false`、`a4_started=false`。
 - ADR-0006 允许在该失败账本之后以 `owner_authorized_exploratory` 模式进入 A4；该授权不改变 A3.4 门禁结论。
 
+## A4 当前状态
+
+- 数据 Job `95586` 以 `COMPLETED 0:0` 用时 `01:28:41`，评估 480 个候选、273 个双资格通过，冻结 256 function + 8 file-window；source manifest SHA256 为 `8cba1ec5...5095495`。
+- 单 GPU 生成 Job `95587` 以 `COMPLETED 0:0` 用时 `02:58:19`，完成 1,056/1,056 候选；候选、summary、manifest SHA256 为 `ca497dbd...f0c67`、`95631a06...07b2`、`b0a001c3...def7`。峰值显存约 6.56 GB。
+- ADR-0008 冻结执行阶段排序：同一 case 内按 generation→parse→policy→apply→build→public→hidden→regression→sanitizer→success 从差到好；同终态仅以非 timeout 优于 timeout。每例最多一对，最高/最低档相同则不配对。
+- DPO 训练文件只含 prompt 与 chosen/rejected 原始 completion；执行终态和排序理由进入独立 audit，不向训练输入泄漏 gold、fixed、测试或执行反馈。
+- 当前评分链 `95651`→`95652`→`95653` 全部为 CPU-only。只有聚合产出质量报告并经负责人另行审阅后，才决定是否进入 A5。
+
 ## A3.4 当前状态
 
 - A3.4 恢复起点审计曾确认三端位于 `cbfb752d85aa2ad3c14f8cfde760b6c21494f31b`，并核对 A3.3 数据锁、M0 预测与评分、正式比较和 timeout 复现哈希；该提交仅是恢复基线，不是当前 HEAD。
@@ -62,7 +70,7 @@
 - 修正轮次正式命名为 `A3.4 / SFT-R2`，候选为 `M1-R2`；机器配置和方法见 [A3.4 协议](a3_4_sft_r2.md)。
 - 静态选择器只消费冻结 A3.3 SFT train/validation；CPU-only Job `94521` 以 `COMPLETED 0:0` 在 2 秒内完成 5 项测试和 1,200/117 集群重建。train/validation SHA256 为 `6eeab690...678cc`、`878abb76...4b73`，selection manifest 为 `7492a373...30ac`。
 - preflight Job `94523` 以 `COMPLETED 0:0` 在 28 秒内完成 `145 passed`、数据/adapter/token/holdout 身份校验；报告 SHA256 为 `9da6ed41...ce3b`。
-- 单 GPU 训练 Job `94524` 以 `COMPLETED 0:0` 结束，用时 15 分 15 秒；完成 150 optimizer steps，最佳 checkpoint 为 epoch 1/step 150，adapter SHA256 为 `8437acca...425a`。原 500 条 reference validation loss 从 `0.12804146` 变为 `0.13105401`（+`0.00301254`）；该轻微上升只作为遗忘风险信号，最终判断必须等待固定 500 条真实推理与评分。运行代码提交为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`，A4 仍未启动。
+- 单 GPU 训练 Job `94524` 以 `COMPLETED 0:0` 结束，用时 15 分 15 秒；完成 150 optimizer steps，最佳 checkpoint 为 epoch 1/step 150，adapter SHA256 为 `8437acca...425a`。原 500 条 reference validation loss 从 `0.12804146` 变为 `0.13105401`（+`0.00301254`）；该轻微上升只作为遗忘风险信号，最终判断必须等待固定 500 条真实推理与评分。运行代码提交为 `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c`；该次运行时 A4 尚未启动。
 - 固定推理 preflight Job `94537` 完成 `154 passed` 和 prompt 逐字节身份核验。单 GPU Job `94538` 以 `COMPLETED 0:0` 结束，用时 `01:13:49`；500/500 状态为 `ok`，499/500 为 strict diff，3/3 确定性 probe 稳定。predictions/run manifest SHA256 分别为 `c5fe4e6d...7bb6a`、`88abe605...3878`。
 - CPU-only scoring v2 Job `94558` 以 `COMPLETED 0:0` 结束，用时 `00:41:02`。M1-R2 parse/apply/compile 为 499/412/392，最终 Pass 为 14/500；function 为 11/400，file_window 为 3/100，regression failure 为 3/500，timeout 为 2/500。
 - 相对 A3.3 M1，apply/compile 分别增加 21/19，regression failure 从 5 降到 3，timeout 从 3 降到 2，但总 Pass 从 15 降到 14、function Pass 从 12 降到 11。原 3 个 timeout 中 2 个消失、1 个保留，同时新增 1 个 timeout；因此不能把总数下降表述为三个风险样本均已修复。
@@ -83,4 +91,5 @@
 8. **已完成**：203 个 Defects4C 候选完成可恢复源码准备和离线双资格筛选，冻结 176 条外部成对评测集。
 9. **已完成**：替换 CPU 评分数组 `95144` 完成 176/176，聚合 `95150` 固化外部 M0/M1-R2 均为 1/176，外部门禁通过。
 10. **已完成**：readiness Job `95151` 忠实记录确认集失败、`a4_ready=false` 和唯一 blocker，三项输入哈希已交叉核验。
-11. **执行中**：首次 CPU Job `95574` 因 27 个 `file_window` 备用候选与至少 5 条测试门槛不可同时满足而失败，失效 GPU Job `95575` 已取消；ADR-0007 保留测试门槛并将备用池修正为 26。新 CPU Job `95586` 已生成 600 function + 26 file_window 候选并开始双重资格筛选，单 GPU Job `95587` 依赖排队。A5 未授权。
+11. **已完成**：Job `95586` 冻结 264 条可执行 train-only 数据；Job `95587` 完成 1,056/1,056 候选生成，1,055 条为 strict diff，seed replay 稳定。
+12. **执行中**：提交 `d296833` 冻结 ADR-0008、偏好对 Schema 和 A4 scoring v1；集群全量测试 `249 passed`、冻结输入 264/1,056/264 核验通过。CPU-only preflight `95651`、评分数组 `95652` 和聚合 `95653` 已按 `afterok` 提交。A5 未授权。

@@ -988,3 +988,13 @@ CPU Job `95574` 先完成全量 243 项测试，随后在候选构建阶段以 `
 ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_window` 组成，只将 `file_window` 备用池从 27 修正为 26，并在排序前显式过滤至少 5 条测试的 family。修正后真实数据审计得到 2,571 个可用 function、26 个可用 file-window，确定性候选池为 600+26。配置/ADR SHA256 分别为 `1e6413b663dbc039ebbee17ca64125ea3d5f98a1d811837cebf1ca0c4bf6bb0d`、`a23b6be751c028beb5a7af7510138885e85fb92a07707609c7fb2d379336bb52`；提交 `a0caffc` 在集群通过 243 项测试。
 
 失效依赖 Job `95575` 已取消，Job `95574` 的 13 个部分候选目录完整移动至 `artifacts/a4/failed/95574-executable-candidates-v1`，未删除。新 CPU Job `95586` 已生成 626 条候选，manifest SHA256 为 `e0337a2afe160795a5e859aff8a9390090a84bdba58cd97e974c3b97b463e5e9`；首批 16 个 file-window 双重资格得到 8 个可选样本，已达到该层最终配额。Job `95587` 申请 1 GPU，以 `afterok:95586` 依赖等待。
+
+## 33. A4 数据、候选生成终态与执行评分启动
+
+修正后的 CPU Job `95586` 以 `COMPLETED 0:0` 用时 `01:28:41`。626 个确定性备用候选中实际执行 480 个，273 个通过双重执行资格；最终按固定顺序冻结 264 条，其中 function 256、file-window 8，另有 146 个因配额已满而未执行。source manifest SHA256 为 `8cba1ec5472a4f4443b766c8fa136f6e928d3911feec9e06457a377775095495`。
+
+依赖式单 GPU Job `95587` 随后以 `COMPLETED 0:0` 用时 `02:58:19`。264 个 prompt 各生成四个候选，1,056/1,056 状态为 `ok`，1,055 个为 strict diff；seed replay 稳定，峰值显存 6,564,878,336 bytes。候选、generation summary、run manifest SHA256 分别为 `ca497dbdd4a989c889d48d2fd9db7b77b4de4d3c327796665a1bde54e7ef0c67`、`95631a06acdb08106e7fd243c1fd4b910090aa2357435383cdddcf80c85607b2`、`b0a001c3458a16dc07949a60a2b152813c955aa1bc625fe883af6011ca1edef7`。生成成功不作为补丁正确性证据。
+
+提交 `d2968335536326b1a4e06628125ee59b383c936e` 新增 A4 scoring v1、ADR-0008、训练专用偏好对 Schema、案例级原子 checkpoint 和 CPU-only Slurm 链。排序只在同一 case 内按终止阶段和 timeout 比较，不使用 gold 相似度；每例最多一对，训练文件不含测试或执行标签。集群按正式环境设置 `PYTHONNOUSERSITE=1` 后全量测试为 `249 passed`，真实冻结输入核验为 264 cases / 1,056 candidates / 264 prompts。
+
+CPU-only preflight Job `95651`、264 项评分数组 `95652` 和聚合/偏好对 Job `95653` 已按 `afterok` 依赖提交。A5 未自动授权，必须等待最终 A4 质量报告和负责人复核。

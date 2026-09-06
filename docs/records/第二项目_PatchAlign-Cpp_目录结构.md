@@ -33,7 +33,8 @@
 │   │   │   ├── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
 │   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
 │   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
-│   │   │   └── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
+│   │   │   ├── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
+│   │   │   └── a4_preference_scoring_v1.json # A4 执行评分、排序与输出绑定
 │   │   ├── external/
 │   │   │   ├── a3_defects4c_sources_v1.json # 官方源与 203 候选计划
 │   │   │   ├── a3_defects4c_qualification_v1.json # 离线双资格契约
@@ -48,10 +49,11 @@
 │   │   ├── status.md                       # 唯一实时阶段与作业状态页
 │   │   ├── 项目全程总结与核心结论.md       # 稳定项目叙事和核心研究结论
 │   │   ├── interview_retrospective.md       # 面试复述：个人职责、故障归因和表达素材
+│   │   ├── a4_preference_data.md            # A4 输入、执行排序、配对与解释边界
 │   │   ├── decisions/                      # 不静默改写的架构/实验决策记录
 │   │   ├── evidence/                       # 可复核实验问题与论文证据
 │   │   └── records/                        # 历史执行记录和目录结构台账
-│   ├── schemas/                            # A0/A2/A3 与 A4 candidate Schema
+│   ├── schemas/                            # A0/A2/A3、A4 candidate 与 preference-pair Schema
 │   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
@@ -74,7 +76,7 @@
 │   │   ├── baseline/                        # A3 预检、推理、版本化评分与比较脚本
 │   │   ├── training/                        # A3.2/A3.3 及 A3.4 preflight、训练、固定推理与绑定验证
 │   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
-│   │   ├── preference/                      # A4 train-only 选择、资格、配置、生成与提交
+│   │   ├── preference/                      # A4 train-only 选择、资格、生成、评分、配对与提交
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -104,6 +106,9 @@
 │   │   ├── a3_4_finalize_pre_a4.sbatch     # 只生成 readiness；不启动 A4
 │   │   ├── a4_data.sbatch                   # exploratory A4 CPU 数据冻结与资格
 │   │   ├── a4_generate.sbatch               # readiness/owner override 后的单 GPU 候选生成
+│   │   ├── a4_score_preflight.sbatch        # A4 CPU-only 全量测试与冻结输入预检
+│   │   ├── a4_score_array.sbatch            # A4 CPU-only 264 项可恢复执行评分
+│   │   ├── a4_preference_finalize.sbatch    # A4 CPU-only 聚合、配对和 manifest
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -128,7 +133,11 @@
 │       │   ├── sft-pilot/{bf16_lora,nf4_qlora}/ # A3.2 adapter、预测与 scoring v2
 │       │   ├── comparison-a32/93955/        # A3.2 可比性审计与方案选择
 │       │   └── logs/                        # A3 各阶段 Slurm 原始日志
-│       ├── a4/                              # owner-authorized exploratory A4 数据与生成产物
+│       ├── a4/                              # owner-authorized exploratory A4 产物
+│       │   ├── preference-generation-v1/    # 1,056 个冻结 GPU 候选与生成 manifest
+│       │   ├── preference-scoring-v1/       # 评分 checkpoints、scores、pairs、audit 与汇总
+│       │   ├── failed/                      # 失败运行的保留证据
+│       │   └── logs/                        # A4 CPU/GPU Slurm 日志
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -534,3 +543,10 @@ HT-O-TA/patchalign-cpp
 - `scripts/preference/build_a4_executable_candidates.py` 在排序前过滤测试覆盖，A4 机器配置的备用池修正为 600 function + 26 file-window，最终 256+8 组成不变；
 - `artifacts/a4/failed/95574-executable-candidates-v1/` 在集群保存首次失败作业的部分候选，当前有效大数据仍位于 `/mingli01/data/patchalign-cpp/a4/`；
 - A4 生成 finalizer 同时绑定 ADR-0006 的负责人授权、ADR-0007 的可行性修正和修正后数据配置哈希。
+
+### 2026-09-06：A4 执行评分与偏好对结构
+
+- 新增 `configs/evaluation/a4_preference_scoring_v1.json`、ADR-0008 和 `schemas/a4-preference-pair-v0.1.schema.json`，冻结 1,056 条评分分母、终止阶段排序、每例最多一对和 A5 人工复核边界；
+- `scripts/preference/` 新增 preflight、案例级评分、聚合配对和依赖提交入口；`slurm/` 新增三份 CPU-only 作业；
+- 集群新增 `artifacts/a4/preference-scoring-v1/`，案例 checkpoint 与最终 scores/preferences/audit/summary/manifest 均被 Git 忽略并留在集群；
+- 没有移动或删除模型、数据、环境或既有 artifact；A4 生成产物保持只读输入。
