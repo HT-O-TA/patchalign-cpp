@@ -99,3 +99,7 @@ known limitations
 6. 用户对该次发布明确批准。
 
 本治理规范定义工程门禁，不替代正式法律意见。
+
+## 9. 本轮交付状态
+
+依据 [ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md)，本轮在 SFT 与 exploratory A4 收尾。M1-R2 的[模型卡](../delivery/model_card_m1_r2.md)和[交付清单](../delivery/README.md)已建立，但逐来源许可、敏感信息和漏洞披露审计尚未关闭，因此 adapter、派生偏好数据和完整预测只作内部研究交付，不构成公开发布批准。

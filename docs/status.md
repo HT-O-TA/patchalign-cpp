@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-06 09:31 CST（2026-09-06T01:31Z）
+最后核验：2026-09-06 09:57 CST（2026-09-06T01:57Z）
 
-项目状态：**A3.4 readiness 仍未通过；负责人授权的 exploratory A4 已完成，等待 A5 人工决策**。124 条新确认集门禁失败使正式晋级仍被阻断，账本保持 `a4_ready=false`。A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。
+项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -19,7 +19,8 @@
 | A3.2 | 完成 | BF16 LoRA/NF4 QLoRA pilot 完成；按预注册资源平局规则选择 NF4 QLoRA |
 | A3.3 | 内部门禁未通过 | 正式训练、500 条推理、评分和比较均完成；主提升通过，但 timeout 退化超过上限 0.1pp |
 | A3.4 | 完成；最终 readiness 未通过 | Defects4C 176/176 评分完成，M0/M1-R2 均为 1/176；确认集失败使 `a4_ready=false` |
-| A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对偏好数据，A5 待人工决策 |
+| A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
+| A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
 
@@ -47,24 +48,25 @@
 - 正式配置 SHA256：`358894a6e8e3b54a1b71ea1884848296c8af6381063cb44fb1a0f70483f4abb4`。
 - 完整数据分布、路径和训练参数不在本页重复维护，分别见 [`a3_formal_v1.json`](../configs/data/a3_formal_v1.json) 和 [`a3_sft_formal_v1.json`](../configs/training/a3_sft_formal_v1.json)。
 
-## 当前边界与下一门禁
+## 当前边界与收尾决策
 
 - A3.3 的 M1 主修复率提升成立，但 timeout 超限，历史门禁结论保持未通过。
-- A3.4 的旧 500 条内部门禁通过，但未见确认集门禁已经失败；无论 Defects4C 最终结果如何，M1-R2 都不能晋级 A4。
+- A3.4 的旧 500 条内部门禁通过，但未见确认集门禁失败；M1-R2 没有取得正式 A4 晋级资格。
 - Defects4C 已按原协议完成 176 条固定分母成对评测；M0/M1-R2 均为 1/176 Pass、0 timeout，外部门禁通过，但没有最终 Pass 提升。
-- pre-A4 readiness 已绑定内部、确认和外部三项 artifact；确认集是唯一 blocker，因此 `a4_ready=false`、`a4_started=false`。
+- pre-A4 readiness 已绑定内部、确认和外部三项 artifact；确认集是唯一 blocker，因此该账本保持 `a4_ready=false`、`a4_started=false`。
 - ADR-0006 允许在该失败账本之后以 `owner_authorized_exploratory` 模式进入 A4；该授权不改变 A3.4 门禁结论。
+- ADR-0009 记录负责人在 A4 质量结果完成后决定本轮不启动 A5/DPO，并以最终报告、模型卡和集群 artifact 索引交付。
 
-## A4 当前状态
+## A4 最终状态
 
 - 数据 Job `95586` 以 `COMPLETED 0:0` 用时 `01:28:41`，评估 480 个候选、273 个双资格通过，冻结 256 function + 8 file-window；source manifest SHA256 为 `8cba1ec5...5095495`。
 - 单 GPU 生成 Job `95587` 以 `COMPLETED 0:0` 用时 `02:58:19`，完成 1,056/1,056 候选；候选、summary、manifest SHA256 为 `ca497dbd...f0c67`、`95631a06...07b2`、`b0a001c3...def7`。峰值显存约 6.56 GB。
 - ADR-0008 冻结执行阶段排序：同一 case 内按 generation→parse→policy→apply→build→public→hidden→regression→sanitizer→success 从差到好；同终态仅以非 timeout 优于 timeout。每例最多一对，最高/最低档相同则不配对。
-- DPO 训练文件只含 prompt 与 chosen/rejected 原始 completion；执行终态和排序理由进入独立 audit，不向训练输入泄漏 gold、fixed、测试或执行反馈。
+- 偏好训练文件只含 prompt 与 chosen/rejected 原始 completion；执行终态和排序理由进入独立 audit，不向训练输入泄漏 gold、fixed、测试或执行反馈。
 - CPU-only preflight `95651`、替换评分数组 `95670`、聚合 `95671` 均完成：1,056 个候选 parse/apply/compile/Pass 为 1,055/805/780/123，regression failure 4、timeout 11。
 - 77/264 个 case 至少有一个 success；形成 182 对偏好数据（function 175、file-window 7），其中 75 对 chosen 为 success、7 对只由 timeout tiebreak 区分；82 个 case 无严格差异而不配对。
 - 原数组 `95652` 与未运行聚合 `95653` 因 `gpu16` 零日志/零 checkpoint 被停止；排除该节点后替换链正常完成，未删除案例或改变评分协议。
-- scores/preferences/summary/manifest SHA256 为 `c218cd58...cee2`、`5e6b56e4...78bf`、`302e7a9a...fc8`、`03c61f0e...7cbe`。A5 必须由负责人审阅后另行授权。
+- scores/preferences/summary/manifest SHA256 为 `c218cd58...cee2`、`5e6b56e4...78bf`、`302e7a9a...fc8`、`03c61f0e...7cbe`。负责人已审阅并决定本轮延后 A5；这些文件作为内部探索产物交付。
 
 ## A3.4 当前状态
 
@@ -96,4 +98,5 @@
 10. **已完成**：readiness Job `95151` 忠实记录确认集失败、`a4_ready=false` 和唯一 blocker，三项输入哈希已交叉核验。
 11. **已完成**：Job `95586` 冻结 264 条可执行 train-only 数据；Job `95587` 完成 1,056/1,056 候选生成，1,055 条为 strict diff，seed replay 稳定。
 12. **已完成**：提交 `d296833` 冻结 ADR-0008、偏好对 Schema 和 A4 scoring v1；preflight `95651`、替换评分数组 `95670` 和聚合 `95671` 完成 1,056 条评分与 182 对偏好数据。
-13. **待负责人决策**：审阅 A4 数据规模、信号强度、timeout 风险和 train-only 泛化边界；未授权 A5/DPO。
+13. **已决策**：负责人审阅 A4 的规模、信号强度、timeout 风险和 train-only 泛化边界后，决定本轮在 SFT + exploratory A4 收尾，A5/DPO 延后。
+14. **已完成**：建立最终技术报告、M1-R2 模型卡和交付说明；大型 artifact 保持集群本地化，不作公开发布。

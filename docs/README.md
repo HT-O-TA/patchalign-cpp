@@ -7,6 +7,7 @@
 | 信息类型 | 权威来源 | 说明 |
 |---|---|---|
 | 当前阶段与作业状态 | [`status.md`](status.md) | 带核验时间的状态快照；每次里程碑或正式作业状态变化时更新 |
+| 本轮最终报告与交付 | [`delivery/`](delivery/) | 收尾口径、模型卡、artifact 清单和接收验证入口 |
 | 项目全程与稳定结论 | [项目全程总结与核心结论](项目全程总结与核心结论.md) | 从立项到当前里程碑的稳定叙事；不维护分钟级作业状态 |
 | 正式数据配额与路径 | [`configs/data/a3_formal_v1.json`](../configs/data/a3_formal_v1.json) | 机器读取的冻结配置；文档只解释，不另立一套数字 |
 | 正式训练与生成参数 | [`configs/training/a3_sft_formal_v1.json`](../configs/training/a3_sft_formal_v1.json) | 模型、数据、训练和评测输入模式的机器契约 |
@@ -22,6 +23,9 @@
 
 ## 阅读入口
 
+- 最终交付：[交付说明](delivery/README.md)
+- 最终报告：[PatchAlign-Cpp 最终技术报告](delivery/final_report.md)
+- 最终模型候选：[M1-R2 模型卡](delivery/model_card_m1_r2.md)
 - 全程总览：[项目全程总结与核心结论](项目全程总结与核心结论.md)
 - 当前进度：[项目状态](status.md)
 - A0 契约：[A0 索引](a0/README.md)
@@ -33,6 +37,7 @@
 - A3.3：[正式 SFT](a3_3_formal_sft.md)
 - A3.4：[SFT-R2 安全修正轮次](a3_4_sft_r2.md)
 - A4：[可执行偏好数据与保守配对协议](a4_preference_data.md)
+- 收尾决策：[ADR-0009：以 SFT 与探索性研究作为本轮交付终点](decisions/0009-close-after-sft-and-exploratory-a4.md)
 - 正式实验问题：[A3.3 论文材料](evidence/a3_3_pipeline_findings.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)

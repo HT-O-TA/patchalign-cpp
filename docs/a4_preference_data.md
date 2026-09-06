@@ -6,7 +6,7 @@
 
 A4 只研究能否从同一训练样本的多个模型 completion 中提取可复现的执行偏好信号。来源限定为 A3.3 冻结 train 中的 RunBugRun C++，不消费 validation、internal holdout、confirmation、Defects4C，也不把 gold patch、fixed source、hidden tests 或执行反馈交给模型。
 
-pre-A4 readiness 的机器事实保持 `a4_ready=false`，唯一 blocker 为独立确认集失败。负责人通过 ADR-0006 授权失败模式研究；A5/DPO 必须在 A4 质量报告后另行决定。
+pre-A4 readiness 的机器事实保持 `a4_ready=false`，唯一 blocker 为独立确认集失败。负责人通过 ADR-0006 授权失败模式研究；A4 完成后又通过 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md) 决定本轮在 A5/DPO 前收尾。
 
 ## 已冻结输入
 
@@ -55,8 +55,8 @@ CPU-only preflight Job `95651` 在排除异常节点后于 `gpu25` 用 18 秒完
 
 大部分案例为秒级，少数 timeout 补丁形成显著长尾。最慢的 case index 50 有 18 个 public tests，四个候选均为 `public_test_failed`，其中三个候选在 18 项上全部 timeout；完整记录使任务用时 54 分 6 秒。项目保持冻结的完整 outcomes 语义，没有看见长尾后改为 fail-fast 或删除该案例。
 
-## 结果解释与下一门禁
+## 结果解释与收尾边界
 
-候选级 11.65% Pass 和经验 Pass@4 29.17% 说明同题多次采样能产生可用执行差异，但数据来自训练分布且经过可执行资格筛选，不能与独立确认集或 Defects4C 的 greedy Pass@1 直接比较，也不能证明泛化。182 对中只有 75 对含完整 success，另外 107 对是较弱的阶段排序信号；是否足以进行 DPO 需要负责人结合规模、信号强度、timeout 风险与验证设计审阅。
+候选级 11.65% Pass 和经验 Pass@4 29.17% 说明同题多次采样能产生可用执行差异，但数据来自训练分布且经过可执行资格筛选，不能与独立确认集或 Defects4C 的 greedy Pass@1 直接比较，也不能证明泛化。182 对中只有 75 对含完整 success，另外 107 对是较弱的阶段排序信号。负责人审阅规模、信号强度、timeout 风险与 train-only 泛化边界后，决定本轮不启动 DPO。
 
-A4 结果不得回写 A3.4 readiness。run manifest 保持 `a5_started=false`，A5 不会自动启动。
+A4 结果不得回写 A3.4 readiness。run manifest 保持 `a5_started=false`；偏好数据作为内部探索产物交付，未来重启 A5 必须新增授权、版本化配置和未见验证设计。

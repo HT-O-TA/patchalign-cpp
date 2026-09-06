@@ -1,6 +1,6 @@
 # PatchAlign-Cpp
 
-PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目研究在固定数据、提示和评测协议下，LoRA/QLoRA SFT 与 DPO 是否能提高开放权重 Base 模型生成可应用、可编译、通过隐藏测试且修改克制的补丁的能力。
+PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目在固定数据、提示和评测协议下完成了 LoRA/QLoRA SFT、独立确认与外部评测，并开展了负责人授权的探索性执行偏好研究。本轮在 A5/DPO 前收尾；正式晋级失败和负结果均保留。
 
 项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
 
@@ -15,6 +15,9 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 
 ## 当前入口
 
+- [最终交付说明](docs/delivery/README.md)
+- [最终技术报告](docs/delivery/final_report.md)
+- [M1-R2 模型卡](docs/delivery/model_card_m1_r2.md)
 - [项目全程总结与核心结论](docs/项目全程总结与核心结论.md)
 - [项目状态（唯一实时状态页）](docs/status.md)
 - [文档索引与防漂移规则](docs/README.md)
@@ -65,6 +68,8 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - A3.2 的 70 条 executable training pilot 中，BF16 LoRA 与 NF4 QLoRA 均为 1/70 Pass；该结果只用于选择训练方案，不能形成正式 Base/SFT/DPO 质量结论；
 - A1/A2 pilot 与正式 A3.3 数据不是同一证据等级；正式运行的当前状态和身份必须从状态页及 artifact manifest 核对；
 - A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 绑定 A2/A3 内部 artifact，公开正式报告前应以新版本提升且不改写历史结果；
+- A3.4 的旧 holdout 内部门禁通过，但独立确认集失败，完整 readiness 保持 `a4_ready=false`；exploratory A4 不改变该结论；
+- A4 已形成 182 对内部偏好数据，但本轮没有启动或完成 DPO，详见 [ADR-0009](docs/decisions/0009-close-after-sft-and-exploratory-a4.md)；
 - 基础模型预训练污染未知，只能披露，不能声称完全排除。
 
 ## 许可证与发布边界

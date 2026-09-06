@@ -50,6 +50,7 @@
 │   │   ├── 项目全程总结与核心结论.md       # 稳定项目叙事和核心研究结论
 │   │   ├── interview_retrospective.md       # 面试复述：个人职责、故障归因和表达素材
 │   │   ├── a4_preference_data.md            # A4 输入、执行排序、配对与解释边界
+│   │   ├── delivery/                       # 最终报告、M1-R2 模型卡与交付验证入口
 │   │   ├── decisions/                      # 不静默改写的架构/实验决策记录
 │   │   ├── evidence/                       # 可复核实验问题与论文证据
 │   │   └── records/                        # 历史执行记录和目录结构台账
@@ -201,6 +202,7 @@
 │   │   ├── 项目全程总结与核心结论.md       # 从立项至当前的稳定总览
 │   │   ├── a0/                            # 索引、核心协议、Schema、实验、治理
 │   │   ├── decisions/
+│   │   ├── delivery/                       # 最终报告、模型卡和交付说明
 │   │   ├── development/
 │   │   ├── evidence/                      # A0/G0 证据与 A3.3 论文问题材料
 │   │   └── records/                       # 执行记录与独立目录台账
@@ -286,7 +288,7 @@ HT-O-TA/patchalign-cpp
 - 仓库原创代码、文档、Schema、配置和脚本采用 Apache-2.0；
 - 当前版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`；
 - 仓库许可证不覆盖模型、数据集、生成补丁或第三方依赖；
-- 第三方清单当前是初始记录，正式 release 前必须按实际 revision 重新审阅。
+- 第三方清单已更新为内部研究交付快照，正式 release 前仍须按实际 revision 逐来源重新审阅。
 
 ### 3.9 Git 同步与产物本地化
 
@@ -325,7 +327,7 @@ HT-O-TA/patchalign-cpp
 
 - 上文只展示已经存在的稳定目录，不预先维护“预计目录树”。
 - 新目录必须有实际代码、配置或产物消费者后再创建和登记。
-- 未来的 DPO、数据卡、模型卡和最终评测报告在对应阶段落地前只属于计划，不出现在当前结构树。
+- 已落地的最终报告、M1-R2 模型卡和交付说明统一位于 `docs/delivery/`；未来 DPO 或数据卡仍须在实际阶段启动后创建。
 - 大型 artifact 内部的 Job/checkpoint 子目录由 manifest 和报告索引，不逐项复制到本文。
 
 ## 5. 更新触发条件
@@ -550,3 +552,11 @@ HT-O-TA/patchalign-cpp
 - `scripts/preference/` 新增 preflight、案例级评分、聚合配对和依赖提交入口；`slurm/` 新增三份 CPU-only 作业；
 - 集群新增 `artifacts/a4/preference-scoring-v1/`，案例 checkpoint 与最终 scores/preferences/audit/summary/manifest 均被 Git 忽略并留在集群；
 - 没有移动或删除模型、数据、环境或既有 artifact；A4 生成产物保持只读输入。
+
+### 2026-09-06：SFT 与探索性研究最终交付
+
+- 新增 `docs/delivery/`，集中保存最终技术报告、M1-R2 模型卡、artifact 清单和接收验证命令；
+- 新增 ADR-0009，记录负责人决定本轮在 A5/DPO 前收尾，不改写 A3.4 readiness 或 A4 run manifest；
+- 更新 README、状态页、全程总结、面试复盘和第三方清单，使“实验完成”“正式晋级”和“公开发布”三个状态分离；
+- 大型 adapter、checkpoint、数据、完整预测、逐例评分和日志没有移动、删除或纳入 Git，仍按原路径保留在集群；
+- 本次目录变化只增加 Git 跟踪的报告目录，不改变模型、环境、Slurm 入口或既有 artifact 引用。

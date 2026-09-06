@@ -1003,4 +1003,10 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 
 最终 1,056 个候选 parse/apply/compile/Pass 为 1,055/805/780/123，regression failure 为 4，timeout 为 11；function Pass 112/1,024，file-window Pass 11/32。77/264 个案例至少有一个 success，成功候选数 0/1/2/3/4 的案例分别为 187/45/20/10/2。构造 182 对偏好数据，另 82 例无严格差异；function/file-window 为 175/7，75 对 chosen 为 success，175 对按终止阶段区分、7 对只按 timeout 区分。
 
-独立审计确认 1,056 个 candidate ID、182 个 pair ID 唯一，pair Schema 全部通过，训练文件不含 gold/fixed/测试路径/终态字段，manifest 哈希与实际字节一致。scores/preferences/pair-audit/summary/run-manifest SHA256 为 `c218cd58ab05a8b7fa59188163cbfaabdf206b4482185cf297e1f63ff2e1cee2`、`5e6b56e4417d49d0a9fcf85e2ec37d3a4b1e358fda870737adea5ae8c0f578bf`、`bcaf461d09e2f54f5b68e30e9a17025ada1c6827b9cb1829556445519b8b6ad2`、`302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8`、`03c61f0e3a376d4879274880634d8d12f4359d03775aa4b7c726cb3d844c7cbe`。run manifest 为 `a5_started=false`；A5 仍待负责人复核。
+独立审计确认 1,056 个 candidate ID、182 个 pair ID 唯一，pair Schema 全部通过，训练文件不含 gold/fixed/测试路径/终态字段，manifest 哈希与实际字节一致。scores/preferences/pair-audit/summary/run-manifest SHA256 为 `c218cd58ab05a8b7fa59188163cbfaabdf206b4482185cf297e1f63ff2e1cee2`、`5e6b56e4417d49d0a9fcf85e2ec37d3a4b1e358fda870737adea5ae8c0f578bf`、`bcaf461d09e2f54f5b68e30e9a17025ada1c6827b9cb1829556445519b8b6ad2`、`302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8`、`03c61f0e3a376d4879274880634d8d12f4359d03775aa4b7c726cb3d844c7cbe`。run manifest 为 `a5_started=false`；在该记录点 A5 仍待负责人复核，最终收尾决定见第 34 节。
+
+## 34. 按 SFT 与探索性研究口径收尾
+
+2026-09-06，负责人审阅 A4 的 182 对规模、75 对 success 信号、107 对非 success 阶段信号、11 个 timeout 和 train-only 泛化边界后，决定暂不进入 A5/DPO，按“完成 SFT 与探索性研究”收尾。该决定由 ADR-0009 固化，不改变 A3.4 的 `a4_ready=false`、确认集失败或 A4 run manifest 的 `a5_started=false`。
+
+交付新增 `docs/delivery/final_report.md`、`docs/delivery/model_card_m1_r2.md` 和 `docs/delivery/README.md`。M1-R2 adapter、训练/推理/评分和 A4 artifact 的集群路径及完整 SHA256 已逐项列入交付说明；模型卡将 M1-R2 标为内部研究 checkpoint，而不是通过全部 promotion gate 的发布模型。adapter、数据、完整预测和日志没有移动或公开发布。
