@@ -1,6 +1,6 @@
 # Data-v2 泛化增强计划
 
-> 当前状态：第一轮只读供给审计已完成；现有来源不足，尚未冻结训练集，尚未训练模型，未授权 A5/DPO。
+> 当前状态：现有供给审计与新来源桌面准入审计均已完成；等待 family 契约决策，尚未下载新来源内容、冻结训练集、训练模型或授权 A5/DPO。
 
 ## 目标
 
@@ -71,6 +71,18 @@ artifacts/data-v2/supply-audit-v1/
 ```
 
 结论：下一步必须接入新的 C++ 修复来源并重新做许可证、repository family、时间边界和 benchmark 污染审计；不能通过重复 v1、放宽 family 上限或使用 confirmation/external gold 补齐。
+
+## 第二阶段：新来源桌面准入
+
+机器清单为 `configs/data/data_v2_source_admission_v1.json`，校验器为 `scripts/data/check_data_v2_source_admission.py`，详细证据见 [新来源准入与污染审计](evidence/data_v2_source_admission.md)。截至 2026-09-06 共审计 9 个方向：
+
+- 元数据 pilot：自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2；
+- 评测保留：Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++；
+- 拒绝：FixEval、PatchEval-Verified，原因是当前发布没有 C++ 数据。
+
+没有任何来源被直接准入训练。自建 GitHub 修复池是首选供给路线，因为它可以主动寻找新仓库、长输入和结构性修改；Multi-SWE-RL 只作仓库级复杂样本补充；RunBugRun v2 只先检查相对 legacy 的 C++ problem family 差量。
+
+本轮同时发现 family 契约冲突：当前 `repo_family` 既是 split 隔离键，又受每 family 最多 2 条限制。train 最低 1,600 条 new-family 样本在 repository-family 解释下至少需要 800 个未见仓库，现有候选不可能直接满足。内容试采前必须通过新版本配置选择“保留规则并缩小目标”或“分离 repository split group 与 sampling family”；本轮未替负责人决定，也未修改第一轮冻结配置。
 
 ## 审计后的决策门
 

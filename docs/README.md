@@ -41,6 +41,7 @@
 - 正式实验问题：[A3.3 论文材料](evidence/a3_3_pipeline_findings.md)
 - 泛化失败诊断：[M1-R2 六项诊断](evidence/generalization_failure_diagnostic.md)
 - 下一研究轮次：[Data-v2 泛化增强计划](data_v2_plan.md)
+- 新来源准入：[Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)

@@ -1028,3 +1028,11 @@ ADR-0007 决定不降低测试门槛、不改变最终 `256 function + 8 file_wi
 Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COMPLETED 0:0` 结束，专项测试 `5 passed`。结果文档同步后，CPU-only 全量回归 Job `96263` 用时 `00:00:16`，得到 `260 passed in 14.31s`。扫描 4,992 条 CommitPackFT 和 237,516 条 RunBugRun 记录后，在合并 family 上限与三套评测隔离下只剩 260 train + 131 validation。Train 中长代码、长 prompt、结构性修改分别为 20/14/20，且全部 260 条为 file-window；validation 对应 4/4/12，另有 74 function。token rejection 为 0。
 
 暂定 2,000/200 增量及其同步覆盖门槛均失败。项目没有生成训练 JSONL、没有放宽 family 上限、没有使用评测答案、没有提交 GPU 训练。candidate-audit、summary、run-manifest SHA256 分别为 `cbe5f2fa910535be57458c5ca43483b21b3e92f17c3badaeef3847d308938e96`、`a7f117a9d8a78c50d2dda17939ff80aeefbeff8bd889b993aece747dcfe6b753`、`cc34dec8b4ac4b21e4cae81a380d489bff57927f0700365e86cc7cb74b138cf9`。下一步转为新数据来源准入与污染审计。
+
+## 37. Data-v2 新来源桌面准入审计
+
+2026-09-06，项目按许可证、可获得性、真实修复对、family 多样性、长/多行供给、可执行测试和评测污染七项，对 9 个方向完成官方资料桌面审计。`data_v2_source_admission_v1.json` 将自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2 标为 metadata pilot；将 Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ 标为 evaluation reserve；FixEval 与 PatchEval-Verified 因当前发布无 C++ 而拒绝。
+
+机器校验器确认 source ID 唯一、评测保留集合完整、所有内容下载授权为 false、evaluation gold 消费为 false，并显式计算当前规则下的 800 个未见仓库下界。本地 base Python 缺少 pytest，因此本记录点只完成 validator 直接运行；专项 pytest 将由项目集群环境做 CPU-only 验收。
+
+审计没有下载任何候选 JSONL、SQLite dump、源代码或容器，也没有生成 Data-v2 或提交 GPU。新的决策门是：若继续保持 repository 等于 family 且每 family 最多 2 条，需缩小 1,600 条 new-family 目标；若保持规模目标，则必须用新版本契约分离 repository split group 与细粒度 sampling family，并另设每仓库上限。不得静默修改第一轮冻结配置。

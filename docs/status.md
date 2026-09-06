@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-06 19:08 CST（2026-09-06T11:08Z）
+最后核验：2026-09-06 21:55 CST（2026-09-06T13:55Z）
 
-项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成第一轮供给审计，尚未构造训练集或提交 GPU 训练。
+项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，尚未下载新来源内容、构造训练集或提交 GPU 训练。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -22,6 +22,7 @@
 | A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
 | 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
+| Data-v2 来源准入 | 桌面审计完成；等待契约决策 | 9 个来源分为 3 个元数据 pilot、4 个评测保留、2 个拒绝；未下载内容、未用 GPU |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
@@ -83,6 +84,12 @@ CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；�
 - 暂定 2,000/200 增量的同步门槛在两个 split 均失败，因此没有生成训练 JSONL、没有启动 SFT，也没有改写现有评测集。
 
 正式结果位于 `artifacts/data-v2/supply-audit-v1/`；candidate-audit/summary/run-manifest SHA256 分别为 `cbe5f2fa...8e96`、`a7f117a9...b753`、`cc34dec8...8cf9`。下一步是引入经过许可证、family 和评测污染审计的新 C++ 修复来源，见 [Data-v2 泛化增强计划](data_v2_plan.md)。
+
+## Data-v2 新来源准入
+
+2026-09-06 已完成只读官方资料审计，并用 `configs/data/data_v2_source_admission_v1.json` 固化 9 个候选：自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2 进入元数据 pilot；Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ 作为评测保留；FixEval 与 PatchEval-Verified 因当前发布无 C++ 而拒绝。
+
+本轮没有下载 JSONL、SQLite、仓库源码或容器，`content_downloaded=false`、`training_data_frozen=false`、`gpu_job_authorized=false`。当前新 blocker 是 family 契约：若 repository 就是 family 且每 family 最多 2 条，要满足 train 至少 1,600 条 new-family 样本，理论下界是 800 个未见仓库；现有公开候选无法直接满足。进入网络元数据 pilot 前需版本化决定“缩小增量目标”或“分离 repository split group 与细粒度 sampling family”，不得静默放宽。完整证据见 [Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)。
 
 ## A4 最终状态
 

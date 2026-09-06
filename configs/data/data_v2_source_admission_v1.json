@@ -1,0 +1,301 @@
+{
+  "version": "data-v2-source-admission-v1",
+  "as_of": "2026-09-06",
+  "state": {
+    "desk_research_complete": true,
+    "content_downloaded": false,
+    "training_data_frozen": false,
+    "gpu_job_authorized": false
+  },
+  "admission_dimensions": [
+    "license",
+    "availability",
+    "real_fix_pair",
+    "family_diversity",
+    "long_and_multiline_supply",
+    "executable_tests",
+    "evaluation_contamination"
+  ],
+  "license_policy": {
+    "initial_permissive_spdx_allowlist": [
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "BSL-1.0",
+      "ISC",
+      "MIT",
+      "Zlib"
+    ],
+    "repository_license_file_and_sha256_required": true,
+    "dataset_level_license_is_not_repository_clearance": true,
+    "manual_review_required_for_unknown_multiple_or_non_allowlisted": true,
+    "legal_advice_claimed": false
+  },
+  "contamination_policy": {
+    "evaluation_gold_consumed": false,
+    "exclude_entire_repository_for_frozen_or_reserved_repository_benchmarks": true,
+    "require_complete_repository_denylist_before_content_acquisition": true,
+    "require_commit_and_parent_sha": true,
+    "require_train_validation_repository_disjointness": true,
+    "protected_benchmark_source_ids": [
+      "multi-swe-bench-cpp",
+      "bugscpp",
+      "llvm-apr-benchmark",
+      "debugbench-cpp"
+    ]
+  },
+  "family_contract_blocker": {
+    "current_split_and_cap_key": "repo_family",
+    "maximum_samples_per_family_across_v1_plus_increment": 2,
+    "provisional_minimum_new_family_samples_train": 1600,
+    "minimum_unseen_repositories_if_repo_is_family": 800,
+    "decision_required": true,
+    "allowed_resolution_paths": [
+      "retain_current_contract_and_reduce_the_increment_target",
+      "separate_repository_split_group_from_finer_sampling_family_with_new_versioned_contract"
+    ],
+    "silent_relaxation_allowed": false
+  },
+  "preferred_path": "github-issue-linked-cpp-mining",
+  "sources": [
+    {
+      "id": "github-issue-linked-cpp-mining",
+      "decision": "metadata_pilot",
+      "role": "preferred_primary_supply_path",
+      "official_url": "https://docs.github.com/en/rest",
+      "primary_evidence_urls": [
+        "https://docs.github.com/en/rest/licenses/licenses",
+        "https://docs.github.com/en/rest/commits/commits",
+        "https://docs.github.com/en/rest/pulls/pulls"
+      ],
+      "languages": ["C++"],
+      "official_scale": "not_applicable_custom_collection",
+      "repair_origin": "merged_issue_or_pull_request_linked_developer_fix",
+      "execution_evidence": "must_be_reconstructed_per_repository",
+      "license": {
+        "status": "per_repository_verification_required",
+        "declared": "none_at_collection_level",
+        "scope": "each_source_repository"
+      },
+      "fit": [
+        "can_target_unseen_repositories",
+        "can_prefer_longer_and_structural_changes",
+        "can_preserve_exact_commit_and_parent_identity"
+      ],
+      "blockers": [
+        "family_contract_requires_owner_decision",
+        "per_repository_license_and_test_replay_are_not_yet_verified",
+        "benchmark_repository_denylist_is_not_yet_complete",
+        "api_rate_and_reproducible_query_snapshot_are_not_yet_frozen"
+      ],
+      "next_action": "design_and_run_metadata_only_repository_discovery_after_contract_decision",
+      "content_download_authorized": false
+    },
+    {
+      "id": "multi-swe-rl",
+      "decision": "metadata_pilot",
+      "role": "secondary_repository_level_supply_probe",
+      "official_url": "https://huggingface.co/datasets/ByteDance-Seed/Multi-SWE-RL",
+      "primary_evidence_urls": [
+        "https://huggingface.co/datasets/ByteDance-Seed/Multi-SWE-RL",
+        "https://github.com/multi-swe-bench/multi-swe-bench/blob/main/README.md"
+      ],
+      "languages": ["C++", "C", "Go", "Java", "JavaScript", "Rust", "TypeScript"],
+      "official_scale": "4723_initial_all_language_instances",
+      "repair_origin": "repository_issue_resolution_tasks_including_unannotated_and_discarded_benchmark_candidates",
+      "execution_evidence": "repository_level_test_and_container_fields_are_published",
+      "license": {
+        "status": "conditional_per_repository",
+        "declared": "CC0_subject_to_Bytedance_rights_and_underlying_repository_licenses",
+        "scope": "dataset_and_each_source_repository"
+      },
+      "fit": [
+        "real_repository_context",
+        "C++_repositories_present",
+        "fix_and_test_patch_fields_present"
+      ],
+      "blockers": [
+        "C++_instance_count_and_exact_revision_not_yet_frozen",
+        "about_ten_C++_repositories_cannot_satisfy_current_800_repository_lower_bound",
+        "repository_level_or_multifile_tasks_do_not_directly_match_function_first_schema",
+        "must_exclude_Multi-SWE-bench_and_other_reserved_benchmark_overlap",
+        "dataset_metadata_label_is_other_while_card_describes_conditional_CC0"
+      ],
+      "next_action": "pin_revision_and_project_only_C++_metadata_before_any_patch_content_admission",
+      "content_download_authorized": false
+    },
+    {
+      "id": "runbugrun-v2",
+      "decision": "metadata_pilot",
+      "role": "legacy_delta_and_bug_taxonomy_probe",
+      "official_url": "https://github.com/giganticode/run_bug_run",
+      "primary_evidence_urls": [
+        "https://github.com/giganticode/run_bug_run",
+        "https://github.com/giganticode/run_bug_run/releases"
+      ],
+      "languages": ["C++", "C", "Python", "Java", "Ruby", "JavaScript", "Go", "PHP", "C#"],
+      "official_scale": "over_700000_all_language_executable_pairs",
+      "repair_origin": "competitive_programming_submission_pairs_from_Project_CodeNet",
+      "execution_evidence": "tests_bug_labels_and_Bubblewrap_infrastructure_published",
+      "license": {
+        "status": "source_terms_review_required",
+        "declared": "consult_each_upstream_source",
+        "scope": "Project_CodeNet_and_test_sources"
+      },
+      "fit": [
+        "C++_present",
+        "executable_tests",
+        "hunk_and_bug_label_metadata"
+      ],
+      "blockers": [
+        "same_CodeNet_problem_domain_as_237516_already_audited_legacy_records",
+        "new_C++_problem_family_delta_not_yet_measured",
+        "short_program_domain_does_not_supply_repository_diversity",
+        "release_is_a_large_compressed_SQLite_dump"
+      ],
+      "next_action": "obtain_release_size_schema_and_C++_problem_id_delta_before_full_download",
+      "content_download_authorized": false
+    },
+    {
+      "id": "multi-swe-bench-cpp",
+      "decision": "evaluation_reserve",
+      "role": "future_repository_level_external_evaluation",
+      "official_url": "https://multi-swe-bench.github.io/",
+      "primary_evidence_urls": [
+        "https://multi-swe-bench.github.io/",
+        "https://github.com/multi-swe-bench/multi-swe-bench/blob/main/README.md"
+      ],
+      "languages": ["C++"],
+      "official_scale": "129_C++_evaluation_instances",
+      "repair_origin": "expert_curated_real_world_issue_resolution",
+      "execution_evidence": "Docker_evaluation_environment_published",
+      "license": {
+        "status": "benchmark_and_repository_review_required",
+        "declared": "Apache-2.0_project_code_dataset_card_other",
+        "scope": "benchmark_code_dataset_and_source_repositories"
+      },
+      "fit": ["new_repository_level_external_evidence", "C++_only_slice_available"],
+      "blockers": [
+        "must_remain_unseen_if_selected_as_external_evaluation",
+        "agentic_repository_scope_exceeds_current_single_patch_contract"
+      ],
+      "next_action": "preserve_repository_and_instance_denylist_without_reading_gold",
+      "content_download_authorized": false
+    },
+    {
+      "id": "bugscpp",
+      "decision": "evaluation_reserve",
+      "role": "future_executable_C_and_C++_benchmark",
+      "official_url": "https://github.com/Suresoft-GLaDOS/bugscpp",
+      "primary_evidence_urls": ["https://github.com/Suresoft-GLaDOS/bugscpp"],
+      "languages": ["C", "C++"],
+      "official_scale": "215_total_defects",
+      "repair_origin": "real_world_reproducible_defects",
+      "execution_evidence": "checkout_build_and_test_commands_published",
+      "license": {
+        "status": "benchmark_code_clear_underlying_projects_require_review",
+        "declared": "MIT",
+        "scope": "benchmark_code_and_each_project"
+      },
+      "fit": ["real_defects", "executable_tests", "multiple_projects"],
+      "blockers": [
+        "mixed_C_and_C++_count_requires_measurement",
+        "cppcheck_overlaps_existing_Defects4C_external_family",
+        "using_as_training_would_destroy_independent_evaluation_value"
+      ],
+      "next_action": "reserve_and_later_qualify_strict_C++_nonoverlap_slice",
+      "content_download_authorized": false
+    },
+    {
+      "id": "llvm-apr-benchmark",
+      "decision": "evaluation_reserve",
+      "role": "low_priority_LLVM_stress_evaluation",
+      "official_url": "https://github.com/dtcxzyw/llvm-apr-benchmark",
+      "primary_evidence_urls": ["https://github.com/dtcxzyw/llvm-apr-benchmark"],
+      "languages": ["C++"],
+      "official_scale": "295_verified_LLVM_issues_as_of_2025-05-19",
+      "repair_origin": "real_world_LLVM_middle_end_issues",
+      "execution_evidence": "build_fast_test_and_full_regression_helpers_published",
+      "license": {
+        "status": "benchmark_code_clear_underlying_project_review_required",
+        "declared": "Apache-2.0",
+        "scope": "benchmark_code_and_LLVM"
+      },
+      "fit": ["227_single_function_fixes", "264_single_file_fixes", "full_regression_testing"],
+      "blockers": [
+        "single_LLVM_repository",
+        "LLVM_is_already_139_of_176_current_Defects4C_cases",
+        "training_use_would_increase_existing_project_skew_and_contaminate_a_benchmark"
+      ],
+      "next_action": "keep_out_of_training_and_use_only_for_optional_LLVM_stress_analysis",
+      "content_download_authorized": false
+    },
+    {
+      "id": "debugbench-cpp",
+      "decision": "evaluation_reserve",
+      "role": "synthetic_bug_taxonomy_auxiliary_evaluation",
+      "official_url": "https://github.com/thunlp/DebugBench",
+      "primary_evidence_urls": [
+        "https://github.com/thunlp/DebugBench",
+        "https://arxiv.org/abs/2401.04621"
+      ],
+      "languages": ["C++", "Java", "Python"],
+      "official_scale": "4253_all_language_instances",
+      "repair_origin": "GPT-4_implanted_bugs_in_LeetCode_community_snippets",
+      "execution_evidence": "benchmark_and_evaluation_scripts_published",
+      "license": {
+        "status": "source_content_terms_review_required",
+        "declared": "Apache-2.0_repository",
+        "scope": "repository_and_LeetCode_source_content"
+      },
+      "fit": ["four_major_and_18_minor_bug_categories", "controlled_difficulty_slices"],
+      "blockers": [
+        "synthetic_bugs_not_developer_fix_pairs",
+        "snippet_domain_not_repository_generalization",
+        "benchmark_should_not_be_used_as_primary_training_supply"
+      ],
+      "next_action": "reserve_only_for_optional_taxonomy_diagnostics",
+      "content_download_authorized": false
+    },
+    {
+      "id": "fixeval",
+      "decision": "reject",
+      "role": "none",
+      "official_url": "https://github.com/FixEval/FixEval_official",
+      "primary_evidence_urls": ["https://github.com/FixEval/FixEval_official"],
+      "languages": ["Java", "Python"],
+      "official_scale": "preprocessed_release_is_Java_and_Python_only",
+      "repair_origin": "competitive_programming_submission_pairs",
+      "execution_evidence": "execution_evaluation_published_for_released_languages",
+      "license": {
+        "status": "not_reviewed_after_language_rejection",
+        "declared": "not_used",
+        "scope": "not_applicable"
+      },
+      "fit": [],
+      "blockers": ["no_released_C++_preprocessed_dataset"],
+      "next_action": "none",
+      "content_download_authorized": false
+    },
+    {
+      "id": "patcheval-verified",
+      "decision": "reject",
+      "role": "none",
+      "official_url": "https://github.com/bytedance/PatchEval",
+      "primary_evidence_urls": ["https://github.com/bytedance/PatchEval"],
+      "languages": ["Go", "JavaScript", "Python"],
+      "official_scale": "230_verified_CVE_cases",
+      "repair_origin": "real_world_vulnerability_repairs",
+      "execution_evidence": "Docker_fix_run_validation",
+      "license": {
+        "status": "not_reviewed_after_language_rejection",
+        "declared": "Apache-2.0_repository",
+        "scope": "not_applicable"
+      },
+      "fit": [],
+      "blockers": ["verified_release_has_no_C_or_C++"],
+      "next_action": "none",
+      "content_download_authorized": false
+    }
+  ]
+}
