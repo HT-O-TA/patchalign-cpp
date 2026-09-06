@@ -11,6 +11,7 @@ from scripts.diagnostics.analyze_generalization_failure import (
     ks_distance,
     terminal_summary,
     total_variation,
+    verify_model_identity,
 )
 
 
@@ -53,6 +54,41 @@ def test_internal_terminal_funnel_is_monotonic_and_requires_full_pass() -> None:
         "hidden": 2,
         "regression": 1,
     }
+
+
+def test_model_identity_requires_adapter_and_artifact_bindings(tmp_path) -> None:
+    import json
+
+    run = tmp_path / "run.json"
+    score = tmp_path / "score.json"
+    adapter, prediction, execution = "a" * 64, "b" * 64, "c" * 64
+    run.write_text(
+        json.dumps(
+            {
+                "adapter_sha256": "sha256:" + adapter,
+                "prediction_artifact_sha256": "sha256:" + prediction,
+            }
+        )
+    )
+    score.write_text(
+        json.dumps(
+            {
+                "adapter_sha256": "sha256:" + adapter,
+                "prediction_artifact_sha256": "sha256:" + prediction,
+                "execution_artifact_sha256": "sha256:" + execution,
+            }
+        )
+    )
+    spec = {
+        "expected_adapter_sha256": adapter,
+        "r2_predictions_sha256": prediction,
+        "r2_scores_sha256": execution,
+    }
+    verify_model_identity(spec, {"run_manifest": run, "score_manifest": score})
+    spec["expected_adapter_sha256"] = "d" * 64
+    with pytest.raises(RuntimeError, match="adapter identity"):
+        verify_model_identity(spec, {"run_manifest": run, "score_manifest": score})
+
 
 
 def test_unknown_terminal_fails_closed() -> None:

@@ -82,6 +82,25 @@ def verify_input(repo: Path, spec: dict[str, Any], key: str) -> Path:
     return path
 
 
+def verify_model_identity(spec: dict[str, Any], paths: dict[str, Path]) -> None:
+    expected_adapter = "sha256:" + spec["expected_adapter_sha256"]
+    run_manifest = json.loads(paths["run_manifest"].read_text(encoding="utf-8"))
+    if run_manifest.get("adapter_sha256") != expected_adapter:
+        raise RuntimeError("run manifest adapter identity mismatch")
+    expected_prediction = "sha256:" + spec["r2_predictions_sha256"]
+    if run_manifest.get("prediction_artifact_sha256") != expected_prediction:
+        raise RuntimeError("run manifest prediction binding mismatch")
+    if "score_manifest" in paths:
+        score_manifest = json.loads(paths["score_manifest"].read_text(encoding="utf-8"))
+        if score_manifest.get("adapter_sha256") != expected_adapter:
+            raise RuntimeError("score manifest adapter identity mismatch")
+        if score_manifest.get("prediction_artifact_sha256") != expected_prediction:
+            raise RuntimeError("score manifest prediction binding mismatch")
+        expected_scores = "sha256:" + spec["r2_scores_sha256"]
+        if score_manifest.get("execution_artifact_sha256") != expected_scores:
+            raise RuntimeError("score manifest execution binding mismatch")
+
+
 def indexed(rows: Iterable[dict[str, Any]], key: str) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -567,10 +586,14 @@ def main() -> None:
     for name in ("internal", "confirmation", "external"):
         spec = config[name]
         paths = {}
-        for key in ("manifest", "prompts", "m0_scores", "r2_predictions", "r2_scores"):
+        keys = ["manifest", "prompts", "m0_scores", "r2_predictions", "r2_scores", "run_manifest"]
+        if "score_manifest" in spec:
+            keys.append("score_manifest")
+        for key in keys:
             path = verify_input(repo, spec, key)
             paths[key] = path
             input_hashes[str(path)] = sha256_file(path)
+        verify_model_identity(spec, paths)
         manifest_obj = json.loads(paths["manifest"].read_text(encoding="utf-8"))
         cases = manifest_obj["cases"]
         prompts = indexed(read_jsonl(paths["prompts"]), "case_id")
