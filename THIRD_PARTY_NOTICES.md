@@ -15,7 +15,9 @@ PatchAlign-Cpp 的 Apache-2.0 许可证只覆盖本仓库原创代码、文档�
 | RunBugRun data v0.0.1；匹配器语义固定到 legacy commit `5c023d6273ced705a5f83063b6b4cbf67aa81fa5` | A1/A2/A3/A4 C++ 数据、测试判定与训练 | CodeNet 来源许可仍须逐项审计 | 原始代码、测试、候选池、holdout 和派生偏好数据仅保留在集群，不进入 Git、不公开分发 |
 | CommitPackFT C++ | A1/A3 SFT train/validation | 数据集及底层仓库许可尚未逐来源完成审计 | 原始和重打包数据仅保留在集群；本轮不公开数据或 adapter |
 | Defects4C 官方源 commit `aecc2cf5f751d7c0894ae7d95ee0b8ae28e77b39` 及其 11 个上游 C++ 项目 | A3.4 外部资格与成对评测 | 数据集与各上游项目条款须逐项核验 | 官方源码 checkout、测试和完整预测只留在集群；Git 仅保存配置、处理代码、聚合指标与哈希 |
-| 未来 C++ 修复数据源和 benchmark repository | 后续训练与评测 | 尚未开始逐来源审计 | 未获再分发许可前不发布原始或重打包内容 |
+| GitHub 公开 C++ issue/PR 元数据 pilot | Data-v2.1 供给与治理可行性预筛 | 仅将 GitHub 自动识别 SPDX 作为预筛信号；逐仓库许可尚未完成 | 只保存必要公开身份、统计与哈希；不保存 patch、源码、标题/正文、用户身份或 LICENSE 原文，不构成训练准入 |
+| Multi-SWE-RL、RunBugRun v2 与未来 C++ 修复来源 | 后续元数据研究、训练候选或评测 | 数据集及底层仓库条款尚待逐项审计 | 未获内容准入和再分发结论前不下载/发布补丁或重打包数据 |
+| Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ | 保留的未来评测身份 | 各数据集及上游项目条款待正式评测时固定 | 当前 denylist 使用公开身份防污染；不读取 gold、不作为训练来源 |
 
 ## 发布要求
 

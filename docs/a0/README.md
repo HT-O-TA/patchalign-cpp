@@ -22,6 +22,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [ADR-0007](../decisions/0007-a4-testable-candidate-pool-correction.md) | A4 可执行候选池的输入可行性修正 | Accepted implementation correction |
 | [ADR-0008](../decisions/0008-a4-execution-ranked-preference-pairs.md) | A4 候选执行阶段排序与保守偏好对构造 | Accepted for exploratory A4 |
 | [ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md) | 本轮在 SFT + exploratory A4 收尾，A5/DPO 延后 | Accepted by project owner |
+| [ADR-0010](../decisions/0010-data-v2-hierarchical-family-contract.md) | Data-v2 分离仓库 split group 与细粒度 sampling family | Accepted by project owner |
 
 自动验收、fixture 和质量门禁的合并证据见 [`a0-validation.md`](../evidence/a0-validation.md)。历史执行细节保留在[执行记录](../records/第二项目_PatchAlign-Cpp_执行记录.md)，不在本索引重复展开。
 

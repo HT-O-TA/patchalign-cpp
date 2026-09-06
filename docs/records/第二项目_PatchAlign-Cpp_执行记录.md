@@ -1038,3 +1038,11 @@ Job `96256` 在 `gpu18` 以 4 CPU、16 GiB、0 GPU 运行 `00:06:14` 并以 `COM
 首次 one-off 全量 Job `96327` 在进入 pytest 前失败，日志为 `/bin/sh: set: Illegal option -o pipefail`。原因是 `sbatch --wrap` 默认 shell 与 Bash 专属选项不兼容，不是测试失败；随后使用 POSIX `set -eu` 重提并通过。该失败作业和日志均保留。
 
 审计没有下载任何候选 JSONL、SQLite dump、源代码或容器，也没有生成 Data-v2 或提交 GPU。新的决策门是：若继续保持 repository 等于 family 且每 family 最多 2 条，需缩小 1,600 条 new-family 目标；若保持规模目标，则必须用新版本契约分离 repository split group 与细粒度 sampling family，并另设每仓库上限。不得静默修改第一轮冻结配置。
+
+## 38. Data-v2.1 分层 family 契约与 GitHub 元数据 pilot
+
+2026-09-06，负责人接受 ADR-0010：用 `repository_split_group` 承担仓库级 train/validation/benchmark 隔离，用更细的 `sampling_family` 承担最多 2 条的重复控制，并增加 train/validation 每仓库 40/20 条上限。2,000/200 保持容量探针；多样性最低目标冻结为 train 100 个新仓库、1,000 个新 sampling family，validation 20 个新仓库、100 个新 sampling family。此前 800 仓库下界作为旧契约冲突证据保留，不回写第一轮供给审计。
+
+项目随后实现 GitHub C++ issue/PR metadata-only pilot：固定查询、API 版本、最多 25 个 PR 详情请求、最多 15 个不同仓库目标、许可证 allowlist、评测仓库 denylist 和最小字段投影。采集器禁止保存 patch、源码、标题/正文、用户身份与 LICENSE 原文，只保存必要公开身份、统计、内容哈希和拒绝原因；内容准入 denylist 仍显式标记为不完整。
+
+本步骤只授权集群 CPU/网络试采。父提交、C++ 文件变更、测试重放、许可证全文审计、完整 benchmark 去污染、Data-v2 构造与 GPU 训练仍未获准。

@@ -31,6 +31,7 @@ def test_registry_is_closed_before_content_acquisition() -> None:
     assert summary["content_downloaded"] is False
     assert summary["training_data_frozen"] is False
     assert summary["gpu_job_authorized"] is False
+    assert summary["family_contract_decision_required"] is False
 
 
 def test_evaluation_reserves_are_exactly_protected() -> None:
@@ -49,7 +50,9 @@ def test_family_lower_bound_is_explicit_and_consistent() -> None:
     registry = load_registry()
     blocker = registry["family_contract_blocker"]
     assert blocker["minimum_unseen_repositories_if_repo_is_family"] == 800
-    assert blocker["decision_required"] is True
+    assert blocker["decision_required"] is False
+    assert blocker["was_decision_required_at_desk_audit"] is True
+    assert blocker["accepted_resolution_contract"]["path"] == "configs/data/data_v2_contract_v2_1.json"
     assert blocker["silent_relaxation_allowed"] is False
 
 

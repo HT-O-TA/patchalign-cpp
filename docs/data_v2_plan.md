@@ -1,6 +1,6 @@
 # Data-v2 泛化增强计划
 
-> 当前状态：现有供给审计与新来源桌面准入审计均已完成；等待 family 契约决策，尚未下载新来源内容、冻结训练集、训练模型或授权 A5/DPO。
+> 当前状态：现有供给审计与新来源桌面准入审计均已完成；负责人已接受 ADR-0010 的分层 family 契约，GitHub C++ 修复元数据 pilot 已实现、待集群 CPU/网络实测。尚未下载补丁或源码内容、冻结训练集、训练模型或授权 A5/DPO。
 
 ## 目标
 
@@ -82,9 +82,17 @@ artifacts/data-v2/supply-audit-v1/
 
 没有任何来源被直接准入训练。自建 GitHub 修复池是首选供给路线，因为它可以主动寻找新仓库、长输入和结构性修改；Multi-SWE-RL 只作仓库级复杂样本补充；RunBugRun v2 只先检查相对 legacy 的 C++ problem family 差量。
 
-本轮同时发现 family 契约冲突：当前 `repo_family` 既是 split 隔离键，又受每 family 最多 2 条限制。train 最低 1,600 条 new-family 样本在 repository-family 解释下至少需要 800 个未见仓库，现有候选不可能直接满足。内容试采前必须通过新版本配置选择“保留规则并缩小目标”或“分离 repository split group 与 sampling family”；本轮未替负责人决定，也未修改第一轮冻结配置。
+桌面审计发现的 family 契约冲突已由负责人接受 ADR-0010 解决：`repository_split_group` 只负责仓库级 train/validation/benchmark 隔离，`sampling_family` 负责 issue/function 级重复控制，仍保持 v1+增量每 sampling family 最多 2 条，并新增 train/validation 每仓库最多 40/20 条。2,000/200 仍是容量探针，不是训练配额；新的多样性最低目标为 train 100 个新仓库、1,000 个新 sampling family，validation 20 个新仓库、100 个新 sampling family。第一轮冻结配置不被回写。
 
 集群 CPU-only 专项 Job `96326` 完成 `5 passed in 0.03s`；替换全量回归 Job `96328` 完成 `265 passed in 13.50s`。首次 one-off 全量 Job `96327` 因 `/bin/sh` 不支持 Bash `pipefail`，在 pytest 前退出；失败被保留并由 POSIX 兼容的 `set -eu` 重提修正。
+
+## 第三阶段：分层契约与 GitHub 元数据 pilot
+
+版本化机器契约为 `configs/data/data_v2_contract_v2_1.json`，决策依据为 [ADR-0010](decisions/0010-data-v2-hierarchical-family-contract.md)。`scripts/data/check_data_v2_contract.py` 以 fail-closed 方式检查 split、sampling、仓库上限、容量目标和防泄漏边界。
+
+首轮 GitHub pilot 由 `configs/data/data_v2_metadata_pilot_v1.json` 与 `scripts/data/collect_data_v2_github_metadata.py` 固定，目标是对最多 25 个候选 PR 详情请求形成最多 15 个不同 C++ 仓库的元数据投影。它只允许保存仓库/PR/commit 身份、公开统计、许可证标识与哈希、查询响应哈希和拒绝原因；禁止保存 patch、源码 blob、标题正文、用户身份和 LICENSE 原文。评测仓库 denylist 在内容准入前仍标记为不完整，因此本阶段只能判断供给与治理可行性，不能产生训练样本。
+
+该 pilot 使用 CPU 和网络，不申请 GPU。即使达到 15 仓库目标，也只说明发现链和筛选链可运行；父提交核验、变更文件类型、测试重放、许可证原文审计、时间边界和完整 benchmark 去污染仍必须在受控内容阶段另行闭环。
 
 ## 审计后的决策门
 
@@ -92,7 +100,7 @@ artifacts/data-v2/supply-audit-v1/
 
 1. 所有冻结输入和原始 shard 哈希一致；
 2. confirmation/external gold 消费保持为 false；
-3. 2,000/200 草案的同步覆盖门槛可实现，或先形成负责人认可的版本化修订；
+3. ADR-0010 的 2,000/200 容量探针及 train/validation 多样性最低目标得到真实元数据与后续内容资格结果支持；
 4. 新训练集构造器能够拒绝覆盖、输出 Schema/隔离/token 报告并可重复得到相同哈希；
 5. 训练方案预注册至少 3 个 seed 的小规模对照，评测继续使用冻结 greedy Pass@1 和真实执行评分。
 

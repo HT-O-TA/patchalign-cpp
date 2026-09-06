@@ -23,6 +23,8 @@
 │   │   │   ├── a3_formal_v1.json           # A3.3 正式数据配额、隔离和路径契约
 │   │   │   ├── data_v2_supply_audit_v1.json # Data-v2 原始供给、隔离与容量探针
 │   │   │   ├── data_v2_source_admission_v1.json # 新 C++ 来源准入、评测保留与下载门禁
+│   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
+│   │   │   ├── data_v2_metadata_pilot_v1.json # GitHub metadata-only 试采查询与输出边界
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
 │   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
@@ -76,6 +78,8 @@
 │   │   │   ├── check_a2_replay_stability.py # 资格回放与最终回放精确核验
 │   │   │   ├── summarize_a2_results.py      # A2 汇总与验收门禁
 │   │   │   ├── check_data_v2_source_admission.py # 新来源桌面清单 fail-closed 校验
+│   │   │   ├── check_data_v2_contract.py # Data-v2.1 分层 family 契约校验
+│   │   │   ├── collect_data_v2_github_metadata.py # 不落 patch/源码的 GitHub 元数据采集器
 │   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
 │   │   ├── setup/
 │   │   │   └── build_bubblewrap.sh         # 固定版本的可复现工具构建入口
@@ -119,6 +123,7 @@
 │   │   ├── a3_generalization_diagnostic.sbatch # CPU-only M1-R2 六项诊断
 │   │   ├── data_v2_supply_audit.sbatch     # CPU-only 新数据容量与防泄漏审计
 │   │   ├── data_v2_source_admission.sbatch # CPU-only 新来源清单专项验收
+│   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -593,3 +598,10 @@ HT-O-TA/patchalign-cpp
 - 显式记录 repository-family 解释下 1,600 条 new-family 目标需要至少 800 个未见仓库，后续必须版本化修订目标或 family 分层；
 - CPU-only 专项 Job `96326` 与替换全量 Job `96328` 分别通过 5 项和 265 项测试；首次 one-off Job `96327` 的 `/bin/sh`/`pipefail` 包装错误按原日志保留；
 - 本次增加 Git 跟踪的清单、代码、测试、文档和 CPU-only 验收入口；没有新增数据目录、正式 artifact 或 GPU 请求。
+
+### 2026-09-06：新增 Data-v2.1 分层契约与元数据试采入口
+
+- 新增 ADR-0010、`data_v2_contract_v2_1.json` 和 fail-closed validator，分离仓库 split group 与细粒度 sampling family；
+- 新增 `data_v2_metadata_pilot_v1.json`、GitHub 元数据采集器、专项测试和 CPU-only Slurm 入口；
+- pilot 输出目录为 `artifacts/data-v2/metadata-pilot-v1/`，只允许公开身份、统计、哈希与拒绝原因，不保存 patch、源码、标题/正文、用户身份或许可证原文；
+- 本次未建立训练数据或模型目录，也未授权 GPU、内容下载或 A5。

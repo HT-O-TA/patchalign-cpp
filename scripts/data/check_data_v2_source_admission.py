@@ -47,7 +47,12 @@ def validate_registry(registry: dict[str, Any]) -> dict[str, Any]:
     require(family["provisional_minimum_new_family_samples_train"] == 1600, "new-family target changed")
     expected_minimum = (family["provisional_minimum_new_family_samples_train"] + family["maximum_samples_per_family_across_v1_plus_increment"] - 1) // family["maximum_samples_per_family_across_v1_plus_increment"]
     require(family["minimum_unseen_repositories_if_repo_is_family"] == expected_minimum, "repository lower bound is inconsistent")
-    require(family["decision_required"] is True, "family decision gate disabled")
+    require(family["decision_required"] is False, "accepted family decision not recorded")
+    require(family["was_decision_required_at_desk_audit"] is True, "desk-audit history changed")
+    require(family["accepted_resolution"] == "separate_repository_split_group_from_finer_sampling_family_with_new_versioned_contract", "unexpected family resolution")
+    contract = family["accepted_resolution_contract"]
+    require(contract["path"] == "configs/data/data_v2_contract_v2_1.json", "resolution contract path changed")
+    require(contract["sha256"] == "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2", "resolution contract hash changed")
     require(family["silent_relaxation_allowed"] is False, "silent family relaxation enabled")
 
     sources = registry["sources"]
@@ -79,6 +84,8 @@ def validate_registry(registry: dict[str, Any]) -> dict[str, Any]:
         "decision_counts": dict(sorted(counts.items())),
         "preferred_path": registry["preferred_path"],
         "minimum_unseen_repositories_if_repo_is_family": family["minimum_unseen_repositories_if_repo_is_family"],
+        "family_contract_decision_required": family["decision_required"],
+        "accepted_resolution_contract": family["accepted_resolution_contract"],
         "content_downloaded": False,
         "training_data_frozen": False,
         "gpu_job_authorized": False,

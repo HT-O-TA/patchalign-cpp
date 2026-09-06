@@ -49,7 +49,13 @@
     "maximum_samples_per_family_across_v1_plus_increment": 2,
     "provisional_minimum_new_family_samples_train": 1600,
     "minimum_unseen_repositories_if_repo_is_family": 800,
-    "decision_required": true,
+    "decision_required": false,
+    "was_decision_required_at_desk_audit": true,
+    "accepted_resolution": "separate_repository_split_group_from_finer_sampling_family_with_new_versioned_contract",
+    "accepted_resolution_contract": {
+      "path": "configs/data/data_v2_contract_v2_1.json",
+      "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+    },
     "allowed_resolution_paths": [
       "retain_current_contract_and_reduce_the_increment_target",
       "separate_repository_split_group_from_finer_sampling_family_with_new_versioned_contract"
@@ -83,12 +89,12 @@
         "can_preserve_exact_commit_and_parent_identity"
       ],
       "blockers": [
-        "family_contract_requires_owner_decision",
+        "hierarchical_family_contract_accepted_content_admission_still_closed",
         "per_repository_license_and_test_replay_are_not_yet_verified",
-        "benchmark_repository_denylist_is_not_yet_complete",
-        "api_rate_and_reproducible_query_snapshot_are_not_yet_frozen"
+        "benchmark_repository_denylist_is_not_content_complete",
+        "api_rate_and_reproducible_query_snapshot_require_pilot_evidence"
       ],
-      "next_action": "design_and_run_metadata_only_repository_discovery_after_contract_decision",
+      "next_action": "run_metadata_only_repository_discovery_under_v2_1_contract",
       "content_download_authorized": false
     },
     {
@@ -116,7 +122,7 @@
       ],
       "blockers": [
         "C++_instance_count_and_exact_revision_not_yet_frozen",
-        "about_ten_C++_repositories_cannot_satisfy_current_800_repository_lower_bound",
+        "about_ten_C++_repositories_cannot_satisfy_the_100_train_repository_target",
         "repository_level_or_multifile_tasks_do_not_directly_match_function_first_schema",
         "must_exclude_Multi-SWE-bench_and_other_reserved_benchmark_overlap",
         "dataset_metadata_label_is_other_while_card_describes_conditional_CC0"

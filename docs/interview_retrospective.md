@@ -132,6 +132,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 9. 冻结候选配额与真实最小测试覆盖联合不可满足：不降低 5-test 门槛或最终组成，只修正备用池并把真实可行域审计加入数据前置检查。
 10. 同一 CPU 作业在特定节点零日志：用相同提交跨节点复现区分节点故障与代码错误，保留 Job 身份重排并精确排除异常节点。
 11. 完整测试 outcomes 导致 timeout 长尾：用案例级数组和原子 checkpoint 隔离拖尾，不在结果出现后改成 fail-fast 或删样本。
+12. 同一个 family 字段同时承担隔离与采样上限，造成 800 新仓库的不可行下界：拆成仓库级 split group 和 issue/function 级 sampling family，再用独立仓库上限约束集中度；先做只落最小元数据与哈希的网络 pilot，避免在容量和污染未证明前下载补丁。
 
 详细证据见 [`evidence/a3_3_pipeline_findings.md`](evidence/a3_3_pipeline_findings.md)。
 

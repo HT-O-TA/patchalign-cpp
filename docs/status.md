@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-06 22:04 CST（2026-09-06T14:04Z）
+最后核验：2026-09-06；Data-v2.1 契约已接受，metadata-only pilot 待集群运行
 
-项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，尚未下载新来源内容、构造训练集或提交 GPU 训练。
+项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only pilot 已实现、待集群 CPU/网络实测；尚未下载补丁或源码、构造训练集或提交 GPU 训练。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -22,7 +22,7 @@
 | A4 | 负责人授权 exploratory 完成 | 1,056 个候选全量评分；123 Pass、11 timeout；形成 182 对内部偏好数据 |
 | 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
-| Data-v2 来源准入 | 桌面审计完成；等待契约决策 | 9 个来源分为 3 个元数据 pilot、4 个评测保留、2 个拒绝；未下载内容、未用 GPU |
+| Data-v2 来源准入 | 契约已接受；元数据 pilot 待运行 | 9 个来源分为 3 个元数据 pilot、4 个评测保留、2 个拒绝；ADR-0010 已冻结 split/sampling 分层；未下载补丁、未用 GPU |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
@@ -89,7 +89,7 @@ CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；�
 
 2026-09-06 已完成只读官方资料审计，并用 `configs/data/data_v2_source_admission_v1.json` 固化 9 个候选：自建 GitHub issue/PR 关联 C++ 修复池、Multi-SWE-RL、RunBugRun v2 进入元数据 pilot；Multi-SWE-bench C++、BugsCpp、LLVM APR Benchmark、DebugBench C++ 作为评测保留；FixEval 与 PatchEval-Verified 因当前发布无 C++ 而拒绝。
 
-本轮没有下载 JSONL、SQLite、仓库源码或容器，`content_downloaded=false`、`training_data_frozen=false`、`gpu_job_authorized=false`。当前新 blocker 是 family 契约：若 repository 就是 family 且每 family 最多 2 条，要满足 train 至少 1,600 条 new-family 样本，理论下界是 800 个未见仓库；现有公开候选无法直接满足。进入网络元数据 pilot 前需版本化决定“缩小增量目标”或“分离 repository split group 与细粒度 sampling family”，不得静默放宽。完整证据见 [Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)。
+本轮没有下载 JSONL、SQLite、仓库源码或容器，`content_downloaded=false`、`training_data_frozen=false`、`gpu_job_authorized=false`。负责人已接受 [ADR-0010](decisions/0010-data-v2-hierarchical-family-contract.md)：仓库级 `repository_split_group` 负责隔离，细粒度 `sampling_family` 仍维持最多 2 条，并新增 train/validation 每仓库 40/20 条上限以及 100/20 个新仓库、1,000/100 个新 sampling family 最低目标。当前只授权 GitHub metadata-only pilot；内容下载、测试重放、Data-v2 冻结和 GPU 仍关闭。完整证据见 [Data-v2 新来源准入与污染审计](evidence/data_v2_source_admission.md)。
 
 CPU-only 专项 Job `96326` 在提交 `b93084c` 上以 `5 passed in 0.03s` 完成；全量回归 Job `96328` 为 `265 passed in 13.50s`。首次 one-off 回归 Job `96327` 因 `sbatch --wrap` 的 `/bin/sh` 不支持 Bash `pipefail` 而在进入 pytest 前失败，已由 POSIX 兼容命令替代，不计为测试失败。
 

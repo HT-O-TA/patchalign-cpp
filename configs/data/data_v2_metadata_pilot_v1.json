@@ -1,0 +1,111 @@
+{
+  "version": "data-v2-github-metadata-pilot-v1",
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "decision": {
+    "path": "docs/decisions/0010-data-v2-hierarchical-family-contract.md",
+    "sha256": "sha256:db826bb02901f129c3a8e5b6c3f71a8b3a9c2844aa770fb203843bb6d7ea9770"
+  },
+  "api": {
+    "base_url": "https://api.github.com",
+    "version": "2022-11-28",
+    "user_agent": "patchalign-cpp-data-v2-metadata-pilot/1",
+    "token_environment_variable": "GITHUB_TOKEN",
+    "timeout_seconds": 30,
+    "maximum_attempts": 3
+  },
+  "search": {
+    "query": "is:pr is:merged label:bug language:C++ merged:2023-01-01..2024-05-31 stars:>=100 archived:false",
+    "sort": "created",
+    "order": "asc",
+    "per_page": 100,
+    "page": 1
+  },
+  "pilot": {
+    "target_unique_repositories": 15,
+    "maximum_candidate_details": 25,
+    "maximum_records_per_repository": 1,
+    "minimum_repository_stars": 100,
+    "minimum_changed_lines": 2,
+    "maximum_changed_lines": 200,
+    "maximum_changed_files": 10,
+    "require_primary_language_cpp": true,
+    "require_explicit_linked_issue": true,
+    "require_current_license_content_sha256": true,
+    "allowed_spdx": [
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "BSL-1.0",
+      "ISC",
+      "MIT",
+      "Zlib"
+    ]
+  },
+  "denylist": {
+    "exact_canonical_repositories": [
+      "github.com/bitcoin/bitcoin",
+      "github.com/catchorg/catch2",
+      "github.com/cgal/cgal",
+      "github.com/fmtlib/fmt",
+      "github.com/halide/halide",
+      "github.com/llvm/llvm-project",
+      "github.com/nlohmann/json",
+      "github.com/root-project/root",
+      "github.com/simdjson/simdjson",
+      "github.com/skypjack/entt",
+      "github.com/uncrustify/uncrustify",
+      "github.com/yhirose/cpp-httplib",
+      "github.com/zeromq/libzmq"
+    ],
+    "exact_repository_name_aliases": [
+      "atomicparsley",
+      "berry",
+      "coreutils",
+      "cpp_peglib",
+      "cppcheck",
+      "dlt",
+      "einsteintoolkit",
+      "exiv2",
+      "jerryscript",
+      "libchewing",
+      "libssh",
+      "libtiff",
+      "libucl",
+      "libxml2",
+      "llvm",
+      "llvm-project",
+      "md4c",
+      "ndpi",
+      "openssl",
+      "proj",
+      "wget2",
+      "wireshark",
+      "xbps",
+      "yaml-cpp",
+      "yaml_cpp",
+      "yara",
+      "zsh"
+    ],
+    "sources_covered": [
+      "Defects4C-qualified-v1",
+      "Multi-SWE-bench-C++",
+      "BugsCpp",
+      "LLVM-APR-Benchmark",
+      "DebugBench-LeetCode-domain"
+    ],
+    "complete_for_patch_content_admission": false
+  },
+  "projection": {
+    "store_patch": false,
+    "store_source_code": false,
+    "store_title_or_body": false,
+    "store_user_identity": false,
+    "store_title_and_body_sha256": true,
+    "store_license_text": false,
+    "store_license_text_sha256": true
+  },
+  "output_directory": "artifacts/data-v2/metadata-pilot-v1"
+}

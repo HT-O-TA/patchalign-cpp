@@ -1,0 +1,92 @@
+{
+  "version": "data-v2-contract-v2.1",
+  "accepted_decision": "docs/decisions/0010-data-v2-hierarchical-family-contract.md",
+  "owner_accepted": true,
+  "seed": 20260906,
+  "scope": {
+    "capacity_probe_only": true,
+    "source_content_download_authorized": false,
+    "training_dataset_freeze_authorized": false,
+    "gpu_authorized": false,
+    "a5_dpo_authorized": false
+  },
+  "identity": {
+    "repository_source": {
+      "repository_split_group": "lowercase_canonical_host/owner/repository_without_dot_git",
+      "sampling_family_primary": "repository_split_group|canonical_target_path|normalized_symbol_or_issue_cluster",
+      "sampling_family_fallback": "repository_split_group|canonical_target_path|stable_hunk_anchor_hash"
+    },
+    "competitive_programming_source": {
+      "repository_split_group": "lowercase_dataset/problem_id",
+      "sampling_family": "same_as_repository_split_group",
+      "synthetic_family_expansion_allowed": false
+    },
+    "required_source_identity": [
+      "source_dataset",
+      "source_revision",
+      "repository_split_group",
+      "sampling_family",
+      "fix_commit_sha",
+      "parent_commit_sha"
+    ]
+  },
+  "split": {
+    "existing_v1_mapping_wins": true,
+    "new_split_group_validation_percent": 10,
+    "hash_seed": 20260906,
+    "train_validation_repository_split_group_overlap": 0,
+    "benchmark_repository_split_group_overlap": 0,
+    "cross_source_canonical_repository_matching": true
+  },
+  "caps": {
+    "maximum_samples_per_sampling_family_across_v1_plus_increment": 2,
+    "maximum_increment_samples_per_repository_split_group": {
+      "train": 40,
+      "validation": 20
+    },
+    "maximum_single_new_source_fraction": 0.7
+  },
+  "provisional_increment": {
+    "train": {
+      "total": 2000,
+      "minimum_new_repository_split_groups": 100,
+      "minimum_new_sampling_families": 1000,
+      "minimum_function": 1200,
+      "minimum_file_window": 400,
+      "minimum_code_lines_ge_100": 800,
+      "minimum_prompt_tokens_ge_1024": 700,
+      "minimum_complex_edit": 1200,
+      "minimum_structural_edit": 250
+    },
+    "validation": {
+      "total": 200,
+      "minimum_new_repository_split_groups": 20,
+      "minimum_new_sampling_families": 100,
+      "minimum_function": 120,
+      "minimum_file_window": 40,
+      "minimum_code_lines_ge_100": 80,
+      "minimum_prompt_tokens_ge_1024": 70,
+      "minimum_complex_edit": 120,
+      "minimum_structural_edit": 25
+    }
+  },
+  "contamination": {
+    "evaluation_gold_consumed": false,
+    "complete_reserved_repository_denylist_required_before_patch_download": true,
+    "exclude_forks_of_denied_repositories": true,
+    "exclude_exact_instance_and_commit_overlap": true,
+    "base_model_pretraining_contamination_claim": "unknown"
+  },
+  "reporting": {
+    "separate_counts_required": [
+      "samples",
+      "repository_split_groups",
+      "sampling_families",
+      "source_datasets",
+      "task_levels",
+      "edit_types",
+      "license_statuses"
+    ],
+    "metadata_pilot_is_training_admission": false
+  }
+}
