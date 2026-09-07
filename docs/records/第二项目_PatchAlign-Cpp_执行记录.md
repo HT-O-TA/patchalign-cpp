@@ -1170,3 +1170,29 @@ ADR-0017 在 Job `96939` 的固定 artifact 上选择 200 个 PR（train 160、v
 detail outcome gate 固定为至少 50 条、train/validation 至少 40/10 且至少覆盖 30/8 个仓库；只有通过后才允许建立固定 50 条（40/10）可执行内容 pilot，并要求至少 10/50 达到稳定 buggy-fail/fixed-pass。已新增可恢复采集器、配置、6 项本地功能测试、12 小时 CPU/网络入口及零网络零输出的短 preflight 入口。长作业必须等集群全量 pytest、输入哈希和固定 200 条选择通过后再提交。
 
 ADR-0018 作为暂未激活的第三来源提案，固定 CommitPack revision、365 个 C++ shard 清单和仅下载升序首分片 `c++-0001.jsonl` 的边界。只有 GitHub detail 路线通过且确实需要补足单来源 70% 上限时，才执行该 CPU 供给审计；当前未下载 524 MB 分片、未生成训练数据、未申请 GPU。
+
+## 52. Data-v2 可执行样本上下文与逐测试契约强化
+
+2026-09-07，在不查询尚未到既定检查窗口的 Job 96959、不取得候选源码和不激活
+ADR-0019 的前提下，完成后续内容 pilot 的两项可复用基础实现。
+
+第一，新增 `data_v2_cpp_context.py`：正式样本只消费已由本地 Git 图核验的
+`git diff --unified=0` old ranges，并用冻结 Clang 16 的 AST JSON 识别函数定义。
+缺失物理行号时按精确 UTF-8 byte offset 还原；implicit、lambda、macro、include/
+foreign file 和歧义节点 fail-closed。只有唯一最内层函数覆盖全部修改 anchor 才标为
+function，否则进入遵守 256/96/96 上限的确定性 file-window，core 过大则拒绝。
+7 项纯函数测试覆盖 UTF-8 offset、嵌套方法、lambda/implicit 排除、跨文件/macro
+排除、跨函数回退、窗口平衡与边界拒绝。
+
+第二，新增 `data_v2_ctest_results.py`：从
+`ctest --show-only=json-v1` 构造路径规范化的稳定 test ID，从 CTest 原生
+`Testing/<TAG>/Test.xml` 取得逐项 pass/fail/timeout、Exit Code 和输出哈希。实测
+CTest 3.22.1 的 JUnit 对 fail 与 timeout 信息不足，因此不作为权威结果；正式 rootfs
+仍固定 CTest 3.26.4。目录/测试数上限、完整测试集合一致性、重复身份、结构化文件
+16 MiB 上限和 encoded output 均 fail-closed；崩溃属于确定性 test failure，not-run/
+缺项才是基础设施错误。4 项异常/规范化测试及一个真实两测试 CTest probe 通过。
+
+本机因未安装 pytest，仅执行了 7+4 项等价直接断言、Python 语法检查、真实 CTest
+JSON/Test.xml 端到端 smoke 和 `git diff --check`；集群全量 pytest 必须等 detail
+长作业终态后，在不破坏其 commit/checkpoint 绑定的情况下同步新提交再执行。当前
+仍没有下载 patch/source、没有 Data-v2 训练样本，也没有授权 GPU/SFT/DPO。

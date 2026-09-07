@@ -700,3 +700,13 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0018 作为尚未激活的 CommitPack C++ 单分片供给审计提案；当前没有下载分片或建立对应 artifact；
 - 新增 ADR-0019 作为尚未激活的 GitHub 固定 50 条内容执行提案；只冻结安全重建边界，当前没有内容配置、源码 checkout 或执行 artifact；
 - Job `96938`/`96939` 的大 artifact 继续保留在 `artifacts/data-v2/` 并由 Git 忽略，Git 只保存可复现配置、代码、测试、入口和证据摘要。
+
+### 2026-09-07：Data-v2 内容资格基础工具
+
+- `scripts/data/data_v2_cpp_context.py`：从已核验 Git diff old ranges 与冻结 Clang
+  AST 选择 function/file-window，上下文选择为纯函数、可独立重放；
+- `scripts/data/data_v2_ctest_results.py`：规范化 CTest 测试身份并解析原生
+  Test.xml 的逐测试结果；
+- 对应专项测试位于 `tests/unit/test_data_v2_cpp_context.py` 和
+  `tests/unit/test_data_v2_ctest_results.py`；
+- 本次没有新增 artifact 目录；临时 CTest probe 位于本机 `/tmp`，不属于项目交付。

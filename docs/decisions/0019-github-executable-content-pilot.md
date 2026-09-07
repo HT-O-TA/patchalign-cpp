@@ -65,6 +65,30 @@ buggy parent。
 - 无法安全分离测试与生产修改时拒绝，不能把完整 gold fix 混入 buggy；
 - fixed 与 buggy+test-delta 都必须成功配置和编译；编译失败不冒充测试失败。
 
+### 函数边界与 file-window 的冻结算法
+
+正式 Data-v2 禁止复用 A1 中按花括号栈猜测函数范围的启发式。该实现会把命名空间、
+类、初始化列表、lambda 和聚合初始化误认成函数，不能支撑“函数级为主”的结论。
+
+1. 成功配置/编译时生成并保存 `compile_commands.json`；用上述冻结 Clang 16 在同一
+   断网沙箱内，按目标 translation unit 的真实编译参数产生
+   `-Xclang -ast-dump=json -fsyntax-only`。替换编译器及 action/output/dependency
+   参数；遇到 response file、compiler plugin 或 config override 时拒绝，不执行；
+2. 只接受带直接 `CompoundStmt` 定义体的 `FunctionDecl`、`CXXMethodDecl`、
+   `CXXConstructorDecl`、`CXXDestructorDecl` 和 `CXXConversionDecl`。implicit、
+   lambda call operator、macro expansion、included/foreign-file 和范围不完整的节点
+   一律不猜；
+3. Clang JSON 省略 `line` 时，从精确 UTF-8 源文件的 byte `offset` 推导物理行；
+   AST JSON、compile-command canonical hash、源文件 SHA256 和 Clang hash 一起留证；
+4. 从已通过本地 Git 图核验的 `git diff --unified=0` 读取 old ranges：替换/删除
+   的精确旧行作为 anchor，纯插入同时锚定相邻 old 行。只有唯一最内层函数定义包含
+   全部 anchor 时才是 `function`；跨函数、歧义或 AST
+   不可证时降为 `file_window`，不能为了配额强判 function；
+5. file-window 的 core 包含全部 anchor，并完整扩展到每个被 anchor 触及的旧函数。
+   core 超过 256 行即拒绝；否则在前后各 96 行上限内最大化上下文，容量不足时
+   两侧平衡、完全相同时优先较早行。文件边界自然缩短；token 超限只对称缩上下文，
+   不截 core。core 自身超过 4,096 tokens 时拒绝。
+
 ## 受限构建 profile
 
 自动默认 profile 为版本化的 `cmake_ctest_out_of_tree_v1`：
@@ -87,6 +111,27 @@ README/CI 日志中直接复制 shell 字符串执行，也禁止通过 profile 
 - 未被版本化 profile 覆盖的 build system 记为固定候选拒绝，不能临时猜命令；
 - 每例固定 CPU、内存、文件输出与 wall-time，build 目录在记录结果后删除，源码
   checkout 和日志保留集群本地且不进入 Git。
+
+### 测试身份和逐项结果
+
+`ctest` 或 `make test` 的一个聚合退出码不足以证明 public/hidden/regression 闭环。
+
+- CMake profile 在 fixed 与 buggy+test-delta 各自构建后，必须先执行
+  `ctest --test-dir build --show-only=json-v1`，规范化完整测试名、command、工作目录
+  和影响执行的 properties，生成稳定 `test_id`；两边测试 ID 集合必须完全一致；
+- 随后以完整分母运行 `ctest --test-dir build -T Test --no-compress-output`，读取
+  CTest 原生 `Testing/<TAG>/Test.xml`。它提供逐项 Completion Status、Exit Code 和
+  output，能区分 timeout；实测 JUnit 只能稳定提供 pass/fail，因此不作为权威结果。
+  canonical result hash 排除 dashboard 时间、耗时和主机元数据，只规范化 checkout/
+  build 路径前缀，绝不删除测试正文中的任意时间文本；聚合退出码只用于交叉核验；
+  注册数超过 10,000、枚举 JSON/Test.xml 任一超过 16 MiB 或总 wall-time 超限时按
+  固定拒绝原因退出，不截断、抽样或替换测试；
+- fixed 必须枚举出的全部测试通过。buggy 对同一完整分母执行后，才允许按逐项结果
+  形成 fail-to-pass 和 pass-to-pass；第二个干净工作树必须重新枚举和执行，测试集合、
+  每项状态、分区及规范化结果 hash 全部一致；
+- Make profile 只有在版本化配置显式声明确定性的 `enumerate_argv`、结构化 parser、
+  单测稳定 ID 以及逐项执行模板时才可准入。只有整体 `make test` 的仓库在 v1 拒绝，
+  不得从控制台文本猜测试数或把一次失败复制成多个目标测试。
 
 ### 现有冻结 rootfs 的实测边界
 
