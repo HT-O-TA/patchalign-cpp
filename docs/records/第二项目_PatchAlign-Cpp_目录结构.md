@@ -639,5 +639,12 @@ HT-O-TA/patchalign-cpp
 ### 2026-09-07：新增 exploratory formal 500 推理入口
 
 - 新增独立 formal 500 配置、artifact validator、CPU preflight、单 GPU 分段推理器和专项测试；
-- 输出规划为 `artifacts/data-v2/exploratory-formal/inference/`，不覆盖 `artifacts/a3/sft-r2/inference/`；
+- 输出 `artifacts/data-v2/exploratory-formal/inference/` 已由 Job `96662` 固化 500 条预测、probe、summary 与 manifest，不覆盖 `artifacts/a3/sft-r2/inference/`；
 - GPU 作业必须消费同一 Git 提交产生的通过态 preflight。
+
+
+### 2026-09-07：exploratory formal 500 推理终态
+
+- preflight Job `96658` 与 GPU Job `96662` 完成，500/500 生成成功、498 strict diff、3/3 probe 稳定；
+- `gpu12` 无预测启动停滞通过同 Job ID 重排到 `gpu04`，状态与日志保留；
+- scoring artifact 尚不存在，下一目录更新应在 `a3-scoring-v2` 完成后记录。

@@ -1088,3 +1088,14 @@ CPU-only Job `96423` 在提交 `080b82f87ade210ecc23b1f6ac429a8be9f8bcd0` 上用
 2026-09-07，在不改写 M1-R2 历史推理产物的前提下，新增独立 `data-v2-exploratory-formal-inference-v0.1`。配置绑定 Job `96427` 的训练提交 `53329624`、训练配置 `8fd855ef...07e5`、selection manifest `5852bf9b...83c`、training summary `23df309c...ac5a`、training manifest `3feb8f6c...60a8b`、best-checkpoint `5dff61e8...f6c9` 和 adapter `d01dc411...21323`。
 
 评测输入保持 formal holdout 500 条（400 function + 100 file-window）、prompt artifact `1a1c8cb...ba1f`、raw completion、greedy Pass@1、max input/new tokens 4,096/512 和 `a3-scoring-v2` 不变。新增 common validator、CPU preflight、分段可恢复单 GPU 推理器和专项漂移测试；preflight 必须验证全仓测试、训练 artifact 反向绑定、模型/环境、500 条 token 与 prompt 字节身份，并要求独立输出目录不存在。该记录点尚未提交 GPU 或执行评分。
+
+
+## 42. Data-v2 exploratory formal 500 推理终态
+
+CPU-only preflight Job `96658` 在 `gpu18` 用时 28 秒并以 `COMPLETED 0:0` 结束，全仓 `298 passed in 19.27s`。报告确认 formal 500 为 400 function + 100 file-window，输入 170～3,589 tokens，重建 prompt artifact SHA256 `1a1c8cb2...ba1f` 与既有 formal 评测逐字节相同；config/preflight SHA256 为 `722a057aa30d77eec4b44511f38196f3c825a50797dd6ddae079a92e63abe3c4`、`0935067bbb95df496b9a30c22057c1268f5d1103b1e5bc59898769e30ed6306a`。
+
+单 GPU Job `96662` 首次在 `gpu12` 获得资源，但运行 23 分 38 秒仍为 0/500，CPU 累计约 77 秒、RSS 约 575 MiB，日志停在 `nvidia-smi` 后且模型分片未加载。确认只有已绑定的 inference-state、没有 partial/final predictions 后，保留同一 Job ID 执行 `requeuehold → exclude gpu12,gpu16 → release`；`Restarts=1`，未删除或覆盖 artifact。替换节点 `gpu04` 在分配后 3 秒进入脚本并正常加载模型。
+
+Job 最终在 `gpu04` 以 `COMPLETED 0:0` 用时 `01:15:27` 结束，500/500 generation status 为 ok，498/500 为 strict diff，3/3 deterministic probe 稳定。有效生成耗时 4,287.01 秒，峰值 allocated GPU memory 为 6,815,647,744 bytes；Slurm MaxRSS 为 17,739,308 KiB。predictions、generation summary、determinism probe、run manifest SHA256 分别为 `4adcb5b7df160bcfcb941c38dbc19690db884badd5754b21d3d133df3cc4eabe`、`2141632b0ccbd735fd2b027704e1ee12fffc3970949b8ede03de686d575e22dc`、`e0678c116361cbc924136780017ab2e8e5268cb05fb8a0ec0f25609782bbccd8`、`0d5bd0d1d0c0667412dc7a2485102538ba8de773ffc40e4eb392c8399ce2546b`；run manifest 反向绑定 adapter `d01dc411...21323` 和运行提交 `c1854abb...b162e`。
+
+本终态只证明不可变生成闭环，尚未得到 parse/apply/build/Pass、regression 或 timeout 指标。下一步必须冻结 scoring binding 并执行 CPU-only `a3-scoring-v2`；不能从 498 条 strict diff 推断修复正确率。
