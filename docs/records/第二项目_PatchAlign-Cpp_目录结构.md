@@ -698,4 +698,5 @@ HT-O-TA/patchalign-cpp
 - 新增 `slurm/data_v2_github_detail_preflight.sbatch`，只验证全仓测试、冻结输入哈希、固定 200 条选择和仓库覆盖，不触网、不写 pilot 输出；
 - 新增 ADR-0017，冻结详情门、600 个逻辑请求上限、50 条 outcome gate 和后续 50 条可执行内容门；
 - 新增 ADR-0018 作为尚未激活的 CommitPack C++ 单分片供给审计提案；当前没有下载分片或建立对应 artifact；
+- 新增 ADR-0019 作为尚未激活的 GitHub 固定 50 条内容执行提案；只冻结安全重建边界，当前没有内容配置、源码 checkout 或执行 artifact；
 - Job `96938`/`96939` 的大 artifact 继续保留在 `artifacts/data-v2/` 并由 Git 忽略，Git 只保存可复现配置、代码、测试、入口和证据摘要。

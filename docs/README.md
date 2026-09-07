@@ -52,6 +52,7 @@
 - GitHub identity 修正：[ADR-0016：仓库 URL 大小写规范化](decisions/0016-github-repository-identity-casefold.md)
 - GitHub 固定详情门：[ADR-0017：固定 detail 与后续可执行内容 pilot](decisions/0017-fixed-github-detail-and-execution-pilot.md)
 - CommitPack 有界候选：[ADR-0018：C++ 单分片供给审计提案](decisions/0018-commitpack-cpp-bounded-supply-audit.md)
+- GitHub 内容执行提案：[ADR-0019：固定 50 条的安全 commit/test 重建](decisions/0019-github-executable-content-pilot.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)
