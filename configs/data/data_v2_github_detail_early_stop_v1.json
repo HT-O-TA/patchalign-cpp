@@ -1,0 +1,65 @@
+{
+  "version": "data-v2-github-detail-early-stop-v1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0020-stop-github-detail-v1-on-unreachable-gate.md",
+    "sha256": "sha256:6aea15a2698ed32edd4ac2d1c8aaa4137cba4dc0c51bfd10d0d5b17fba54930a"
+  },
+  "source_run": {
+    "version": "data-v2-github-detail-pilot-v1",
+    "git_commit": "bb30de8fb2327e53bd384d59baada235c56fd168",
+    "slurm_job_id": 96959,
+    "terminal_state": "CANCELLED by 1039",
+    "elapsed": "04:10:31",
+    "started_at": "2026-09-07T13:21:16Z",
+    "ended_at": "2026-09-07T17:31:47Z",
+    "node": "gpu25",
+    "config": {
+      "path": "configs/data/data_v2_github_detail_pilot_v1.json",
+      "sha256": "sha256:0ff14154ffd8cf82ff4512b7f97f2125eab799bdbafe8de988202c200997a04d"
+    },
+    "script": {
+      "path": "scripts/data/collect_data_v2_github_detail_pilot.py",
+      "sha256": "sha256:85e2d553281a743d0c75fb3f78c3584716f27af4d88a1a77ac1741d8ed50770b"
+    },
+    "selected_candidates": {
+      "path": "artifacts/data-v2/github-detail-pilot-v1/selected-candidates.jsonl",
+      "sha256": "sha256:a0cf60033dd42a60c64c5c62393b70a2f1f1509919114992ae551c401a776576",
+      "count": 200,
+      "split_counts": {
+        "train": 160,
+        "validation": 40
+      },
+      "split_order": [
+        "train",
+        "validation"
+      ]
+    },
+    "checkpoint_root": "artifacts/data-v2/github-detail-pilot-v1/checkpoints",
+    "checkpoint_counts": {
+      "pull": 145,
+      "issue": 81,
+      "license": 20
+    }
+  },
+  "outcome_gate": {
+    "minimum_records": 50,
+    "minimum_split_records": {
+      "train": 40,
+      "validation": 10
+    },
+    "minimum_split_repositories": {
+      "train": 30,
+      "validation": 8
+    }
+  },
+  "scope": {
+    "network_requests": 0,
+    "patch_or_source_read": false,
+    "raw_response_read": false,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "output_directory": "artifacts/data-v2/github-detail-pilot-v1/early-stop-audit-v1"
+}
