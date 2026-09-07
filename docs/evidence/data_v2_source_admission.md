@@ -64,3 +64,9 @@
 桌面准入审计已闭环，共 9 条候选：3 条进入元数据 pilot、4 条冻结为评测保留、2 条因语言不符拒绝。推荐主路线是自建 issue/PR 关联的真实 C++ 修复池，Multi-SWE-RL 仅作结构性补充，RunBugRun v2 只做 legacy 差量核验。当前没有来源获得“可直接进入训练”的许可。
 
 负责人已接受分层 family 契约，但当前 GitHub 单查询容量门已失败。下一实际动作不是提交训练，而是版本化设计多查询/多时间窗的仓库发现层，并行量化 Multi-SWE-RL C++ 与 RunBugRun v2 的真实差量；任何补丁内容准入仍需新的显式门禁。完整结果见 [GitHub C++ 元数据 pilot](data_v2_github_metadata_pilot.md)。
+
+## 2026-09-07 补充候选核查
+
+- SWE-smith 官方仓库提供可执行环境、合成 bug 和测试验证框架，但 2026-01-13 的官方多语言进展只发布 JavaScript，并把 C++ 列为后续路线图。因此当前接入 C++ 会变成自行开发一个新的合成数据系统，不是可直接复用的数据来源，本轮不启动。依据：[SWE-smith 官方仓库](https://github.com/SWE-bench/SWE-smith)、[官方多语言进展](https://www.swebench.com/post-260113-swesmith-javascript.html)。
+- BeetleBox 数据卡列出 C++ train/test 3,868/4,783 条，字段含 issue/PR URL、before/after SHA 和修改文件，适合作为 GitHub 身份索引；但全数据仅 29 个项目，卡片未声明逐记录许可证，也未发布可直接重放的测试命令。本轮只保留为未来 metadata 候选，不下载、不计入 Data-v2 容量。依据：[BeetleBox 官方数据卡](https://huggingface.co/datasets/bug-localization/BeetleBox/blob/main/README.md)。
+- 以上核查不改变 ADR-0017 的固定 GitHub detail 分母，也不激活 ADR-0018；没有下载新数据、创建训练文件或申请 GPU。
