@@ -1099,3 +1099,10 @@ CPU-only preflight Job `96658` 在 `gpu18` 用时 28 秒并以 `COMPLETED 0:0` �
 Job 最终在 `gpu04` 以 `COMPLETED 0:0` 用时 `01:15:27` 结束，500/500 generation status 为 ok，498/500 为 strict diff，3/3 deterministic probe 稳定。有效生成耗时 4,287.01 秒，峰值 allocated GPU memory 为 6,815,647,744 bytes；Slurm MaxRSS 为 17,739,308 KiB。predictions、generation summary、determinism probe、run manifest SHA256 分别为 `4adcb5b7df160bcfcb941c38dbc19690db884badd5754b21d3d133df3cc4eabe`、`2141632b0ccbd735fd2b027704e1ee12fffc3970949b8ede03de686d575e22dc`、`e0678c116361cbc924136780017ab2e8e5268cb05fb8a0ec0f25609782bbccd8`、`0d5bd0d1d0c0667412dc7a2485102538ba8de773ffc40e4eb392c8399ce2546b`；run manifest 反向绑定 adapter `d01dc411...21323` 和运行提交 `c1854abb...b162e`。
 
 本终态只证明不可变生成闭环，尚未得到 parse/apply/build/Pass、regression 或 timeout 指标。下一步必须冻结 scoring binding 并执行 CPU-only `a3-scoring-v2`；不能从 498 条 strict diff 推断修复正确率。
+
+
+## 43. Data-v2 exploratory formal 500 真实评分准备
+
+2026-09-07，新建 `data-v2-exploratory-formal-scoring-v0.1`，把 Job `96662` 的 500 条不可变预测与 formal holdout、adapter、推理提交、生成配置、四类生成 artifact、`a3-scoring-v2` 和 Bubblewrap 0.12.0 逐项绑定。预测 SHA256 为 `4adcb5b7...4eabe`，run manifest 为 `0d5bd0d1...2546b`；固定分母仍为 400 function + 100 file-window。
+
+评分输出固定到独立的 `artifacts/data-v2/exploratory-formal/inference/scoring-v2/`，预检要求输出目录尚不存在、仓库干净、全量测试通过，并逐条验证 prediction Schema、顺序、adapter 身份和 500/500 `status=ok`。CPU-only Slurm 作业申请 4 CPU、4 GiB、12 小时时限，不申请 GPU，并排除已知异常节点 `gpu12,gpu16`。本节只记录评分冻结与提交准备，不提前填写 Pass、regression 或 timeout 结果。

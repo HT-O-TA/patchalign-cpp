@@ -40,6 +40,7 @@
 │   │   │   ├── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
 │   │   │   ├── a3_generalization_diagnostic_v1.json # M1-R2 六项泛化诊断输入与身份契约
 │   │   │   ├── data_v2_exploratory_formal_inference_v0_1.json # 新 adapter 对 formal 500 的不可变推理绑定
+│   │   │   ├── data_v2_exploratory_formal_scoring_v0_1.json # 新 adapter formal 500 预测与 scoring v2 绑定
 │   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
 │   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
 │   │   │   ├── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
@@ -135,6 +136,7 @@
 │   │   ├── data_v2_exploratory_replay_train.sbatch # 单 GPU 探索性 adapter continuation
 │   │   ├── data_v2_exploratory_formal_infer_preflight.sbatch # CPU-only formal 推理身份预检
 │   │   ├── data_v2_exploratory_formal_infer.sbatch # 单 GPU、分段可恢复 formal 500 推理
+│   │   ├── data_v2_exploratory_formal_score.sbatch # CPU-only formal 500 真实执行评分
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成

@@ -116,4 +116,4 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 
 混合 train 固定为 416 function + 364 file-window，避免 260 条全 file-window 增量单独 continuation；训练从 M1-R2 adapter 以 NF4、单轮、低学习率继续。CPU Job `96423` 已冻结 780/131；preflight Job `96426` 以 `287 passed` 核验 Schema、隔离、token、adapter、模型、环境和提交身份；单 GPU Job `96427` 已完成 98-step continuation，adapter SHA256 为 `d01dc411...21323`。
 
-该路线不把旧来源包装成正式 Data-v2，不改变 A3.4/A5 状态。训练 loss 结果只允许作为优化与遗忘风险信号。`data-v2-exploratory-formal-inference-v0.1` 已冻结新 adapter 与原 formal 500 prompt 身份；preflight Job `96658` 与单 GPU Job `96662` 已完成，得到 500/500 成功生成、498 strict diff 和 3/3 稳定 probe。下一步是按 `a3-scoring-v2` 完成 CPU 真实执行评分；之后仍须完成 confirmation 124 和 Defects4C 176，才能讨论泛化。
+该路线不把旧来源包装成正式 Data-v2，不改变 A3.4/A5 状态。训练 loss 结果只允许作为优化与遗忘风险信号。`data-v2-exploratory-formal-inference-v0.1` 已冻结新 adapter 与原 formal 500 prompt 身份；preflight Job `96658` 与单 GPU Job `96662` 已完成，得到 500/500 成功生成、498 strict diff 和 3/3 稳定 probe。formal 500 的 CPU 真实评分绑定已冻结为 `data-v2-exploratory-formal-scoring-v0.1`，精确锁定 Job `96662` 的预测和 `a3-scoring-v2`，等待作业执行；之后仍须完成 confirmation 124 和 Defects4C 176，才能讨论泛化。
