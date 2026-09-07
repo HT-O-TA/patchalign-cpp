@@ -123,6 +123,8 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 
 负责人在旧 replay formal 失败后授予从 Data-v2 到正式 DPO 和最终交付的持续决策权。新路线由 [ADR-0012](decisions/0012-data-v2-to-dpo-staged-governance.md) 管理：旧 780 条混合分支封存，不运行其 confirmation/Defects4C，也不重复调参。
 
-`data-v2-multisource-discovery-v1` 将 discovery 与详情资格拆开。GitHub 主路线固定 2018～2025 的 32 个季度窗口、created 升/降序各一页，共 64 个 metadata-only search 请求；输出只保留仓库、PR 号/API URL、时间和响应哈希，按查询原子 checkpoint。只有实际 split 达到 100/20 个仓库、1,000/100 个候选 family 和 2,000/200 按 cap 计算的样本上界 才能进入固定 200 PR 详情 pilot。
+`data-v2-multisource-discovery-v1` 原计划按 2018～2025 的 32 个季度窗口执行 64 次 Issue Search，但 Job `96894`/`96902` 暴露出端点语义错误：`language`、`stars` 和 `archived` 是 Repository Search 条件，不是 Issue/PR Search 条件。Job `96894` 在 11 个 checkpoint 后遇到 HTTP 504；同提交续跑 `96902` 到 19/64 时主动取消。两者没有终态 manifest，不能支持容量结论；checkpoint 和日志只作为负面工程证据保留。
+
+[ADR-0013](decisions/0013-correct-github-discovery-endpoint-semantics.md) 用版本化 v2 修正，不覆盖 v1：先通过合法的 Repository Search 固定 10×100 个 C++ 仓库候选，再按 Data-v2.1 哈希 split 与固定哈希排序选取 200 train + 40 validation 仓库，最后对每个仓库执行 `repo:… is:pr is:merged linked:issue` 的 repo-local PR Search。共 250 个 metadata-only 请求，间隔至少 7 秒并逐请求原子 checkpoint；输出仍只保留必要身份、时间、star 快照和响应哈希。容量门仍是有候选的实际 split 仓库 100/20、候选 PR 上界 1,000/100、cap 后样本上界 2,000/200，不因修正端点而降低。
 
 Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留评测仓库，训练路线关闭。RunBugRun v2 固定 tag/revision `v2`/`bbac70b7...c938`，官方压缩 SQL 为 120,501,798 bytes，只作为不计仓库多样性的次级 problem-family 差量来源；本 discovery 配置不授权下载，必须在 GitHub 容量门后新增契约。所有 Data-v2 内容、GPU、训练和 DPO 在容量与污染门通过前保持关闭。

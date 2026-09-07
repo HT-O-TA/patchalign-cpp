@@ -1,0 +1,92 @@
+{
+  "version": "data-v2-repository-pr-discovery-v2",
+  "as_of": "2026-09-07",
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "decision": {
+    "path": "docs/decisions/0013-correct-github-discovery-endpoint-semantics.md",
+    "sha256": "sha256:a6f6f67262abf989f5a77b6d52278d6fa1f0ac922b1415ff13b10f159f02717c"
+  },
+  "legacy_denylist": {
+    "path": "configs/data/data_v2_metadata_pilot_v1_2.json",
+    "sha256": "sha256:1cf147cddf3f34f12f0b939ce1ca8f59ff00fc0e8af23536900388c721261f79",
+    "complete_for_patch_content_admission": false
+  },
+  "supersedes": {
+    "config": "configs/data/data_v2_multisource_discovery_v1.json",
+    "jobs": [96894, 96902],
+    "reason": "issue_search_does_not_define_language_stars_or_archived_qualifiers"
+  },
+  "scope": {
+    "metadata_only": true,
+    "patch_or_source_download_authorized": false,
+    "training_dataset_freeze_authorized": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "github": {
+    "api": {
+      "base_url": "https://api.github.com",
+      "version": "2022-11-28",
+      "user_agent": "patchalign-cpp-data-v2-repository-pr-discovery/2",
+      "token_environment_variable": "GITHUB_TOKEN",
+      "timeout_seconds": 30,
+      "maximum_attempts": 3,
+      "minimum_request_interval_seconds": 7.0,
+      "maximum_search_requests": 250
+    },
+    "repository_search": {
+      "endpoint": "/search/repositories",
+      "query": "language:C++ stars:>=20 archived:false pushed:>=2018-01-01",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "pages": 10,
+      "default_excludes_forks": true,
+      "require_returned_language_cpp": true,
+      "require_returned_not_archived": true,
+      "require_returned_not_fork": true
+    },
+    "repository_selection": {
+      "ranking": "sha256(seed_nul_repository_split_group)",
+      "train_repositories": 200,
+      "validation_repositories": 40,
+      "existing_contract_hash_split_required": true
+    },
+    "pull_request_search": {
+      "endpoint": "/search/issues",
+      "query_template": "repo:{owner_repo} is:pr is:merged linked:issue merged:2018-01-01..2025-12-31",
+      "sort": "created",
+      "order": "desc",
+      "per_page": 100,
+      "page": 1
+    },
+    "projection": {
+      "store_repository_identity": true,
+      "store_repository_star_snapshot": true,
+      "store_pr_number_and_api_url": true,
+      "store_timestamps": true,
+      "store_title_body_labels_user": false,
+      "store_patch_or_source": false,
+      "store_raw_response": false,
+      "store_response_sha256": true
+    },
+    "capacity_gate": {
+      "all_queries_complete_required": true,
+      "train_minimum_unique_repositories_with_candidates": 100,
+      "validation_minimum_unique_repositories_with_candidates": 20,
+      "train_minimum_candidate_pr_upper_bound": 1000,
+      "validation_minimum_candidate_pr_upper_bound": 100,
+      "train_minimum_projected_sample_upper_bound_after_caps": 2000,
+      "validation_minimum_projected_sample_upper_bound_after_caps": 200,
+      "maximum_samples_per_candidate_family": 2,
+      "repository_caps": {
+        "train": 40,
+        "validation": 20
+      }
+    }
+  },
+  "output_directory": "artifacts/data-v2/repository-pr-discovery-v2"
+}

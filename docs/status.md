@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-07；旧 exploratory replay 已封存，新 Data-v2 多来源 discovery 已冻结待验收
+最后核验：2026-09-07；旧 exploratory replay 已封存，Data-v2 repository→PR discovery v2 正在准备验收
 
-项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only v1 Job `96406` 已完成但因 PR 级 `label:bug` 查询过窄得到 0 条；v1.1 已核验前 18 条并按治理规则全部拒绝；v1.2 已倒序按仓库去重检查 12 条且仍为 0。冻结查询只有 34 个不同仓库，低于 100 个 train 新仓库门槛，故当前查询容量判定失败并结束本轮试采。正式 Data-v2 仍未构造；旧 exploratory replay 已完成并因 formal 13/500 未过门而封存。负责人已将从新 Data-v2、正式 SFT、偏好审计、正式 DPO 到最终交付的决策授权给执行方；ADR-0012 冻结多来源预算和 staged early-stop，当前只准备 CPU/网络 discovery，GPU 与 DPO 仍关闭。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。ADR-0009 所述“SFT 与探索性研究收尾”作为上一轮历史交付保留，但已被负责人随后授予的持续执行授权扩展；旧 `a4_ready=false` 和 `a5_started=false` 仍是旧模型链的事实，不能用来跳过新路线的前置门。旧 exploratory replay 因 formal `13/500` 未过门而封存。ADR-0012 冻结新数据、三 seed SFT、staged 正式评测、偏好审计、DPO 和最终交付条件。首个 `data-v2-multisource-discovery-v1` 被发现错误地把 Repository Search 的 `language/stars/archived` 条件用于 Issue Search；Job `96894` 在 11/64 时遇到 HTTP 504，续跑 Job `96902` 在 19/64 时因语义无效主动取消，均无终态 manifest。ADR-0013 已冻结正确的 repository→repo-local linked-PR 两级 discovery v2；当前无内容下载、无训练数据、无 GPU，DPO 仍由正式 Data-v2 和 SFT 三门结果约束。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,8 +24,8 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | 多来源 discovery 已冻结待执行 | ADR-0012 固定 64 个 GitHub search、RunBugRun v2 差量路线和 SFT/DPO early-stop；当前无内容下载、无 GPU |
-| A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
+| Data-v2→DPO 新轮次 | repository→PR discovery v2 准备验收 | v1 端点语义无效并已停止；ADR-0013 固定 10 次仓库搜索 + 240 次仓库内 linked-PR 搜索；当前无内容下载、无 GPU |
+| A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## A3.3 当前有效链
 

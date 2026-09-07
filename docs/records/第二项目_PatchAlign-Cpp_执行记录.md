@@ -1124,3 +1124,11 @@ CPU-only Job `96780` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 `00:27:42`�
 多来源身份审计确认：Multi-SWE-RL revision `9777648932daa214ba18c70c81e85821b5836f32` 的 9 个 C++ 仓库全部命中当前保留评测 denylist，训练可用仓库为 0；RunBugRun v2 tag revision 为 `bbac70b7ae7331d87892e861356cf133476bc938`，release 资产 `runbugrun.sql.lrz` 为 120,501,798 bytes。无口令 GitHub API 条件保持不变。
 
 新增 `data-v2-multisource-discovery-v1`、可恢复采集器、专项测试和 CPU-only Slurm 入口。计划最多 64 个 search 请求，理论请求等待约 7.5 分钟，加全仓测试和调度缓冲预计实际运行 10～15 分钟。该准备点尚未下载 patch/source、未创建训练数据、未提交 GPU。
+
+## 46. GitHub discovery 端点语义修正
+
+2026-09-07，提交 `1a6747e90d18ddba08607645c4de81ae2566d421` 的集群全量测试为 `324 passed in 13.91s`。CPU/网络 Job `96894` 在完成 11/64 个查询后因 GitHub API 单次 `504 Gateway Time-out` 失败；同一配置和脚本哈希由 Job `96902` 从 checkpoint 续跑。续跑到 19/64 时，通过核对 GitHub 官方搜索文档确认 v1 把 Repository Search 的 `language:C++`、`stars:>=20`、`archived:false` 错用于 Issue Search。HTTP 200 只代表查询字符串可解析，不能证明 qualifier 属于该搜索域。
+
+继续执行剩余请求不会得到合法的 C++ 仓库容量证据，因此 Job `96902` 在运行 `00:04:18` 后主动取消。两个作业均未生成 `candidates.jsonl`、`summary.json` 或 `run-manifest.json`；已有 19 个查询 checkpoint 与日志保留为失败证据，不进入后续容量计算。
+
+新增 ADR-0013 和 `data-v2-repository-pr-discovery-v2`：先用 Repository Search 的合法语言、star、活跃状态条件读取前 1,000 个候选仓库，按原 Data-v2.1 hash split 和固定 hash rank 选择 200 train + 40 validation，再对每个仓库用合法的 `repo`、`is:pr`、`is:merged`、`linked:issue` 条件搜索 PR。总预算固定 250 次 search、间隔至少 7 秒，仍禁止正文、用户、raw response、patch/source、训练数据和 GPU。容量阈值不变。
