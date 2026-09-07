@@ -1106,3 +1106,12 @@ Job 最终在 `gpu04` 以 `COMPLETED 0:0` 用时 `01:15:27` 结束，500/500 gen
 2026-09-07，新建 `data-v2-exploratory-formal-scoring-v0.1`，把 Job `96662` 的 500 条不可变预测与 formal holdout、adapter、推理提交、生成配置、四类生成 artifact、`a3-scoring-v2` 和 Bubblewrap 0.12.0 逐项绑定。预测 SHA256 为 `4adcb5b7...4eabe`，run manifest 为 `0d5bd0d1...2546b`；固定分母仍为 400 function + 100 file-window。
 
 评分输出固定到独立的 `artifacts/data-v2/exploratory-formal/inference/scoring-v2/`，预检要求输出目录尚不存在、仓库干净、全量测试通过，并逐条验证 prediction Schema、顺序、adapter 身份和 500/500 `status=ok`。CPU-only Slurm 作业申请 4 CPU、4 GiB、12 小时时限，不申请 GPU，并排除已知异常节点 `gpu12,gpu16`。本节只记录评分冻结与提交准备，不提前填写 Pass、regression 或 timeout 结果。
+
+
+## 44. Data-v2 exploratory formal 500 真实评分终态
+
+CPU-only Job `96780` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 `00:27:42`、MaxRSS 857,320 KiB。作业先完成全仓 `310 passed in 30.73s`；preflight 确认 500 条、400/100 组成、498 条 strict diff、3 条稳定 probe、输出目录事前不存在，以及 prediction `4adcb5b7...4eabe`、holdout `5c438d36...c3386`、adapter `d01dc411...21323` 和 scoring config `b8d9507e...59e8` 的冻结身份。preflight SHA256 为 `b4fd59498d5a36d0e4222669f334048ca95e0500477ae7e24fb1bb2e8331a2cf`。
+
+真实结果为 parse/apply/compile/public/Pass `498/412/389/27/13`；function `10/400`，file-window `3/100`，regression failure `8/500`，timeout `1/500`。相对 M1-R2 的 `499/412/392/22/14`，apply 不变、compile -3、public +5、Pass -1；逐样本配对为 10 条 success 保持、3 条新增、4 条丢失。唯一新模型 timeout `rbr-formal-020137ad770189b0c280` 是 M1-R2 已有 timeout，旧 timeout `rbr-formal-453863d9f85a5352eb05` 消失；regression failure 从 3 增至 8。
+
+预注册 formal 下限为 Pass≥14、timeout≤2，本结果只满足 timeout 门，不满足 Pass 门，因此该单 seed continuation 不获得晋级资格。ADR/config 没有定义 formal 失败后的自动 early-stop；confirmation 124 与 Defects4C 176 若继续只补充诊断完整性，不会改变 formal 已失败的事实。scores、summary、manifest SHA256 分别为 `9150c6fb405b6813ec35cd27bffb508d3f2a9e196f375d53c453f119a4770bfb`、`1a8bc423dc19b3e403bf99c2a2db79c6f2dfc608087e5c82624dfa02e865ddd3`、`9cfd016026590e350eef3e78a3edac07e3fd9dbc2f16d409498509aa91b177cf`。

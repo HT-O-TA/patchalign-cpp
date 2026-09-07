@@ -119,6 +119,15 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 
 面试要点：负门禁之后仍可做探索，但必须把授权边界、数据隔离和结论强度写进机器契约；生成成功、可配对和适合 DPO 是三个不同层次的问题。
 
+### Data-v2 exploratory replay：loss 改善没有转化为 Pass 提升
+
+- 在正式 Data-v2 容量不足时，明确把 260 条安全增量 + 520 条 replay 标记为单 seed exploratory continuation，不降低许可证、污染或新 family 门槛。
+- 98-step QLoRA 后 formal validation loss 小幅下降，但冻结 formal 500 真实评分只有 13/500，低于 M1-R2 的 14/500 和预注册下限 14；逐样本是新增 3、丢失 4，而非所有成功整体平移。
+- timeout 从 2 降到 1，但 regression failure 从 3 增到 8，说明风险指标之间也会迁移；不能用 loss、strict diff 或某个安全指标的改善替代端到端判断。
+- 这轮负结果证明了 staged evidence 的价值：先用同一 holdout 和同一执行协议做低成本淘汰，再决定是否值得为独立 confirmation/外部集继续占用 GPU。
+
+面试要点：主动展示一个“loss 看起来更好、真实 Pass 反而下降”的消融，说明自己能区分优化信号、工程指标和产品级正确性，并按预注册阈值停止包装结果。
+
 ## 代表性的工程故障与改进
 
 1. 全量资格回放在单次时限内无法完成：改为候选级原子 checkpoint 和可恢复执行。
