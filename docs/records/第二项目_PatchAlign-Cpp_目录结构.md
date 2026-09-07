@@ -39,6 +39,7 @@
 │   │   │   ├── a3_sft_r2_inference_v1.json # A3.4 训练 artifact 与固定推理绑定
 │   │   │   ├── a3_sft_r2_scoring_v1.json   # A3.4 不可变预测与 scoring v2 绑定
 │   │   │   ├── a3_generalization_diagnostic_v1.json # M1-R2 六项泛化诊断输入与身份契约
+│   │   │   ├── data_v2_exploratory_formal_inference_v0_1.json # 新 adapter 对 formal 500 的不可变推理绑定
 │   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
 │   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
 │   │   │   ├── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
@@ -132,6 +133,8 @@
 │   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
 │   │   ├── data_v2_exploratory_replay_preflight.sbatch # CPU-only 全量测试与身份预检
 │   │   ├── data_v2_exploratory_replay_train.sbatch # 单 GPU 探索性 adapter continuation
+│   │   ├── data_v2_exploratory_formal_infer_preflight.sbatch # CPU-only formal 推理身份预检
+│   │   ├── data_v2_exploratory_formal_infer.sbatch # 单 GPU、分段可恢复 formal 500 推理
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -631,3 +634,10 @@ HT-O-TA/patchalign-cpp
 - CPU preflight Job `96426` 与单 GPU Job `96427` 均成功，运行提交为 `53329624`；
 - 训练 artifact 位于 `artifacts/data-v2/exploratory-replay-training/`，含 step 49/98 checkpoint、best checkpoint、training summary 和 run manifest；
 - 该目录继续由 `.gitignore` 排除并留在集群，Git 只同步配置、代码、Slurm 入口和文档。
+
+
+### 2026-09-07：新增 exploratory formal 500 推理入口
+
+- 新增独立 formal 500 配置、artifact validator、CPU preflight、单 GPU 分段推理器和专项测试；
+- 输出规划为 `artifacts/data-v2/exploratory-formal/inference/`，不覆盖 `artifacts/a3/sft-r2/inference/`；
+- GPU 作业必须消费同一 Git 提交产生的通过态 preflight。

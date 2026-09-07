@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-07；exploratory replay 训练完成，三套真实执行评测待运行
+最后核验：2026-09-07；exploratory replay 训练完成，formal 500 推理 preflight 待运行
 
 项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only v1 Job `96406` 已完成但因 PR 级 `label:bug` 查询过窄得到 0 条；v1.1 已核验前 18 条并按治理规则全部拒绝；v1.2 已倒序按仓库去重检查 12 条且仍为 0。冻结查询只有 34 个不同仓库，低于 100 个 train 新仓库门槛，故当前查询容量判定失败并结束本轮试采。正式 Data-v2 仍未构造；另行标记的 exploratory replay 已完成 CPU 构建与单 GPU continuation，尚未进行三套真实执行评测。
 
@@ -23,7 +23,7 @@
 | 收尾后泛化诊断 | 完成 | Job `96197` 对 M1-R2 完成六项只读诊断；结论为尚未证明语义泛化 |
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
-| Data-v2 exploratory replay | 单 GPU 训练完成；真实评测待运行 | Jobs `96423`/`96426`/`96427` 完成数据、preflight 和 98-step continuation；尚不能声称泛化提升 |
+| Data-v2 exploratory replay | 训练完成；formal 推理绑定已冻结 | Jobs `96423`/`96426`/`96427` 完成；formal 500 CPU preflight 通过后提交 1 GPU 推理 |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链
@@ -101,6 +101,8 @@ CPU-only Job `96423` 在提交 `080b82f` 上以 `COMPLETED 0:0` 用时 57 秒完
 该数据只服务 ADR-0011 的单 seed、98-step、M1-R2 adapter continuation 消融，不满足 Data-v2.1 正式容量门，也不启动 A5。CPU preflight Job `96426` 在提交 `53329624` 上用时 23 秒，以 `287 passed` 完成全仓测试，并验证数据、token、模型、adapter、环境和 Git 身份；报告 SHA256 为 `4a6f4416...79f3`。
 
 单 GPU Job `96427` 随后在 `gpu06` 以 `COMPLETED 0:0` 用时 `00:11:41` 完成 780 micro-steps / 98 optimizer steps，无 OOM、NaN 或超时，峰值 allocated 显存为 14,453,680,640 bytes（约 13.46 GiB）。最佳 checkpoint 为 epoch 1 / step 98，adapter SHA256 为 `d01dc411...21323`。formal SFT validation 的 report-only loss 从 M1-R2 的 `0.1310540061` 降到 `0.1293390337`（`-0.0017149724`），focused validation loss 为 `0.2120499949`。这只说明监督损失与遗忘风险信号没有恶化，不能替代 formal 500、confirmation 124 和 Defects4C 176 的真实执行评分。training summary/manifest SHA256 为 `23df309c...ac5a`、`3feb8f6c...60a8b`。
+
+下一步已建立独立的 `data-v2-exploratory-formal-inference-v0.1` 绑定：精确锁定新 adapter 及训练 artifact，继续使用原 formal 500、原 prompt 字节、greedy Pass@1 和 4,096/512 token 上限，不覆盖 M1-R2 推理目录。当前等待 CPU preflight，全绿后才提交单 GPU 推理；执行评分尚未开始。
 
 ## A4 最终状态
 

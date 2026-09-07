@@ -1081,3 +1081,10 @@ CPU-only Job `96423` 在提交 `080b82f87ade210ecc23b1f6ac429a8be9f8bcd0` 上用
 最佳 checkpoint 为 `checkpoints/checkpoint-step-000098-epoch-1`，focused validation loss 为 `0.2120499949`；formal SFT validation 的 report-only loss 从源 M1-R2 的 `0.1310540061` 降到 `0.1293390337`，差值 `-0.0017149724`。新 adapter、adapter config、training summary、training manifest、best-checkpoint SHA256 分别为 `d01dc411a2e67b9ad1e796433bce3836f07c2aa4d754e6976f47d1ab94421323`、`8e02f058d459339b36d3ed43ec348f7874f753cf34f794e0a06341f7651c7483`、`23df309cab3b6cbebb41f6afed1b075114e0f9cdeaf56bac96ee7e6edd20ac5a`、`3feb8f6c8b3e1b8a61bfe15f61ae16f7abc34da52c8698312a8c0f710ef60a8b`、`5dff61e8f1d76cd0ed32197b04ebde7ebf5e83493e450d0fc70c8bd41626f6c9`；反向绑定核验通过。
 
 本终态只证明训练稳定、checkpoint 可追溯以及 formal validation loss 未恶化。它不是 Pass 提升证据，不满足正式 Data-v2.1 容量契约，不改变 A3.4 readiness 失败或 A5 延后状态。下一步应为新 adapter 建立不可变推理绑定，依次完成 formal 500、confirmation 124 和 Defects4C 176 的真实执行评测。
+
+
+## 41. Data-v2 exploratory formal 500 推理准备
+
+2026-09-07，在不改写 M1-R2 历史推理产物的前提下，新增独立 `data-v2-exploratory-formal-inference-v0.1`。配置绑定 Job `96427` 的训练提交 `53329624`、训练配置 `8fd855ef...07e5`、selection manifest `5852bf9b...83c`、training summary `23df309c...ac5a`、training manifest `3feb8f6c...60a8b`、best-checkpoint `5dff61e8...f6c9` 和 adapter `d01dc411...21323`。
+
+评测输入保持 formal holdout 500 条（400 function + 100 file-window）、prompt artifact `1a1c8cb...ba1f`、raw completion、greedy Pass@1、max input/new tokens 4,096/512 和 `a3-scoring-v2` 不变。新增 common validator、CPU preflight、分段可恢复单 GPU 推理器和专项漂移测试；preflight 必须验证全仓测试、训练 artifact 反向绑定、模型/环境、500 条 token 与 prompt 字节身份，并要求独立输出目录不存在。该记录点尚未提交 GPU 或执行评分。

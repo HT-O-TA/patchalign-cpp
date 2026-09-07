@@ -1,0 +1,45 @@
+{
+  "version": "data-v2-exploratory-formal-inference-v0.1",
+  "run_id": "dv2_exploratory_formal_s20260906",
+  "seed": 20260906,
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "source_training": {
+    "directory": "/mingli01/project/ht/patchalign-cpp/artifacts/data-v2/exploratory-replay-training",
+    "git_commit": "53329624ddc2ce764b8b7acbf133d6e12682be16",
+    "config_sha256": "sha256:8fd855eefb83c1ae47df0698a85d186673c7c18d5eadb78f0e63e9a2502707e5",
+    "selection_manifest_sha256": "sha256:5852bf9b6bfa091af7dd5b3cfb6ef2bfaa84d1aed07478454af9978ba79f083c",
+    "manifest_sha256": "sha256:3feb8f6c8b3e1b8a61bfe15f61ae16f7abc34da52c8698312a8c0f710ef60a8b",
+    "summary_sha256": "sha256:23df309cab3b6cbebb41f6afed1b075114e0f9cdeaf56bac96ee7e6edd20ac5a",
+    "best_checkpoint_sha256": "sha256:5dff61e8f1d76cd0ed32197b04ebde7ebf5e83493e450d0fc70c8bd41626f6c9",
+    "checkpoint": "checkpoints/checkpoint-step-000098-epoch-1",
+    "adapter_sha256": "sha256:d01dc411a2e67b9ad1e796433bce3836f07c2aa4d754e6976f47d1ab94421323",
+    "source_adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a"
+  },
+  "evaluation": {
+    "holdout_root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+    "holdout_manifest": "a2-manifest.json",
+    "holdout_manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+    "prompt_artifact_sha256": "sha256:1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f",
+    "required_task_levels": {
+      "function": 400,
+      "file_window": 100
+    },
+    "prompt_version": "a3-cpp-repair-v1",
+    "input_mode": "raw_completion",
+    "allowed_path": "main.cpp",
+    "scoring_protocol": "a3-scoring-v2",
+    "generation": {
+      "do_sample": false,
+      "temperature": null,
+      "top_p": null,
+      "num_return_sequences": 1,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 512
+    }
+  }
+}
