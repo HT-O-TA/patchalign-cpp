@@ -70,10 +70,14 @@ buggy parent。
 正式 Data-v2 禁止复用 A1 中按花括号栈猜测函数范围的启发式。该实现会把命名空间、
 类、初始化列表、lambda 和聚合初始化误认成函数，不能支撑“函数级为主”的结论。
 
-1. 成功配置/编译时生成并保存 `compile_commands.json`；用上述冻结 Clang 16 在同一
-   断网沙箱内，按目标 translation unit 的真实编译参数产生
-   `-Xclang -ast-dump=json -fsyntax-only`。替换编译器及 action/output/dependency
-   参数；遇到 response file、compiler plugin 或 config override 时拒绝，不执行；
+1. 成功配置/编译时生成并保存 `compile_commands.json`；原始 `command` 只用
+   POSIX quoting 解析成 argv，绝不交给 shell。只剥离 ccache/sccache launcher，
+   编译器替换为上述冻结 Clang 16，并删除 action/output/dependency 与 Werror 参数，
+   再按目标 translation unit 的真实其余参数产生
+   `-Xclang -ast-dump=json -fsyntax-only`。response file、shell metacharacter、
+   compiler plugin/config、`-B`、附着式 output、native CPU 参数、目标 TU 缺失或
+   多义时均拒绝 AST 调用，不执行、不猜测；规范化 argv 与执行目录生成 canonical
+   hash；
 2. 只接受带直接 `CompoundStmt` 定义体的 `FunctionDecl`、`CXXMethodDecl`、
    `CXXConstructorDecl`、`CXXDestructorDecl` 和 `CXXConversionDecl`。implicit、
    lambda call operator、macro expansion、included/foreign-file 和范围不完整的节点
@@ -84,7 +88,11 @@ buggy parent。
    的精确旧行作为 anchor，纯插入同时锚定相邻 old 行。只有唯一最内层函数定义包含
    全部 anchor 时才是 `function`；跨函数、歧义或 AST
    不可证时降为 `file_window`，不能为了配额强判 function；
-5. file-window 的 core 包含全部 anchor，并完整扩展到每个被 anchor 触及的旧函数。
+5. Git 必须同时使用 `--no-ext-diff --no-textconv --no-renames`，路径/状态另用
+   NUL-delimited plumbing 核验。zero-context parser 只接受一个既有 UTF-8 文本文件，
+   并复核每个 hunk 声明与正文计数；new/deleted/binary/rename/copy/mode change、
+   多文件、context 行和计数不符全部拒绝；
+6. file-window 的 core 包含全部 anchor，并完整扩展到每个被 anchor 触及的旧函数。
    core 超过 256 行即拒绝；否则在前后各 96 行上限内最大化上下文，容量不足时
    两侧平衡、完全相同时优先较早行。文件边界自然缩短；token 超限只对称缩上下文，
    不截 core。core 自身超过 4,096 tokens 时拒绝。

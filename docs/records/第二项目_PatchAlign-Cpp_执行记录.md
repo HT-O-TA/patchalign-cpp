@@ -1196,3 +1196,26 @@ CTest 3.22.1 的 JUnit 对 fail 与 timeout 信息不足，因此不作为权威
 JSON/Test.xml 端到端 smoke 和 `git diff --check`；集群全量 pytest 必须等 detail
 长作业终态后，在不破坏其 commit/checkpoint 绑定的情况下同步新提交再执行。当前
 仍没有下载 patch/source、没有 Data-v2 训练样本，也没有授权 GPU/SFT/DPO。
+
+## 53. compile database 与 Git diff 安全解析基础
+
+2026-09-07，新增 `data_v2_compile_commands.py` 和
+`data_v2_git_diff.py`，继续为尚未激活的 ADR-0019 内容资格链补齐可重放基础，
+没有读取候选源码或提交新实验。
+
+compile database 解析器支持标准 arguments/command 两种字段，但 command 只通过
+POSIX quoting 转 argv，永不交给 shell；仅允许 ccache/sccache 加受支持 C/C++
+compiler 形态。输出、依赖、action 和 Werror 参数被确定性删除，response file、
+shell metacharacter、plugin/config、`-B`、附着式 output 与 native CPU 参数
+fail-closed。目标 source、directory 必须在 checkout/build 边界内且只有一个匹配
+entry，临时根路径规范化后生成跨 run canonical hash。
+
+Git parser 只接受 `--unified=0 --no-ext-diff --no-textconv --no-renames` 产生的单个
+既有 UTF-8 文本文件 diff，逐 hunk 复核 old/new count；新增/删除/二进制/重命名/
+复制/mode、多文件、context 或计数漂移一律拒绝。其 old ranges 直接交给上一节的
+anchor 算法，不再由另一套文本 diff 重新对齐。
+
+两组各 4 项直接断言通过；真实 CMake 3.22/G++ 11 compile database 净化 smoke 和
+当前仓库真实 Git zero-context diff 解析 smoke 也通过。本机没有 Ninja/Clang，未做
+本地 AST 进程 smoke，也未安装依赖；冻结 Clang 16 的实际 argv/AST 与全量 pytest
+留到 Job 96959 终态后在集群受控环境验证。

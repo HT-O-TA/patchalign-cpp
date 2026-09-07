@@ -707,6 +707,9 @@ HT-O-TA/patchalign-cpp
   AST 选择 function/file-window，上下文选择为纯函数、可独立重放；
 - `scripts/data/data_v2_ctest_results.py`：规范化 CTest 测试身份并解析原生
   Test.xml 的逐测试结果；
-- 对应专项测试位于 `tests/unit/test_data_v2_cpp_context.py` 和
-  `tests/unit/test_data_v2_ctest_results.py`；
+- `scripts/data/data_v2_compile_commands.py`：把 CMake compile database 安全、
+  确定性地投影为冻结 Clang AST argv，不执行原始 shell command；
+- `scripts/data/data_v2_git_diff.py`：校验单文件 zero-context Git diff 并输出
+  old/new ranges；
+- 对应专项测试统一位于 `tests/unit/test_data_v2_*.py`；
 - 本次没有新增 artifact 目录；临时 CTest probe 位于本机 `/tmp`，不属于项目交付。
