@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-07；旧 exploratory replay 已封存，Data-v2 repository→PR discovery v2 正在准备验收
+最后核验：2026-09-07；旧 exploratory replay 已封存，Data-v2 repository→PR discovery v2.1 修复待集群验收
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。ADR-0009 所述“SFT 与探索性研究收尾”作为上一轮历史交付保留，但已被负责人随后授予的持续执行授权扩展；旧 `a4_ready=false` 和 `a5_started=false` 仍是旧模型链的事实，不能用来跳过新路线的前置门。旧 exploratory replay 因 formal `13/500` 未过门而封存。ADR-0012 冻结新数据、三 seed SFT、staged 正式评测、偏好审计、DPO 和最终交付条件。首个 `data-v2-multisource-discovery-v1` 被发现错误地把 Repository Search 的 `language/stars/archived` 条件用于 Issue Search；Job `96894` 在 11/64 时遇到 HTTP 504，续跑 Job `96902` 在 19/64 时因语义无效主动取消，均无终态 manifest。ADR-0013 已冻结正确的 repository→repo-local linked-PR 两级 discovery v2；当前无内容下载、无训练数据、无 GPU，DPO 仍由正式 Data-v2 和 SFT 三门结果约束。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。ADR-0009 所述“SFT 与探索性研究收尾”作为上一轮历史交付保留，但已被负责人随后授予的持续执行授权扩展；旧 `a4_ready=false` 和 `a5_started=false` 仍是旧模型链的事实，不能用来跳过新路线的前置门。旧 exploratory replay 因 formal `13/500` 未过门而封存。ADR-0012 冻结新数据、三 seed SFT、staged 正式评测、偏好审计、DPO 和最终交付条件。首个 `data-v2-multisource-discovery-v1` 被发现错误地把 Repository Search 的 `language/stars/archived` 条件用于 Issue Search；Job `96894` 在 11/64 时遇到 HTTP 504，续跑 Job `96902` 在 19/64 时因语义无效主动取消，均无终态 manifest。ADR-0013 已冻结 repository→repo-local linked-PR 两级 discovery。Job 96922 完成 250/250 个请求，但 2,955 条 PR 因内部小写 canonical identity 与 GitHub 官方大小写 URL 的敏感比较被误拒，故其 train 79/100 容量失败结论无效。ADR-0016 保持查询和阈值不变，发布大小写不敏感且绑定完整 denylist 的 v2.1；当前无内容下载、无训练数据、无 GPU，DPO 仍由正式 Data-v2 和 SFT 三门结果约束。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,7 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | repository→PR discovery v2 准备验收 | v1 端点语义无效并已停止；ADR-0013 固定 10 次仓库搜索 + 240 次仓库内 linked-PR 搜索；当前无内容下载、无 GPU |
+| Data-v2→DPO 新轮次 | repository→PR discovery v2.1 待集群验收 | Job 96922 完成但暴露 URL 大小写比较缺陷；ADR-0016 固定只修身份投影、不改查询/阈值；当前无内容下载、无 GPU |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## A3.3 当前有效链
@@ -94,6 +94,8 @@ CPU-only Job `96256` 在提交 `3b1fa42` 上完成，5 项专项测试通过；�
 本轮没有下载 JSONL、SQLite、仓库源码或容器，`content_downloaded=false`、`training_data_frozen=false`、`gpu_job_authorized=false`。负责人已接受 [ADR-0010](decisions/0010-data-v2-hierarchical-family-contract.md)：仓库级 `repository_split_group` 负责隔离，细粒度 `sampling_family` 仍维持最多 2 条，并新增 train/validation 每仓库 40/20 条上限以及 100/20 个新仓库、1,000/100 个新 sampling family 最低目标。当前只授权 GitHub metadata-only pilot。v1 Job `96406` 为 0/15 仓库，诊断确认 PR 级 `label:bug` 是零结果条件；v1.1 保留 15 仓库目标、检查 18 个 PR 后仍为 0；拒绝由 6 个文件数越界、3 个行数越界、7 个无显式同仓库 issue、1 个 stars 不足和 1 个许可证不在 allowlist 组成。48 条搜索结果实际覆盖 34 个仓库；v1.2 Job `96417` 倒序、详情前按仓库去重检查 12 个仓库后仍为 0，拒绝为文件数 4、行数 1、fork 1、stars 2、无显式 issue 3、许可证 1。由于查询全集的 34 个仓库已小于 train 的 100 个新仓库下限，当前查询容量门直接失败，未继续消耗 API 扫描中段。内容下载、测试重放、Data-v2 冻结和 GPU 仍关闭。完整证据见 [GitHub metadata pilot 结果](evidence/data_v2_github_metadata_pilot.md)。
 
 CPU-only 专项 Job `96326` 在提交 `b93084c` 上以 `5 passed in 0.03s` 完成；来源审计全量回归 Job `96328` 为 `265 passed in 13.50s`。Data-v2.1 最终全仓回归 Job `96419` 为 `276 passed in 13.27s`。首次 one-off 回归 Job `96327` 因 `sbatch --wrap` 的 `/bin/sh` 不支持 Bash `pipefail` 而在进入 pytest 前失败，已由 POSIX 兼容命令替代，不计为测试失败。
+
+RunBugRun v2 的来源边界由 ADR-0015 进一步关闭：官方数据/代码仓库许可证不能替代逐条竞赛提交授权；在逐记录 provenance、训练/再分发授权与 opt-out 排除无法证明前，只允许不含程序/测试正文的 schema 和规模元数据研究，不允许完整 release 下载、Data-v2/SFT/DPO 训练或再分发。该工程决定不是法律意见，也不回写既有实验事实。
 
 ## Data-v2 exploratory replay
 

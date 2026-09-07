@@ -1138,3 +1138,18 @@ CPU-only Job `96780` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 `00:27:42`�
 2026-09-07，在不读取 reference patch、fixed code、测试输出或其他 gold 的前提下，只读取冻结 manifest 的 `problem_id`/`project` 字段。formal 500 与 confirmation 124 均为逐例唯一 problem family，集合交集为 0，稳定 LF 集合哈希分别为 `679d03dc...a323b`、`6d735127...86d1`；Defects4C 176 条只覆盖 `danmar/cppcheck`、`llvm/llvm-project`、`skypjack/entt`、`uncrustify/uncrustify`、`wez/atomicparsley`、`zeromq/libzmq` 六个仓库。
 
 上游身份固定为 BugsCpp `be5cc489cb2b3127ec3b73cb4adfdd290807f55b`（215 defects、24 project IDs）、LLVM APR `765534776d06d355b026f713f265653f34d8b3ad` 和 DebugBench `2761bab93c4c65351b19d0ef4a94b26abe47a185`。新增 ADR-0014、机器配置、validator、专项测试和 CPU-only Slurm 入口；匹配覆盖 exact canonical repository、归一化项目别名、fork source/parent lineage、LeetCode-derived 域和 RunBugRun problem family。complete 标志只允许候选内容审计，训练、GPU 与 DPO 仍为 false。
+
+
+## 48. repository→PR discovery v2 终态与投影缺陷
+
+CPU/网络 Job 96922 在提交 2d6f96378699eee7763beafec06f9da531c32f73 上于 2026-09-07T12:04:12Z 以 COMPLETED 0:0 结束，用时 00:29:35。10 个 Repository Search 与 240 个 repo-local PR Search checkpoint 全部形成，987 个仓库通过初始投影、240 个仓库被固定选择、候选记录 4,766 条；repository pool、selected repositories、candidates、summary、run manifest SHA256 分别为 9b468518...2325b、41d9f869...a8af2、2c5fb978...e75b0、b5f2d5a9...23e6、ffc27ab1...614d。作业未请求 GPU、patch/source、正文、用户身份、raw response 或评测 gold。
+
+终态表面结果为 train 79/100 个有候选仓库、validation 21/20，且 2,955 条 PR 被记为 repository_identity_mismatch。调查证明这不是有效容量失败：内部 canonical repository 强制小写，而 GitHub API URL 保留官方仓库大小写；旧实现对完整 URL 做大小写敏感比较。最小只读探针中，repo:clickhouse/clickhouse 返回 https://api.github.com/repos/ClickHouse/ClickHouse，ClickHouse、QGIS、SFML 等多个仓库因此整页被误拒。
+
+ADR-0016 将 Job 96922 与其 artifact 保留为投影缺陷证据，但禁止把 79/100 当作容量下界。v2.1 保持查询、时间窗、排序、哈希选择、请求预算和所有容量阈值不变，只修正 GitHub owner/repo 的 casefold 身份比较，绑定 ADR-0014 完整 denylist，并使用独立输出目录重新请求；旧 checkpoint 因未保存拒绝条目身份而不能安全离线修复。
+
+## 49. RunBugRun v2 来源许可边界
+
+ADR-0015 固定 RunBugRun v2 revision bbac70b7ae7331d87892e861356cf133476bc938 和 release asset runbugrun.sql.lrz 120,501,798 bytes。官方 RunBugRun 要求检查各原始来源条款；Project CodeNet/CodeContests 的仓库或数据集许可不能自动证明每条第三方竞赛提交的训练与再分发授权，当前 AtCoder 条款和 AI training opt-out 公告又表明提交者权利与同意需要逐条处理。历史采集时适用条款不能从当前页面反推。
+
+因此 RunBugRun v2 在新 Data-v2 路线中只允许不含程序/测试正文的规模、schema 和 problem-family 元数据研究；完整 release 下载、内容取得、SFT、DPO、GPU 和再分发全部关闭。重新评估必须同时获得逐条原始平台身份、适用训练/再分发授权、未知或 opt-out 排除、污染审计及新版本 ADR/机器契约。该 fail-closed 决策不是法律意见，不回写历史实验结果，但对外发布旧模型/数据时仍须披露来源限制。

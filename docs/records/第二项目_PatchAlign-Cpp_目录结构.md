@@ -25,8 +25,10 @@
 │   │   │   ├── data_v2_source_admission_v1.json # 新 C++ 来源准入、评测保留与下载门禁
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
 │   │   │   ├── data_v2_multisource_discovery_v1.json # GitHub/RunBugRun/Multi-SWE 多来源容量与权限门
-│   │   │   ├── data_v2_repository_pr_discovery_v2.json # 合法 Repository→repo-local PR 两级容量发现
+│   │   │   ├── data_v2_repository_pr_discovery_v2.json # v2 历史配置；URL 大小写投影缺陷由 v2.1 取代
+│   │   │   ├── data_v2_repository_pr_discovery_v2_1.json # 查询不变、casefold 身份比较的两级容量发现
 │   │   │   ├── data_v2_evaluation_denylist_v1.json # 当前冻结评测身份与内容取得前 denylist
+│   │   │   ├── data_v2_runbugrun_v2_provenance_gate_v1.json # RunBugRun v2 fail-closed 来源许可门
 │   │   │   ├── data_v2_exploratory_replay_v0_1.json # 安全增量 + formal replay 消融数据契约
 │   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
 │   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
@@ -89,8 +91,9 @@
 │   │   │   ├── check_data_v2_source_admission.py # 新来源桌面清单 fail-closed 校验
 │   │   │   ├── check_data_v2_contract.py # Data-v2.1 分层 family 契约校验
 │   │   │   ├── discover_data_v2_multisource.py # 查询级 checkpoint 的 metadata-only 容量 discovery
-│   │   │   ├── discover_data_v2_repository_prs.py # 端点语义修正后的两级 metadata discovery
+│   │   │   ├── discover_data_v2_repository_prs.py # v2.1 两级 metadata discovery 与 casefold 身份比较
 │   │   │   ├── check_data_v2_evaluation_denylist.py # 编译 problem/repository/fork 评测隔离身份
+│   │   │   ├── check_data_v2_runbugrun_v2_provenance_gate.py # RunBugRun v2 训练边界校验
 │   │   │   ├── collect_data_v2_github_metadata.py # 不落 patch/源码的 GitHub 元数据采集器
 │   │   │   ├── build_data_v2_exploratory_replay.py # 复现安全增量并构造 function replay 混合
 │   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
@@ -138,7 +141,8 @@
 │   │   ├── data_v2_source_admission.sbatch # CPU-only 新来源清单专项验收
 │   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
 │   │   ├── data_v2_multisource_discovery.sbatch # CPU/网络 64-query 多来源容量 discovery
-│   │   ├── data_v2_repository_pr_discovery.sbatch # CPU/网络 250-query 两级容量 discovery
+│   │   ├── data_v2_repository_pr_discovery.sbatch # v2 历史 CPU/网络作业入口
+│   │   ├── data_v2_repository_pr_discovery_v2_1.sbatch # v2.1 CPU/网络 250-query 两级容量 discovery
 │   │   ├── data_v2_evaluation_denylist.sbatch # CPU-only 冻结评测身份编译与验收
 │   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
 │   │   ├── data_v2_exploratory_replay_preflight.sbatch # CPU-only 全量测试与身份预检
@@ -678,3 +682,11 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0014、`data_v2_evaluation_denylist_v1.json`、validator、专项测试和 CPU-only Slurm 入口；
 - 身份覆盖 624 个冻结 CodeNet problem family、Defects4C 六仓库、Multi-SWE C++、BugsCpp、LLVM APR 和 DebugBench 域；
 - complete 只适用于候选内容取得，训练前的 exact content/commit 去重、许可证和执行重放仍为硬门。
+
+
+### 2026-09-07：RunBugRun v2 来源门与 GitHub identity v2.1
+
+- 新增 ADR-0015、机器配置、validator 和专项测试，把 RunBugRun v2 限定为无程序正文的 metadata/schema 研究；完整 release 下载、训练和再分发保持关闭；
+- Job 96922 的 250 个 checkpoint 与终态 artifact 留在 repository-pr-discovery-v2/，但因大小写敏感 URL 比较误拒 2,955 条 PR，不作为容量证据；
+- 新增 ADR-0016、v2.1 配置和 Slurm 入口；查询、选择、限流和阈值不变，身份比较改为 GitHub owner/repo casefold，并绑定完整评测 denylist；
+- v2.1 使用独立 artifacts/data-v2/repository-pr-discovery-v2-1/，不覆盖或复用 v2 final artifact。

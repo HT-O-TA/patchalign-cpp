@@ -21,11 +21,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def load_config() -> dict:
-    return json.loads((ROOT / "configs/data/data_v2_repository_pr_discovery_v2.json").read_text(encoding="utf-8"))
+    return json.loads((ROOT / "configs/data/data_v2_repository_pr_discovery_v2_1.json").read_text(encoding="utf-8"))
 
 
 def deny_config() -> dict:
-    return json.loads((ROOT / "configs/data/data_v2_metadata_pilot_v1_2.json").read_text(encoding="utf-8"))
+    return json.loads((ROOT / "configs/data/data_v2_evaluation_denylist_v1.json").read_text(encoding="utf-8"))
 
 
 def repository_item(owner: str = "fresh", repo: str = "project", stars: int = 50) -> dict:
@@ -73,7 +73,7 @@ def selected_repository(repository: str = "github.com/fresh/project", split: str
     }
 
 
-def test_v2_contract_is_fail_closed_and_metadata_only() -> None:
+def test_v2_1_contract_is_fail_closed_and_metadata_only() -> None:
     config = load_config()
     validate_config(config)
     assert config["scope"] == {
@@ -151,6 +151,14 @@ def test_pull_request_projection_drops_sensitive_fields() -> None:
         "training_admitted",
     }
     assert not {"title", "body", "labels", "user"}.intersection(record)
+
+    mixed_case = pull_item("github.com/Fresh/Project", 18)
+    mixed_record, mixed_reason = project_pull_request_item(mixed_case, repository, "ghrepo-test")
+    assert mixed_reason == "selected"
+    assert mixed_record is not None
+    assert mixed_record["repository_split_group"] == "github.com/fresh/project"
+    assert mixed_record["pr_api_url"].endswith("/Fresh/Project/pulls/18")
+
     mismatched, reason = project_pull_request_item(
         pull_item("github.com/other/repo"), repository, "ghrepo-test"
     )
@@ -213,10 +221,10 @@ def test_capacity_gate_uses_repositories_with_candidates_and_caps() -> None:
         (("github", "repository_selection", "train_repositories"), 199),
         (("github", "pull_request_search", "query_template"), "is:pr"),
         (("github", "capacity_gate", "train_minimum_unique_repositories_with_candidates"), 99),
-        (("legacy_denylist", "complete_for_patch_content_admission"), True),
+        (("evaluation_denylist", "complete_for_candidate_content_acquisition"), False),
     ],
 )
-def test_v2_contract_rejects_drift(path: tuple[str, ...], value: object) -> None:
+def test_v2_1_contract_rejects_drift(path: tuple[str, ...], value: object) -> None:
     changed = copy.deepcopy(load_config())
     target = changed
     for key in path[:-1]:

@@ -18,10 +18,11 @@ import urllib.parse
 import urllib.request
 
 from scripts.data.check_data_v2_contract import assign_new_split, canonical_repository, validate_contract
+from scripts.data.check_data_v2_evaluation_denylist import repository_denial_reason
 
 
-VERSION = "data-v2-repository-pr-discovery-v2"
-DEFAULT_CONFIG = Path("configs/data/data_v2_repository_pr_discovery_v2.json")
+VERSION = "data-v2-repository-pr-discovery-v2.1"
+DEFAULT_CONFIG = Path("configs/data/data_v2_repository_pr_discovery_v2_1.json")
 
 
 def require(condition: bool, message: str) -> None:
@@ -109,15 +110,15 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
     require(config.get("version") == VERSION, "unexpected discovery version")
     contract = verify_bound_file(config["contract"], "Data-v2 contract")
     validate_contract(contract)
-    verify_bound_file(config["decision"], "ADR-0013")
-    deny_config = verify_bound_file(config["legacy_denylist"], "legacy denylist")
+    verify_bound_file(config["decision"], "ADR-0016")
+    deny_config = verify_bound_file(config["evaluation_denylist"], "evaluation denylist")
     require(
-        deny_config["denylist"]["complete_for_patch_content_admission"] is False,
-        "legacy denylist completeness unexpectedly changed",
+        deny_config["scope"]["complete_for_candidate_content_acquisition"] is True,
+        "evaluation denylist is incomplete",
     )
     require(
-        config["legacy_denylist"]["complete_for_patch_content_admission"] is False,
-        "content denylist declared complete",
+        config["evaluation_denylist"]["complete_for_candidate_content_acquisition"] is True,
+        "content-acquisition completeness not bound",
     )
     require(
         config["scope"]
@@ -130,7 +131,7 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
         },
         "discovery scope changed",
     )
-    require(config["supersedes"]["jobs"] == [96894, 96902], "superseded job evidence changed")
+    require(config["supersedes"]["jobs"] == [96922], "superseded job evidence changed")
 
     github = config["github"]
     api = github["api"]
@@ -209,15 +210,12 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
     )
     planned_requests = repository_search["pages"] + selection["train_repositories"] + selection["validation_repositories"]
     require(planned_requests == api["maximum_search_requests"], "request budget does not match query matrix")
-    require(config["output_directory"] == "artifacts/data-v2/repository-pr-discovery-v2", "output directory changed")
+    require(config["output_directory"] == "artifacts/data-v2/repository-pr-discovery-v2-1", "output directory changed")
     return deny_config
 
 
 def is_denied_repository(canonical: str, deny_config: dict[str, Any]) -> bool:
-    denied = deny_config["denylist"]
-    return canonical in set(denied["exact_canonical_repositories"]) or canonical.rsplit("/", 1)[-1] in set(
-        denied["exact_repository_name_aliases"]
-    )
+    return repository_denial_reason(canonical, deny_config) is not None
 
 
 def project_repository_item(
@@ -287,10 +285,10 @@ def project_pull_request_item(
 ) -> tuple[dict[str, Any] | None, str]:
     repository_url = str(item.get("repository_url") or "")
     expected_url = "https://api.github.com/repos/" + repository["repository_split_group"].removeprefix("github.com/")
-    if repository_url != expected_url:
+    if repository_url.casefold() != expected_url.casefold():
         return None, "repository_identity_mismatch"
     pull_url = str((item.get("pull_request") or {}).get("url") or "")
-    if not pull_url.startswith(expected_url + "/pulls/"):
+    if not pull_url.casefold().startswith((expected_url + "/pulls/").casefold()):
         return None, "missing_pull_request_api_url"
     number = int(item.get("number") or 0)
     if number <= 0:
@@ -299,7 +297,7 @@ def project_pull_request_item(
     candidate_id = "ghpr-" + hashlib.sha256(f"{canonical}\0{number}".encode("utf-8")).hexdigest()[:24]
     record = {
         "candidate_id": candidate_id,
-        "source_dataset": "github-linked-pr-discovery-v2",
+        "source_dataset": "github-linked-pr-discovery-v2.1",
         "repository_split_group": canonical,
         "repository_stars_at_discovery": repository["repository_stars_at_discovery"],
         "projected_split": repository["projected_split"],
