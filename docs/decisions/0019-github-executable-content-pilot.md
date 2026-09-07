@@ -88,6 +88,22 @@ README/CI 日志中直接复制 shell 字符串执行，也禁止通过 profile 
 - 每例固定 CPU、内存、文件输出与 wall-time，build 目录在记录结果后删除，源码
   checkout 和日志保留集群本地且不进入 Git。
 
+### 现有冻结 rootfs 的实测边界
+
+2026-09-07 对配置绑定的 `rootfs-cb4efcac` 做只读核验，当前可直接绑定：
+
+- CMake 3.26.4：`f9145454fdcbf2bb6518db2f93a1594fd778500b8c31cba9ecc66e4547e11f51`；
+- CTest：`78eed20996db4a7c55edfa19c0cb18d381242298f48526b8e40e64f172983da1`；
+- Ninja：`f5b0c00c7cdc229f41d35d36770ff1fb38403cfcac41df481446537c36a02267`；
+- Make：`0d4e89c3b814ce99c4900b2a4c758ab780303ae98dddd71ab0dd82ec0ca07fa6`；
+- G++ 9：`0c0b987719385f8e242819dfef6a3e97b4b2540ce4035dbc11565df2966bd69e`；
+- Clang 16：`335b5d001032b1df06155f24e449108a78db000d57386bf93683e00138c6d513`；
+- Bubblewrap 0.12.0：`c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda`。
+
+该 rootfs 不含 Meson 或 Bazel。因此首个实际配置最多启用 CMake/CTest 与经过审计的
+Make profile；Meson/Bazel 只有在新 rootfs 单独构建、验哈希、Slurm 预检并由新
+版本配置绑定后才能启用。此工具核验不构成内容 pilot 激活，也没有执行第三方代码。
+
 ## 双资格、分区与稳定性
 
 1. fixed 必须全量测试通过；
