@@ -690,3 +690,12 @@ HT-O-TA/patchalign-cpp
 - Job 96922 的 250 个 checkpoint 与终态 artifact 留在 repository-pr-discovery-v2/，但因大小写敏感 URL 比较误拒 2,955 条 PR，不作为容量证据；
 - 新增 ADR-0016、v2.1 配置和 Slurm 入口；查询、选择、限流和阈值不变，身份比较改为 GitHub owner/repo casefold，并绑定完整评测 denylist；
 - v2.1 使用独立 artifacts/data-v2/repository-pr-discovery-v2-1/，不覆盖或复用 v2 final artifact。
+
+
+### 2026-09-07：GitHub detail pilot 与第三来源提案
+
+- 新增 `configs/data/data_v2_github_detail_pilot_v1.json`、固定采集器、专项测试及 CPU/网络 Slurm 入口；
+- 新增 `slurm/data_v2_github_detail_preflight.sbatch`，只验证全仓测试、冻结输入哈希、固定 200 条选择和仓库覆盖，不触网、不写 pilot 输出；
+- 新增 ADR-0017，冻结详情门、600 个逻辑请求上限、50 条 outcome gate 和后续 50 条可执行内容门；
+- 新增 ADR-0018 作为尚未激活的 CommitPack C++ 单分片供给审计提案；当前没有下载分片或建立对应 artifact；
+- Job `96938`/`96939` 的大 artifact 继续保留在 `artifacts/data-v2/` 并由 Git 忽略，Git 只保存可复现配置、代码、测试、入口和证据摘要。

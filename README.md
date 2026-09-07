@@ -1,6 +1,6 @@
 # PatchAlign-Cpp
 
-PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目在固定数据、提示和评测协议下完成了 LoRA/QLoRA SFT、独立确认与外部评测，并开展了负责人授权的探索性执行偏好研究。本轮在 A5/DPO 前收尾；正式晋级失败和负结果均保留。
+PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项目在固定数据、提示和评测协议下完成了第一轮 LoRA/QLoRA SFT、独立确认、外部评测和探索性执行偏好研究；历史晋级失败与负结果完整保留。当前已按 ADR-0012 进入 Data-v2→多 seed SFT→正式 DPO 的新研究轮次，RLVR/GRPO 不属于本轮范围。
 
 项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
 
@@ -69,7 +69,7 @@ PatchAlign-Cpp 是一个面向 C++ 缺陷修复的可验证后训练项目。项
 - A1/A2 pilot 与正式 A3.3 数据不是同一证据等级；正式运行的当前状态和身份必须从状态页及 artifact manifest 核对；
 - A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 绑定 A2/A3 内部 artifact，公开正式报告前应以新版本提升且不改写历史结果；
 - A3.4 的旧 holdout 内部门禁通过，但独立确认集失败，完整 readiness 保持 `a4_ready=false`；exploratory A4 不改变该结论；
-- A4 已形成 182 对内部偏好数据，但本轮没有启动或完成 DPO，详见 [ADR-0009](docs/decisions/0009-close-after-sft-and-exploratory-a4.md)；
+- 第一轮 A4 已形成 182 对内部偏好数据且未启动 DPO；该历史收尾见 [ADR-0009](docs/decisions/0009-close-after-sft-and-exploratory-a4.md)。当前新路线必须重新通过 Data-v2、三 seed SFT、正式评测和偏好审计门，不能直接复用这 182 对启动 DPO；
 - 基础模型预训练污染未知，只能披露，不能声称完全排除。
 
 ## 许可证与发布边界

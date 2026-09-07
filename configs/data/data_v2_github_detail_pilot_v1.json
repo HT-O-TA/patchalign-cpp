@@ -1,0 +1,125 @@
+{
+  "version": "data-v2-github-detail-pilot-v1",
+  "as_of": "2026-09-07",
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "decision": {
+    "path": "docs/decisions/0017-fixed-github-detail-and-execution-pilot.md",
+    "sha256": "sha256:04bcc4d2a1cc826e99589be0177cb7638f4d0acdf5f646a13d5ae7eaf2986c61"
+  },
+  "evaluation_denylist": {
+    "path": "configs/data/data_v2_evaluation_denylist_v1.json",
+    "sha256": "sha256:45d2ad1f565e18abbea504d32c2ce6e0ae8b218c7ec29dd9256d5793fbed5f72"
+  },
+  "discovery": {
+    "version": "data-v2-repository-pr-discovery-v2.1",
+    "git_commit": "3dbdbb0c0e0ecd5b94ed476a506a713248d3db9c",
+    "slurm_job_id": 96939,
+    "candidates": {
+      "path": "artifacts/data-v2/repository-pr-discovery-v2-1/candidates.jsonl",
+      "sha256": "sha256:9af2a04b33bdf7b0e12419072904423754039ec5dda83c24cd19e18ad39d0493",
+      "count": 7721
+    },
+    "summary": {
+      "path": "artifacts/data-v2/repository-pr-discovery-v2-1/summary.json",
+      "sha256": "sha256:6893c69ee78395fa08c193a1cc6d7cdadf50f4a9ec113cc207421f9848048dd1"
+    },
+    "run_manifest": {
+      "path": "artifacts/data-v2/repository-pr-discovery-v2-1/run-manifest.json",
+      "sha256": "sha256:9f1faede1218bc1d6ec19c66c68a12dc75fe734ee5b5b3b8c17cd21e7cb8e324"
+    },
+    "expected_capacity": {
+      "train": {
+        "unique_repositories_with_candidates": 143,
+        "candidate_pr_upper_bound": 6565,
+        "projected_sample_upper_bound_after_caps": 4078
+      },
+      "validation": {
+        "unique_repositories_with_candidates": 29,
+        "candidate_pr_upper_bound": 1156,
+        "projected_sample_upper_bound_after_caps": 440
+      }
+    }
+  },
+  "scope": {
+    "metadata_detail_only": true,
+    "patch_or_source_requested": false,
+    "raw_response_stored": false,
+    "text_or_user_identity_stored": false,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "sampling": {
+    "seed": 20260906,
+    "targets": {
+      "train": 160,
+      "validation": 40
+    },
+    "minimum_repository_coverage": {
+      "train": 100,
+      "validation": 20
+    },
+    "maximum_candidates_per_repository": 2,
+    "order": "repository_round_robin_then_sha256_seed_nul_candidate_id"
+  },
+  "api": {
+    "base_url": "https://api.github.com",
+    "version": "2022-11-28",
+    "user_agent": "patchalign-cpp-data-v2-github-detail-pilot/1",
+    "token_environment_variable": "GITHUB_TOKEN",
+    "timeout_seconds": 30,
+    "maximum_attempts": 3,
+    "maximum_logical_requests": 600,
+    "maximum_network_attempts_per_run": 606,
+    "unauthenticated_minimum_interval_seconds": 61.0,
+    "authenticated_minimum_interval_seconds": 0.5
+  },
+  "detail_gates": {
+    "require_primary_language_cpp": true,
+    "require_nonfork_nonarchived": true,
+    "require_merged_and_three_commit_identities": true,
+    "changed_files": {
+      "minimum": 1,
+      "maximum": 10
+    },
+    "changed_lines": {
+      "minimum": 2,
+      "maximum": 200
+    },
+    "require_same_repository_explicit_closing_issue": true,
+    "maximum_linked_issues_checked": 1,
+    "require_bug_label": true,
+    "linked_issue_bug_label_tokens": [
+      "bug",
+      "bugs",
+      "bugfix",
+      "defect",
+      "defects"
+    ],
+    "allowed_spdx": [
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "BSL-1.0",
+      "ISC",
+      "MIT",
+      "Zlib"
+    ],
+    "require_current_license_content_sha256": true
+  },
+  "outcome_gate": {
+    "minimum_records": 50,
+    "minimum_split_records": {
+      "train": 40,
+      "validation": 10
+    },
+    "minimum_split_repositories": {
+      "train": 30,
+      "validation": 8
+    }
+  },
+  "output_directory": "artifacts/data-v2/github-detail-pilot-v1"
+}

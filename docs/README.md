@@ -50,6 +50,8 @@
 - Data-v2 评测隔离：[ADR-0014：完整 denylist 边界](decisions/0014-evaluation-denylist-completeness-boundary.md)
 - RunBugRun v2 训练边界：[ADR-0015：来源许可与 provenance 门](decisions/0015-runbugrun-v2-provenance-training-boundary.md)
 - GitHub identity 修正：[ADR-0016：仓库 URL 大小写规范化](decisions/0016-github-repository-identity-casefold.md)
+- GitHub 固定详情门：[ADR-0017：固定 detail 与后续可执行内容 pilot](decisions/0017-fixed-github-detail-and-execution-pilot.md)
+- CommitPack 有界候选：[ADR-0018：C++ 单分片供给审计提案](decisions/0018-commitpack-cpp-bounded-supply-audit.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)

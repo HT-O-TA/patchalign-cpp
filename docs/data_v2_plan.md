@@ -130,3 +130,10 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留评测仓库，训练路线关闭。RunBugRun v2 固定 tag/revision `v2`/`bbac70b7...c938`，官方压缩 SQL 为 120,501,798 bytes，只作为不计仓库多样性的次级 problem-family 差量来源；本 discovery 配置不授权下载，必须在 GitHub 容量门后新增契约。所有 Data-v2 内容、GPU、训练和 DPO 在容量与污染门通过前保持关闭。
 
 [ADR-0014](decisions/0014-evaluation-denylist-completeness-boundary.md) 进一步冻结当前评测身份：formal/confirmation 共 624 个互斥 CodeNet problem family、Defects4C 的 6 个仓库、Multi-SWE-bench C++ 的 9 个仓库、BugsCpp 24 个项目标识、LLVM APR 与 DebugBench/LeetCode-derived 域。只有 manifest/revision/集合哈希全部通过才允许取得候选内容；这不等于训练准入，取得内容后仍须 exact commit/content 去重、许可证和 buggy-fail/fixed-pass 重放。
+
+
+### v2.1 容量终态与固定详情门
+
+ADR-0016 的 casefold 修正由 Job `96939` 完成独立重跑：7,721 条 metadata 候选覆盖 train/validation 143/29 个仓库，容量门通过。该结果不能直接转成训练数据。ADR-0017 进一步固定 200 条 PR detail 分母，只验证小改动、显式同仓库 bug issue、仓库身份和 allowlist LICENSE；详情门至少 50 条通过后才允许取得固定 50 条的 commit/source/test 内容，并要求至少 10 条稳定 buggy-fail/fixed-pass。
+
+Data-v2 单一新来源仍最多占 70%。CommitPack 的单分片 CPU 供给审计已由 ADR-0018 设计但尚未激活；只有 GitHub detail 门通过且量化出明确第三来源缺口后才下载固定 `c++-0001.jsonl`，避免在主路线质量未知时进行 524 MB 的无效采集。RunBugRun v2 继续受 ADR-0015 限制，不作为本轮训练来源。

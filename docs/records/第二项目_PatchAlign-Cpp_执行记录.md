@@ -1153,3 +1153,20 @@ ADR-0016 将 Job 96922 与其 artifact 保留为投影缺陷证据，但禁止�
 ADR-0015 固定 RunBugRun v2 revision bbac70b7ae7331d87892e861356cf133476bc938 和 release asset runbugrun.sql.lrz 120,501,798 bytes。官方 RunBugRun 要求检查各原始来源条款；Project CodeNet/CodeContests 的仓库或数据集许可不能自动证明每条第三方竞赛提交的训练与再分发授权，当前 AtCoder 条款和 AI training opt-out 公告又表明提交者权利与同意需要逐条处理。历史采集时适用条款不能从当前页面反推。
 
 因此 RunBugRun v2 在新 Data-v2 路线中只允许不含程序/测试正文的规模、schema 和 problem-family 元数据研究；完整 release 下载、内容取得、SFT、DPO、GPU 和再分发全部关闭。重新评估必须同时获得逐条原始平台身份、适用训练/再分发授权、未知或 opt-out 排除、污染审计及新版本 ADR/机器契约。该 fail-closed 决策不是法律意见，不回写历史实验结果，但对外发布旧模型/数据时仍须披露来源限制。
+
+
+## 50. evaluation denylist 与 repository→PR discovery v2.1 终态
+
+CPU-only Job `96938` 在提交 `3dbdbb0c0e0ecd5b94ed476a506a713248d3db9c` 上以 `COMPLETED 0:0` 用时 36 秒结束，全仓 `363 passed`。validator 固定 formal 500 + confirmation 124 共 624 个互斥 problem family、Defects4C 六项目及其他评测保留身份；编译身份集合 SHA256 为 `99a740a2eabc7f84fdb5b614d7501bc0879d8eca00824aef0e0c15dcd812707e`，run manifest SHA256 为 `48c8b2d7ab90f855d42017b00974bffa207a9760ee8b5042f6a2871ea0be7d6c`。
+
+同提交的 CPU/网络 Job `96939` 在 `gpu28` 以 `COMPLETED 0:0` 用时 `00:29:40` 结束，全仓同为 `363 passed`，10 个 repository 和 240 个 PR checkpoint 全部完成。最终 repository pool 为 983 个、固定选择 240 个仓库、候选 7,721 条；train/validation 分别覆盖 143/29 个有候选仓库，PR 上界 6,565/1,156，应用仓库 cap 后上界 4,078/440，所有容量门通过。
+
+repository pool、selected repositories、candidates、summary、run manifest SHA256 分别为 `f13c22fd5be7b634fa7ddf799db93b82c94ab563576a4e96eb1fb74a713b3026`、`663edc7b5f15004e1ed8594339be789adc36f54ecb6c55b1b86f9a1da68d9eff`、`9af2a04b33bdf7b0e12419072904423754039ec5dda83c24cd19e18ad39d0493`、`6893c69ee78395fa08c193a1cc6d7cdadf50f4a9ec113cc207421f9848048dd1`、`9f1faede1218bc1d6ec19c66c68a12dc75fe734ee5b5b3b8c17cd21e7cb8e324`。该结果只证明 metadata 容量，不包含 patch/source、正文、用户身份、训练数据或 GPU。
+
+## 51. 固定 GitHub detail pilot 与第三来源候选
+
+ADR-0017 在 Job `96939` 的固定 artifact 上选择 200 个 PR（train 160、validation 40），每仓库最多 2 条且至少覆盖 100/20 个仓库。详情请求依次验证 PR、最多一个显式同仓库 closing issue 和仓库 LICENSE；任何前置失败均不发后续请求。只保存必要身份、布尔审核字段和响应/许可证哈希，不保存 title/body/label 原文、用户、raw response、patch/source 或测试内容。
+
+detail outcome gate 固定为至少 50 条、train/validation 至少 40/10 且至少覆盖 30/8 个仓库；只有通过后才允许建立固定 50 条（40/10）可执行内容 pilot，并要求至少 10/50 达到稳定 buggy-fail/fixed-pass。已新增可恢复采集器、配置、6 项本地功能测试、12 小时 CPU/网络入口及零网络零输出的短 preflight 入口。长作业必须等集群全量 pytest、输入哈希和固定 200 条选择通过后再提交。
+
+ADR-0018 作为暂未激活的第三来源提案，固定 CommitPack revision、365 个 C++ shard 清单和仅下载升序首分片 `c++-0001.jsonl` 的边界。只有 GitHub detail 路线通过且确实需要补足单来源 70% 上限时，才执行该 CPU 供给审计；当前未下载 524 MB 分片、未生成训练数据、未申请 GPU。
