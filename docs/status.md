@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-07T13:23Z；Job 96958 预检通过，固定 GitHub detail Job 96959 在 gpu25 运行；计划约 17:30Z 稀疏复查
+最后核验：2026-09-07T17:57Z；Job 97150 完成 GitHub detail v1 早停审计；evidence metadata v2 准备中
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。ADR-0009 所述“SFT 与探索性研究收尾”作为上一轮历史交付保留，但已被负责人随后授予的持续执行授权扩展；旧 `a4_ready=false` 和 `a5_started=false` 仍是旧模型链的事实，不能用来跳过新路线的前置门。旧 exploratory replay 因 formal `13/500` 未过门而封存。ADR-0012 冻结新数据、三 seed SFT、staged 正式评测、偏好审计、DPO 和最终交付条件。首个 `data-v2-multisource-discovery-v1` 被发现错误地把 Repository Search 的 `language/stars/archived` 条件用于 Issue Search；Job `96894` 在 11/64 时遇到 HTTP 504，续跑 Job `96902` 在 19/64 时因语义无效主动取消，均无终态 manifest。ADR-0013 已冻结 repository→repo-local linked-PR 两级 discovery。Job 96922 完成 250/250 个请求，但 2,955 条 PR 因内部小写 canonical identity 与 GitHub 官方大小写 URL 的敏感比较被误拒，故其 train 79/100 容量失败结论无效。ADR-0016 保持查询和阈值不变，发布大小写不敏感且绑定完整 denylist 的 v2.1。CPU-only Job 96938 已完成 denylist 全量验收；Job 96939 完成 250/250 个请求并通过容量门，得到 7,721 个候选，train/validation 有候选仓库 143/29。ADR-0017 已固定 200 条 metadata detail pilot 及 50 条后续可执行内容 pilot 的停止门；当前仍无 patch/source 下载、无训练数据、无 GPU，DPO 继续由正式 Data-v2 和三 seed SFT 的分阶段门禁约束。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。repository→PR v2.1 discovery 已证明 metadata 容量，但固定 detail v1 在连续完成 144 个 train 候选时只有 8 条合格；即使余下 train 全部成功也最多 24 条/23 仓库，低于冻结的 40 条/30 仓库门。Job `96959` 因 outcome 数学不可达主动停止，CPU-only Job `97150` 以 `391 passed` 独立重建并确认 8 合格、136 拒绝、1 中断、55 未开始。58 个不同仓库只因关闭 issue 缺少 bug 标签而被拒，故 ADR-0021 建立独立 evidence v2：标签只作分层，最终资格仍由历史许可证、污染隔离及断网 `buggy fail → fixed pass` 稳定重放证明。当前无 patch/source、无训练数据、无 GPU，DPO 仍未启动。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,7 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | 固定 detail pilot 运行中 | CPU preflight Job 96958：369 passed、200 条选择覆盖 143/29 仓库；Job 96959 在 gpu25 按无令牌 61 秒节流运行，当前仍无 patch/source、训练或 GPU |
+| Data-v2→DPO 新轮次 | detail v1 已关闭；evidence metadata v2 准备中 | Job 97150 确认 v1 train 乐观上限 24/40；ADR-0021 保持固定 200 条分母，以真实执行证据取代噪声标签资格 |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## A3.3 当前有效链
@@ -150,3 +150,11 @@ CPU-only Job `96423` 在提交 `080b82f` 上以 `COMPLETED 0:0` 用时 57 秒完
 12. **已完成**：提交 `d296833` 冻结 ADR-0008、偏好对 Schema 和 A4 scoring v1；preflight `95651`、替换评分数组 `95670` 和聚合 `95671` 完成 1,056 条评分与 182 对偏好数据。
 13. **已决策**：负责人审阅 A4 的规模、信号强度、timeout 风险和 train-only 泛化边界后，决定本轮在 SFT + exploratory A4 收尾，A5/DPO 延后。
 14. **已完成**：建立最终技术报告、M1-R2 模型卡和交付说明；大型 artifact 保持集群本地化，不作公开发布。
+
+## GitHub detail v1 早停终态
+
+Job `96959` 在固定顺序的前 144 个 train 候选中仅得到 8 条合格记录。剩余 16 条即使全部成功，train 也最多 24 条；可覆盖仓库最多 23 个，分别低于 40 条和 30 仓库门。作业在 `2026-09-07T17:31:47Z` 主动取消，检查点保留。
+
+CPU-only Job `97150` 在提交 `a169fdf` 上用时 35 秒，完成 `391 passed`，并精确核对源 Job 的 Slurm 终态、源配置/脚本/选择哈希和 145/81/20 个 pull/issue/license checkpoint。最终连续完成前缀为 144：8 合格、136 拒绝、1 中断、55 未开始；第 145 条因只有 pull 而无 issue checkpoint 记为中断。拒绝主项为 issue 无 bug 标签 58、无显式 closing issue 34、文件数越界 20、许可证不在 allowlist 12、行数越界 9。
+
+该结果关闭 ADR-0017 v1，不激活 ADR-0019，也不授权内容或训练。ADR-0021 的新路线保持固定 200 条和全部执行硬门，只把 bug 标签改为分层字段；先完成缺失 metadata，过 40/10、30/8 门后才固定 20 条执行可行性分母。完整证据见 [GitHub detail v1 早停审计](evidence/data_v2_github_detail_early_stop.md)。

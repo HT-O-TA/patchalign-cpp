@@ -1,0 +1,99 @@
+{
+  "version": "data-v2-github-executable-evidence-metadata-v2",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0021-use-executable-evidence-before-bug-label.md",
+    "sha256": "sha256:b686656b77a1189471bef0758ed3d0d32dda860fc4baa802bb8799fb730bb3e2"
+  },
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "evaluation_denylist": {
+    "path": "configs/data/data_v2_evaluation_denylist_v1.json",
+    "sha256": "sha256:45d2ad1f565e18abbea504d32c2ce6e0ae8b218c7ec29dd9256d5793fbed5f72"
+  },
+  "source_v1": {
+    "version": "data-v2-github-detail-pilot-v1",
+    "git_commit": "bb30de8fb2327e53bd384d59baada235c56fd168",
+    "config_sha256": "sha256:0ff14154ffd8cf82ff4512b7f97f2125eab799bdbafe8de988202c200997a04d",
+    "script_sha256": "sha256:85e2d553281a743d0c75fb3f78c3584716f27af4d88a1a77ac1741d8ed50770b",
+    "selection": {
+      "path": "artifacts/data-v2/github-detail-pilot-v1/selected-candidates.jsonl",
+      "sha256": "sha256:a0cf60033dd42a60c64c5c62393b70a2f1f1509919114992ae551c401a776576",
+      "count": 200,
+      "split_counts": {"train": 160, "validation": 40}
+    },
+    "checkpoint_root": "artifacts/data-v2/github-detail-pilot-v1/checkpoints",
+    "checkpoint_counts": {"pull": 145, "issue": 81, "license": 20},
+    "early_stop_audit": {
+      "job_id": 97150,
+      "summary": {
+        "path": "artifacts/data-v2/github-detail-pilot-v1/early-stop-audit-v1/summary.json",
+        "sha256": "sha256:88517d7b196fc53b633358fbaf25413d0ec7cf906759229385297fb7b2cbfd25"
+      },
+      "decisions": {
+        "path": "artifacts/data-v2/github-detail-pilot-v1/early-stop-audit-v1/decisions.jsonl",
+        "sha256": "sha256:3edcbb90074ff43c5a7296a73534a36699924ccdb4e15e6aeb42f4a6e6439c05"
+      },
+      "checkpoint_inventory": {
+        "path": "artifacts/data-v2/github-detail-pilot-v1/early-stop-audit-v1/checkpoint-inventory.json",
+        "sha256": "sha256:46773acfd846570694a2d4e7c3444f71774d60e06cd47cc942c1b344e40a1650",
+        "canonical_sha256": "sha256:7d1829a7ff11c037d32d816402e07d9cd20d925874f12eb4c979d4ac96d8265c"
+      },
+      "run_manifest": {
+        "path": "artifacts/data-v2/github-detail-pilot-v1/early-stop-audit-v1/run-manifest.json",
+        "sha256": "sha256:d82b2bfc3569b057d441c756cce0637b0c835bd39ab4b6e12a61043bae5de554"
+      }
+    }
+  },
+  "scope": {
+    "metadata_only": true,
+    "source_checkpoint_reuse": true,
+    "patch_or_source_requested": false,
+    "license_requested": false,
+    "raw_response_stored": false,
+    "text_or_user_identity_stored": false,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "detail_gates": {
+    "changed_files": {"minimum": 1, "maximum": 10},
+    "changed_lines": {"minimum": 2, "maximum": 200},
+    "require_same_repository_explicit_closing_issue": true,
+    "require_closed_issue_not_pull_request": true,
+    "bug_label_is_stratification_only": true,
+    "linked_issue_bug_label_tokens": ["bug", "bugs", "bugfix", "defect", "defects"]
+  },
+  "reuse_rules": {
+    "accepted_v1_pull_projection": true,
+    "accepted_v1_issue_projection": true,
+    "v1_no_bug_label_reason_implies_closed_issue_and_bug_label_false": true,
+    "all_other_v1_pull_or_issue_rejections_remain_terminal": true,
+    "v1_license_checkpoint_is_not_a_metadata_gate": true
+  },
+  "api": {
+    "base_url": "https://api.github.com",
+    "version": "2022-11-28",
+    "user_agent": "patchalign-cpp-github-executable-evidence-metadata-v2/1",
+    "token_environment_variable": "GITHUB_TOKEN",
+    "timeout_seconds": 30,
+    "maximum_attempts": 3,
+    "maximum_new_logical_requests": 111,
+    "maximum_network_attempts_per_run": 117,
+    "unauthenticated_minimum_interval_seconds": 61.0,
+    "authenticated_minimum_interval_seconds": 0.5
+  },
+  "outcome_gate": {
+    "minimum_records": 50,
+    "minimum_split_records": {"train": 40, "validation": 10},
+    "minimum_split_repositories": {"train": 30, "validation": 8}
+  },
+  "next_stage": {
+    "fixed_feasibility_denominator": {"train": 16, "validation": 4},
+    "minimum_executable_records": 4,
+    "training_admitted": false
+  },
+  "output_directory": "artifacts/data-v2/github-executable-evidence-v2/metadata"
+}

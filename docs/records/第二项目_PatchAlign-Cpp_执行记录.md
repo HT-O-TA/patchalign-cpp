@@ -1219,3 +1219,9 @@ anchor 算法，不再由另一套文本 diff 重新对齐。
 当前仓库真实 Git zero-context diff 解析 smoke 也通过。本机没有 Ninja/Clang，未做
 本地 AST 进程 smoke，也未安装依赖；冻结 Clang 16 的实际 argv/AST 与全量 pytest
 留到 Job 96959 终态后在集群受控环境验证。
+
+## 54. GitHub detail v1 数学早停与证据路线修订
+
+2026-09-08，一次性定时快照确认 Job `96959` 在前 144 个固定 train 候选中只有 8 条合格；剩余 16 条全成功也只有 24/40，因此主动取消。CPU-only Job `97150` 随后以 `COMPLETED 0:0` 用时 35 秒完成 `391 passed`，重建为 8 合格、136 拒绝、1 中断、55 未开始，并确认 train 仓库乐观上限 23/30。summary/run manifest SHA256 为 `88517d7b...fd25`、`d82b2bfc...e554`。
+
+拒绝主项 `linked_issue_without_bug_label` 为 58 条且来自 58 个仓库。ADR-0020 关闭 v1，不恢复、不换样本、不降低原门；ADR-0021 建立独立 executable-evidence v2，标签只作分层，最终资格仍由历史许可证、完整 commit 图和 Bubblewrap 断网 buggy-fail/fixed-pass 稳定重放决定。新 metadata 配置允许逐哈希复用 v1 checkpoint，只补缺失 pull/issue，不请求 license、patch/source，不使用 GPU。

@@ -137,3 +137,9 @@ Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留�
 ADR-0016 的 casefold 修正由 Job `96939` 完成独立重跑：7,721 条 metadata 候选覆盖 train/validation 143/29 个仓库，容量门通过。该结果不能直接转成训练数据。ADR-0017 进一步固定 200 条 PR detail 分母，只验证小改动、显式同仓库 bug issue、仓库身份和 allowlist LICENSE；详情门至少 50 条通过后才允许取得固定 50 条的 commit/source/test 内容，并要求至少 10 条稳定 buggy-fail/fixed-pass。
 
 Data-v2 单一新来源仍最多占 70%。CommitPack 的单分片 CPU 供给审计已由 ADR-0018 设计但尚未激活；只有 GitHub detail 门通过且量化出明确第三来源缺口后才下载固定 `c++-0001.jsonl`，避免在主路线质量未知时进行 524 MB 的无效采集。RunBugRun v2 继续受 ADR-0015 限制，不作为本轮训练来源。
+
+## 第六阶段：detail v1 早停与 executable-evidence v2
+
+固定 detail Job `96959` 在连续完成 144 个 train 候选后只有 8 条合格；train 剩余 16 条，因此记录和仓库乐观上限分别为 24/40、23/30。CPU-only Job `97150` 以 `391 passed` 独立重建这一反证，v1 正式关闭，未取得 patch/source，也未激活 ADR-0019。
+
+136 个拒绝中有 58 条来自 58 个不同仓库，唯一失败条件是关联关闭 issue 没有 bug 标签。ADR-0021 因此建立新版本：保持同一 200 条固定分母和显式 closing issue/关闭状态，小改动与评测 denylist 不变；标签只用于分层，最终缺陷资格仍要求历史许可证和断网双资格稳定重放。先补完缺失的 PR/issue metadata；只有至少 50 条、train/validation 40/10 且仓库 30/8 通过，才固定 20 条（16/4）执行可行性分母。至少 4/20 通过后再运行不重叠的正式 50 条 pilot，避免直接在异构仓库上开展无效大规模构建。

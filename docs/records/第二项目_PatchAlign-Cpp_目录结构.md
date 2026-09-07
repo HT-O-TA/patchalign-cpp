@@ -713,3 +713,10 @@ HT-O-TA/patchalign-cpp
   old/new ranges；
 - 对应专项测试统一位于 `tests/unit/test_data_v2_*.py`；
 - 本次没有新增 artifact 目录；临时 CTest probe 位于本机 `/tmp`，不属于项目交付。
+
+### 2026-09-08：GitHub detail 早停审计与 evidence v2
+
+- 新增 ADR-0020、early-stop 配置/审计器/测试和 CPU-only Slurm 入口；集群 `early-stop-audit-v1/` 保存 200 条决策、8 条合格前缀、checkpoint inventory、summary 与 manifest；
+- 新增早停证据页和 ADR-0021，固定以真实执行证据替代 bug 标签资格的独立 v2 路线；
+- 新增 `data_v2_github_executable_evidence_metadata_v2.json`、metadata v2 采集器、专项测试和 CPU/网络 Slurm 入口；v2 只复用或补充公开 PR/issue 元数据，不取得 patch/source 或许可证内容；
+- 当前没有 Data-v2 训练目录、GPU 作业或 DPO 产物。
