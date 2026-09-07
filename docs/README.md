@@ -45,6 +45,7 @@
 - GitHub 试采结果：[Data-v2 GitHub C++ 元数据 pilot](evidence/data_v2_github_metadata_pilot.md)
 - Data-v2.1 family 契约：[ADR-0010：仓库隔离与采样 family 分层](decisions/0010-data-v2-hierarchical-family-contract.md)
 - Data-v2 exploratory 消融：[ADR-0011：安全增量重放混合](decisions/0011-data-v2-exploratory-replay-mix.md)
+- Data-v2 到 DPO 新轮次：[ADR-0012：分阶段治理与停止门](decisions/0012-data-v2-to-dpo-staged-governance.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)

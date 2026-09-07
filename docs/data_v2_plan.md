@@ -117,3 +117,12 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 混合 train 固定为 416 function + 364 file-window，避免 260 条全 file-window 增量单独 continuation；训练从 M1-R2 adapter 以 NF4、单轮、低学习率继续。CPU Job `96423` 已冻结 780/131；preflight Job `96426` 以 `287 passed` 核验 Schema、隔离、token、adapter、模型、环境和提交身份；单 GPU Job `96427` 已完成 98-step continuation，adapter SHA256 为 `d01dc411...21323`。
 
 该路线不把旧来源包装成正式 Data-v2，不改变 A3.4/A5 状态。训练 loss 结果只允许作为优化与遗忘风险信号。`data-v2-exploratory-formal-inference-v0.1` 已冻结新 adapter 与原 formal 500 prompt 身份；preflight Job `96658` 与单 GPU Job `96662` 已完成，得到 500/500 成功生成、498 strict diff 和 3/3 稳定 probe。formal 500 的 CPU 真实评分由 Job `96780` 完成：parse/apply/compile/Pass 为 `498/412/389/13`，regression failure 8、timeout 1。相对 M1-R2 的 `14/500`，新增 3 个成功、丢失 4 个成功，净退化 1；虽满足 timeout≤2，但未达到 Pass≥14 的预注册下限。该单 seed replay continuation 因此不具备晋级条件。配置没有冻结自动 early-stop；继续运行 confirmation 124 和 Defects4C 176 只能补充诊断证据，不能挽回本轮 formal 门槛，提交额外 GPU 前应单独权衡研究价值。
+
+
+## 第五阶段：多来源 discovery 与 Data-v2→DPO 硬门
+
+负责人在旧 replay formal 失败后授予从 Data-v2 到正式 DPO 和最终交付的持续决策权。新路线由 [ADR-0012](decisions/0012-data-v2-to-dpo-staged-governance.md) 管理：旧 780 条混合分支封存，不运行其 confirmation/Defects4C，也不重复调参。
+
+`data-v2-multisource-discovery-v1` 将 discovery 与详情资格拆开。GitHub 主路线固定 2018～2025 的 32 个季度窗口、created 升/降序各一页，共 64 个 metadata-only search 请求；输出只保留仓库、PR 号/API URL、时间和响应哈希，按查询原子 checkpoint。只有实际 split 达到 100/20 个仓库、1,000/100 个候选 family 和 2,000/200 按 cap 计算的样本上界 才能进入固定 200 PR 详情 pilot。
+
+Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留评测仓库，训练路线关闭。RunBugRun v2 固定 tag/revision `v2`/`bbac70b7...c938`，官方压缩 SQL 为 120,501,798 bytes，只作为不计仓库多样性的次级 problem-family 差量来源；本 discovery 配置不授权下载，必须在 GitHub 容量门后新增契约。所有 Data-v2 内容、GPU、训练和 DPO 在容量与污染门通过前保持关闭。

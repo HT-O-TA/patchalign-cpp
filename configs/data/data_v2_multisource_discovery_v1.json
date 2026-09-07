@@ -1,0 +1,109 @@
+{
+  "as_of": "2026-09-07",
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "decision": {
+    "path": "docs/decisions/0012-data-v2-to-dpo-staged-governance.md",
+    "sha256": "sha256:0bea4bfca0b3ec6dd4303dd06be4c67cf2289ee9efa3c9b304ad36d06593022e"
+  },
+  "github_issue_linked_cpp": {
+    "api": {
+      "base_url": "https://api.github.com",
+      "maximum_attempts": 3,
+      "maximum_search_requests": 64,
+      "minimum_request_interval_seconds": 7.0,
+      "timeout_seconds": 30,
+      "token_environment_variable": "GITHUB_TOKEN",
+      "user_agent": "patchalign-cpp-data-v2-discovery/1",
+      "version": "2022-11-28"
+    },
+    "capacity_gate": {
+      "all_queries_complete_required": true,
+      "maximum_samples_per_candidate_family": 2,
+      "repository_caps": {
+        "train": 40,
+        "validation": 20
+      },
+      "train_minimum_candidate_pr_upper_bound": 1000,
+      "train_minimum_projected_sample_upper_bound_after_caps": 2000,
+      "train_minimum_unique_repositories": 100,
+      "validation_minimum_candidate_pr_upper_bound": 100,
+      "validation_minimum_projected_sample_upper_bound_after_caps": 200,
+      "validation_minimum_unique_repositories": 20
+    },
+    "projection": {
+      "store_patch_or_source": false,
+      "store_pr_number_and_api_url": true,
+      "store_raw_response": false,
+      "store_repository_identity": true,
+      "store_response_sha256": true,
+      "store_timestamps": true,
+      "store_title_body_labels_user": false
+    },
+    "role": "primary_repository_diversity_discovery",
+    "search": {
+      "base_query": "is:pr is:merged language:C++ archived:false stars:>=20",
+      "end_date": "2025-12-31",
+      "orders": [
+        "asc",
+        "desc"
+      ],
+      "page": 1,
+      "per_page": 100,
+      "sort": "created",
+      "start_date": "2018-01-01",
+      "window_months": 3
+    }
+  },
+  "legacy_denylist": {
+    "complete_for_patch_content_admission": false,
+    "path": "configs/data/data_v2_metadata_pilot_v1_2.json",
+    "sha256": "sha256:1cf147cddf3f34f12f0b939ce1ca8f59ff00fc0e8af23536900388c721261f79"
+  },
+  "multi_swe_rl": {
+    "all_cpp_repositories_reserved": true,
+    "cpp_repositories": [
+      "github.com/bitcoin/bitcoin",
+      "github.com/catchorg/catch2",
+      "github.com/cgal/cgal",
+      "github.com/fmtlib/fmt",
+      "github.com/halide/halide",
+      "github.com/nlohmann/json",
+      "github.com/root-project/root",
+      "github.com/simdjson/simdjson",
+      "github.com/yhirose/cpp-httplib"
+    ],
+    "revision": "9777648932daa214ba18c70c81e85821b5836f32",
+    "role": "evaluation_identity_only",
+    "training_content_download_authorized": false
+  },
+  "output_directory": "artifacts/data-v2/multisource-discovery-v1",
+  "runbugrun_v2": {
+    "release_asset": {
+      "name": "runbugrun.sql.lrz",
+      "size_bytes": 120501798,
+      "url": "https://github.com/giganticode/run_bug_run/releases/download/v2/runbugrun.sql.lrz"
+    },
+    "release_download_requires_new_contract": true,
+    "repository": "https://github.com/giganticode/run_bug_run",
+    "repository_diversity_credit": 0,
+    "revision": "bbac70b7ae7331d87892e861356cf133476bc938",
+    "role": "secondary_problem_family_delta",
+    "tag": "v2",
+    "training_admission_authorized": false
+  },
+  "scope": {
+    "dpo_authorized": false,
+    "gpu_authorized": false,
+    "metadata_only": true,
+    "patch_or_source_download_authorized": false,
+    "training_dataset_freeze_authorized": false
+  },
+  "source_admission": {
+    "path": "configs/data/data_v2_source_admission_v1.json",
+    "sha256": "sha256:57a700d3902f5d84f2c36a8120a403aa33aad150a86a1450d11e522d86b6defe"
+  },
+  "version": "data-v2-multisource-discovery-v1"
+}

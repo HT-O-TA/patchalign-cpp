@@ -24,6 +24,7 @@
 │   │   │   ├── data_v2_supply_audit_v1.json # Data-v2 原始供给、隔离与容量探针
 │   │   │   ├── data_v2_source_admission_v1.json # 新 C++ 来源准入、评测保留与下载门禁
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
+│   │   │   ├── data_v2_multisource_discovery_v1.json # GitHub/RunBugRun/Multi-SWE 多来源容量与权限门
 │   │   │   ├── data_v2_exploratory_replay_v0_1.json # 安全增量 + formal replay 消融数据契约
 │   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
 │   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
@@ -85,6 +86,7 @@
 │   │   │   ├── summarize_a2_results.py      # A2 汇总与验收门禁
 │   │   │   ├── check_data_v2_source_admission.py # 新来源桌面清单 fail-closed 校验
 │   │   │   ├── check_data_v2_contract.py # Data-v2.1 分层 family 契约校验
+│   │   │   ├── discover_data_v2_multisource.py # 查询级 checkpoint 的 metadata-only 容量 discovery
 │   │   │   ├── collect_data_v2_github_metadata.py # 不落 patch/源码的 GitHub 元数据采集器
 │   │   │   ├── build_data_v2_exploratory_replay.py # 复现安全增量并构造 function replay 混合
 │   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
@@ -131,6 +133,7 @@
 │   │   ├── data_v2_supply_audit.sbatch     # CPU-only 新数据容量与防泄漏审计
 │   │   ├── data_v2_source_admission.sbatch # CPU-only 新来源清单专项验收
 │   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
+│   │   ├── data_v2_multisource_discovery.sbatch # CPU/网络 64-query 多来源容量 discovery
 │   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
 │   │   ├── data_v2_exploratory_replay_preflight.sbatch # CPU-only 全量测试与身份预检
 │   │   ├── data_v2_exploratory_replay_train.sbatch # 单 GPU 探索性 adapter continuation
@@ -650,3 +653,10 @@ HT-O-TA/patchalign-cpp
 - preflight Job `96658` 与 GPU Job `96662` 完成，500/500 生成成功、498 strict diff、3/3 probe 稳定；
 - `gpu12` 无预测启动停滞通过同 Job ID 重排到 `gpu04`，状态与日志保留；
 - scoring artifact 尚不存在，下一目录更新应在 `a3-scoring-v2` 完成后记录。
+
+
+### 2026-09-07：新增 Data-v2→DPO 分阶段治理与多来源 discovery
+
+- 新增 ADR-0012，冻结旧 replay 停止线、新数据硬门、三 seed SFT、staged 正式评测、偏好审计、正式 DPO 和最终交付条件；
+- 新增 `data_v2_multisource_discovery_v1.json`、可恢复 discovery、专项测试和 CPU/网络 Slurm 入口；
+- Multi-SWE-RL C++ 训练供给归零，RunBugRun v2 只保留为后续需新契约授权的差量来源；本阶段内容下载和 GPU 保持关闭。

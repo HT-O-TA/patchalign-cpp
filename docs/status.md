@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-07；exploratory replay formal 500 真实评分完成，未达到预注册 Pass 下限
+最后核验：2026-09-07；旧 exploratory replay 已封存，新 Data-v2 多来源 discovery 已冻结待验收
 
-项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only v1 Job `96406` 已完成但因 PR 级 `label:bug` 查询过窄得到 0 条；v1.1 已核验前 18 条并按治理规则全部拒绝；v1.2 已倒序按仓库去重检查 12 条且仍为 0。冻结查询只有 34 个不同仓库，低于 100 个 train 新仓库门槛，故当前查询容量判定失败并结束本轮试采。正式 Data-v2 仍未构造；另行标记的 exploratory replay 已完成 CPU 构建、单 GPU continuation 与 formal 500 真实评分，新 adapter 的 confirmation/Defects4C 尚未运行。
+项目状态：**本轮按“完成 SFT 与探索性研究”收尾；A5/DPO 延后**。A3.4 readiness 仍未通过，124 条新确认集门禁失败使正式晋级保持阻断，账本为 `a4_ready=false`。负责人授权的 exploratory A4 已完成 264 条可执行数据、1,056 个候选、全量执行评分和 182 对偏好数据构造；run manifest 保持 `a5_started=false`，未提交任何 A5/DPO 作业。最终交付见 [`delivery/`](delivery/)，收尾决策见 [ADR-0009](decisions/0009-close-after-sft-and-exploratory-a4.md)。本轮交付口径保持不变；其后的 Data-v2 可行性研究已完成现有供给审计和新来源桌面准入审计，并已冻结分层 family 契约。GitHub metadata-only v1 Job `96406` 已完成但因 PR 级 `label:bug` 查询过窄得到 0 条；v1.1 已核验前 18 条并按治理规则全部拒绝；v1.2 已倒序按仓库去重检查 12 条且仍为 0。冻结查询只有 34 个不同仓库，低于 100 个 train 新仓库门槛，故当前查询容量判定失败并结束本轮试采。正式 Data-v2 仍未构造；旧 exploratory replay 已完成并因 formal 13/500 未过门而封存。负责人已将从新 Data-v2、正式 SFT、偏好审计、正式 DPO 到最终交付的决策授权给执行方；ADR-0012 冻结多来源预算和 staged early-stop，当前只准备 CPU/网络 discovery，GPU 与 DPO 仍关闭。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,6 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
+| Data-v2→DPO 新轮次 | 多来源 discovery 已冻结待执行 | ADR-0012 固定 64 个 GitHub search、RunBugRun v2 差量路线和 SFT/DPO early-stop；当前无内容下载、无 GPU |
 | A5 | 延后、未启动 | 负责人决定本轮在 SFT + exploratory A4 收尾；`a5_started=false` |
 
 ## A3.3 当前有效链

@@ -1115,3 +1115,12 @@ CPU-only Job `96780` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 `00:27:42`�
 真实结果为 parse/apply/compile/public/Pass `498/412/389/27/13`；function `10/400`，file-window `3/100`，regression failure `8/500`，timeout `1/500`。相对 M1-R2 的 `499/412/392/22/14`，apply 不变、compile -3、public +5、Pass -1；逐样本配对为 10 条 success 保持、3 条新增、4 条丢失。唯一新模型 timeout `rbr-formal-020137ad770189b0c280` 是 M1-R2 已有 timeout，旧 timeout `rbr-formal-453863d9f85a5352eb05` 消失；regression failure 从 3 增至 8。
 
 预注册 formal 下限为 Pass≥14、timeout≤2，本结果只满足 timeout 门，不满足 Pass 门，因此该单 seed continuation 不获得晋级资格。ADR/config 没有定义 formal 失败后的自动 early-stop；confirmation 124 与 Defects4C 176 若继续只补充诊断完整性，不会改变 formal 已失败的事实。scores、summary、manifest SHA256 分别为 `9150c6fb405b6813ec35cd27bffb508d3f2a9e196f375d53c453f119a4770bfb`、`1a8bc423dc19b3e403bf99c2a2db79c6f2dfc608087e5c82624dfa02e865ddd3`、`9cfd016026590e350eef3e78a3edac07e3fd9dbc2f16d409498509aa91b177cf`。
+
+
+## 45. Data-v2→DPO 新轮次与多来源 discovery 准备
+
+2026-09-07，负责人明确授权自主推进至正式 DPO、正式评测、消融、失败分析和最终交付；RLVR/GRPO 排除在当前目标之外。新增 ADR-0012，把旧 replay `13/500` 负结果封存，并冻结数据、SFT、DPO、三套评测和等待检查策略。
+
+多来源身份审计确认：Multi-SWE-RL revision `9777648932daa214ba18c70c81e85821b5836f32` 的 9 个 C++ 仓库全部命中当前保留评测 denylist，训练可用仓库为 0；RunBugRun v2 tag revision 为 `bbac70b7ae7331d87892e861356cf133476bc938`，release 资产 `runbugrun.sql.lrz` 为 120,501,798 bytes。无口令 GitHub API 条件保持不变。
+
+新增 `data-v2-multisource-discovery-v1`、可恢复采集器、专项测试和 CPU-only Slurm 入口。计划最多 64 个 search 请求，理论请求等待约 7.5 分钟，加全仓测试和调度缓冲预计实际运行 10～15 分钟。该准备点尚未下载 patch/source、未创建训练数据、未提交 GPU。
