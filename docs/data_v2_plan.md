@@ -128,3 +128,5 @@ v1.1 Job `96412` 实查前 18 条后仍为 0：6 条文件数越界、3 条行�
 [ADR-0013](decisions/0013-correct-github-discovery-endpoint-semantics.md) 用版本化 v2 修正，不覆盖 v1：先通过合法的 Repository Search 固定 10×100 个 C++ 仓库候选，再按 Data-v2.1 哈希 split 与固定哈希排序选取 200 train + 40 validation 仓库，最后对每个仓库执行 `repo:… is:pr is:merged linked:issue` 的 repo-local PR Search。共 250 个 metadata-only 请求，间隔至少 7 秒并逐请求原子 checkpoint；输出仍只保留必要身份、时间、star 快照和响应哈希。容量门仍是有候选的实际 split 仓库 100/20、候选 PR 上界 1,000/100、cap 后样本上界 2,000/200，不因修正端点而降低。
 
 Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留评测仓库，训练路线关闭。RunBugRun v2 固定 tag/revision `v2`/`bbac70b7...c938`，官方压缩 SQL 为 120,501,798 bytes，只作为不计仓库多样性的次级 problem-family 差量来源；本 discovery 配置不授权下载，必须在 GitHub 容量门后新增契约。所有 Data-v2 内容、GPU、训练和 DPO 在容量与污染门通过前保持关闭。
+
+[ADR-0014](decisions/0014-evaluation-denylist-completeness-boundary.md) 进一步冻结当前评测身份：formal/confirmation 共 624 个互斥 CodeNet problem family、Defects4C 的 6 个仓库、Multi-SWE-bench C++ 的 9 个仓库、BugsCpp 24 个项目标识、LLVM APR 与 DebugBench/LeetCode-derived 域。只有 manifest/revision/集合哈希全部通过才允许取得候选内容；这不等于训练准入，取得内容后仍须 exact commit/content 去重、许可证和 buggy-fail/fixed-pass 重放。

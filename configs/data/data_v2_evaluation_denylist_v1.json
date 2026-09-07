@@ -1,0 +1,191 @@
+{
+  "version": "data-v2-evaluation-denylist-v1",
+  "as_of": "2026-09-07",
+  "decision": {
+    "path": "docs/decisions/0014-evaluation-denylist-completeness-boundary.md",
+    "sha256": "sha256:c906cc60ed82748ef1791abc3cea0e01b8ca31f22be1beacbfb447eac229ce0d"
+  },
+  "contract": {
+    "path": "configs/data/data_v2_contract_v2_1.json",
+    "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+  },
+  "source_admission": {
+    "path": "configs/data/data_v2_source_admission_v1.json",
+    "sha256": "sha256:57a700d3902f5d84f2c36a8120a403aa33aad150a86a1450d11e522d86b6defe"
+  },
+  "scope": {
+    "complete_for_candidate_content_acquisition": true,
+    "future_evaluation_additions_invalidate_completeness": true,
+    "exact_content_and_commit_dedup_still_required": true,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false,
+    "evaluation_gold_consumed": false
+  },
+  "frozen_manifests": {
+    "formal_holdout": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1/a2-manifest.json",
+      "sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+      "case_count": 500,
+      "identity_field": "problem_id",
+      "unique_identity_count": 500,
+      "identity_set_sha256_lf": "sha256:679d03dc38ddb332563fe646f0d952c0b97f99a0534466cdec404059cd2a323b"
+    },
+    "confirmation": {
+      "path": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1/confirmation-manifest.json",
+      "sha256": "sha256:7adf960fff4e7f1ee3ca95539ffa1196c3421805659c94bb46a29d0022690917",
+      "case_count": 124,
+      "identity_field": "problem_id",
+      "unique_identity_count": 124,
+      "identity_set_sha256_lf": "sha256:6d735127d91ff2e6da4301f52673cb1fee65b7a082355ccd0279ae02394186d1"
+    },
+    "defects4c": {
+      "path": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1/manifest.json",
+      "sha256": "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+      "case_count": 176,
+      "identity_field": "project",
+      "expected_unique_identities": [
+        "danmar___cppcheck",
+        "llvm___llvm-project",
+        "skypjack___entt",
+        "uncrustify___uncrustify",
+        "wez___atomicparsley",
+        "zeromq___libzmq"
+      ]
+    }
+  },
+  "protected_benchmarks": {
+    "multi_swe_bench_cpp": {
+      "identity_revision": "9777648932daa214ba18c70c81e85821b5836f32",
+      "repositories": [
+        "github.com/bitcoin/bitcoin",
+        "github.com/catchorg/catch2",
+        "github.com/cgal/cgal",
+        "github.com/fmtlib/fmt",
+        "github.com/halide/halide",
+        "github.com/nlohmann/json",
+        "github.com/root-project/root",
+        "github.com/simdjson/simdjson",
+        "github.com/yhirose/cpp-httplib"
+      ]
+    },
+    "bugscpp": {
+      "repository": "github.com/suresoft-glados/bugscpp",
+      "revision": "be5cc489cb2b3127ec3b73cb4adfdd290807f55b",
+      "published_defect_count": 215,
+      "project_ids": [
+        "berry",
+        "coreutils",
+        "cpp_peglib",
+        "cppcheck",
+        "dlt_daemon",
+        "example",
+        "exiv2",
+        "jerryscript",
+        "libchewing",
+        "libssh",
+        "libtiff",
+        "libtiff_sanitizer",
+        "libucl",
+        "libxml2",
+        "md4c",
+        "ndpi",
+        "openssl",
+        "proj",
+        "wget2",
+        "wireshark",
+        "xbps",
+        "yaml_cpp",
+        "yara",
+        "zsh"
+      ]
+    },
+    "llvm_apr": {
+      "repository": "github.com/dtcxzyw/llvm-apr-benchmark",
+      "revision": "765534776d06d355b026f713f265653f34d8b3ad",
+      "migrated_repository": "github.com/dtcxzyw/llvm-autofix",
+      "underlying_repository": "github.com/llvm/llvm-project"
+    },
+    "debugbench": {
+      "repository": "github.com/thunlp/debugbench",
+      "revision": "2761bab93c4c65351b19d0ef4a94b26abe47a185",
+      "source_domain": "leetcode-derived",
+      "normalized_repository_component_block_token": "leetcode"
+    }
+  },
+  "repository_matching": {
+    "exact_canonical_repositories": [
+      "github.com/bitcoin/bitcoin",
+      "github.com/catchorg/catch2",
+      "github.com/cgal/cgal",
+      "github.com/danmar/cppcheck",
+      "github.com/dtcxzyw/llvm-apr-benchmark",
+      "github.com/dtcxzyw/llvm-autofix",
+      "github.com/fmtlib/fmt",
+      "github.com/halide/halide",
+      "github.com/llvm/llvm-project",
+      "github.com/nlohmann/json",
+      "github.com/root-project/root",
+      "github.com/simdjson/simdjson",
+      "github.com/skypjack/entt",
+      "github.com/suresoft-glados/bugscpp",
+      "github.com/thunlp/debugbench",
+      "github.com/uncrustify/uncrustify",
+      "github.com/wez/atomicparsley",
+      "github.com/yhirose/cpp-httplib",
+      "github.com/zeromq/libzmq"
+    ],
+    "normalized_repository_name_aliases": [
+      "atomicparsley",
+      "berry",
+      "bitcoin",
+      "catch2",
+      "cgal",
+      "coreutils",
+      "cpp_httplib",
+      "cpp_peglib",
+      "cppcheck",
+      "debugbench",
+      "dlt",
+      "dlt_daemon",
+      "einsteintoolkit",
+      "entt",
+      "example",
+      "exiv2",
+      "fmt",
+      "halide",
+      "jerryscript",
+      "libchewing",
+      "libssh",
+      "libtiff",
+      "libtiff_sanitizer",
+      "libucl",
+      "libxml2",
+      "libzmq",
+      "llvm",
+      "llvm_apr_benchmark",
+      "llvm_autofix",
+      "llvm_project",
+      "md4c",
+      "ndpi",
+      "nlohmann_json",
+      "openssl",
+      "proj",
+      "root",
+      "simdjson",
+      "uncrustify",
+      "wget2",
+      "wireshark",
+      "xbps",
+      "yaml_cpp",
+      "yara",
+      "zsh"
+    ],
+    "normalize_repository_name_by_removing_non_alphanumeric": true,
+    "exclude_if_any_normalized_component_contains": [
+      "leetcode"
+    ],
+    "fork_source_and_parent_resolution_required": true
+  },
+  "output_directory": "artifacts/data-v2/evaluation-denylist-v1"
+}

@@ -1132,3 +1132,9 @@ CPU-only Job `96780` 在 `gpu10` 以 `COMPLETED 0:0` 结束，用时 `00:27:42`�
 继续执行剩余请求不会得到合法的 C++ 仓库容量证据，因此 Job `96902` 在运行 `00:04:18` 后主动取消。两个作业均未生成 `candidates.jsonl`、`summary.json` 或 `run-manifest.json`；已有 19 个查询 checkpoint 与日志保留为失败证据，不进入后续容量计算。
 
 新增 ADR-0013 和 `data-v2-repository-pr-discovery-v2`：先用 Repository Search 的合法语言、star、活跃状态条件读取前 1,000 个候选仓库，按原 Data-v2.1 hash split 和固定 hash rank 选择 200 train + 40 validation，再对每个仓库用合法的 `repo`、`is:pr`、`is:merged`、`linked:issue` 条件搜索 PR。总预算固定 250 次 search、间隔至少 7 秒，仍禁止正文、用户、raw response、patch/source、训练数据和 GPU。容量阈值不变。
+
+## 47. Data-v2 完整评测身份 denylist 准备
+
+2026-09-07，在不读取 reference patch、fixed code、测试输出或其他 gold 的前提下，只读取冻结 manifest 的 `problem_id`/`project` 字段。formal 500 与 confirmation 124 均为逐例唯一 problem family，集合交集为 0，稳定 LF 集合哈希分别为 `679d03dc...a323b`、`6d735127...86d1`；Defects4C 176 条只覆盖 `danmar/cppcheck`、`llvm/llvm-project`、`skypjack/entt`、`uncrustify/uncrustify`、`wez/atomicparsley`、`zeromq/libzmq` 六个仓库。
+
+上游身份固定为 BugsCpp `be5cc489cb2b3127ec3b73cb4adfdd290807f55b`（215 defects、24 project IDs）、LLVM APR `765534776d06d355b026f713f265653f34d8b3ad` 和 DebugBench `2761bab93c4c65351b19d0ef4a94b26abe47a185`。新增 ADR-0014、机器配置、validator、专项测试和 CPU-only Slurm 入口；匹配覆盖 exact canonical repository、归一化项目别名、fork source/parent lineage、LeetCode-derived 域和 RunBugRun problem family。complete 标志只允许候选内容审计，训练、GPU 与 DPO 仍为 false。

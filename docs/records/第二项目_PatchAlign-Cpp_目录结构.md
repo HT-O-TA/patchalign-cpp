@@ -26,6 +26,7 @@
 │   │   │   ├── data_v2_contract_v2_1.json # 仓库 split group、采样 family 与容量目标契约
 │   │   │   ├── data_v2_multisource_discovery_v1.json # GitHub/RunBugRun/Multi-SWE 多来源容量与权限门
 │   │   │   ├── data_v2_repository_pr_discovery_v2.json # 合法 Repository→repo-local PR 两级容量发现
+│   │   │   ├── data_v2_evaluation_denylist_v1.json # 当前冻结评测身份与内容取得前 denylist
 │   │   │   ├── data_v2_exploratory_replay_v0_1.json # 安全增量 + formal replay 消融数据契约
 │   │   │   ├── data_v2_metadata_pilot_v1.json # 首次 GitHub metadata-only 查询；Job 96406 零结果证据
 │   │   │   ├── data_v2_metadata_pilot_v1_1.json # linked issue bug 标签核验修正版
@@ -89,6 +90,7 @@
 │   │   │   ├── check_data_v2_contract.py # Data-v2.1 分层 family 契约校验
 │   │   │   ├── discover_data_v2_multisource.py # 查询级 checkpoint 的 metadata-only 容量 discovery
 │   │   │   ├── discover_data_v2_repository_prs.py # 端点语义修正后的两级 metadata discovery
+│   │   │   ├── check_data_v2_evaluation_denylist.py # 编译 problem/repository/fork 评测隔离身份
 │   │   │   ├── collect_data_v2_github_metadata.py # 不落 patch/源码的 GitHub 元数据采集器
 │   │   │   ├── build_data_v2_exploratory_replay.py # 复现安全增量并构造 function replay 混合
 │   │   │   └── build_a3_sft_r2_data.py     # A3.4 静态安全子集构造器
@@ -137,6 +139,7 @@
 │   │   ├── data_v2_metadata_pilot.sbatch # CPU/网络 GitHub 元数据试采，无 GPU
 │   │   ├── data_v2_multisource_discovery.sbatch # CPU/网络 64-query 多来源容量 discovery
 │   │   ├── data_v2_repository_pr_discovery.sbatch # CPU/网络 250-query 两级容量 discovery
+│   │   ├── data_v2_evaluation_denylist.sbatch # CPU-only 冻结评测身份编译与验收
 │   │   ├── data_v2_exploratory_replay_data.sbatch # CPU-only 重放混合构建
 │   │   ├── data_v2_exploratory_replay_preflight.sbatch # CPU-only 全量测试与身份预检
 │   │   ├── data_v2_exploratory_replay_train.sbatch # 单 GPU 探索性 adapter continuation
@@ -669,3 +672,9 @@ HT-O-TA/patchalign-cpp
 - 新增 ADR-0013、`data_v2_repository_pr_discovery_v2.json`、两级采集器、专项测试和 CPU/网络 Slurm 入口；
 - v1 的 Jobs `96894`/`96902` 及 19 个 checkpoint 保留为无效端点语义证据，不转换成容量结果；
 - v2 先发现仓库、再做 repo-local linked-PR 搜索，仍不下载 patch/source、不生成训练数据、不申请 GPU。
+
+### 2026-09-07：新增 Data-v2 完整评测身份 denylist
+
+- 新增 ADR-0014、`data_v2_evaluation_denylist_v1.json`、validator、专项测试和 CPU-only Slurm 入口；
+- 身份覆盖 624 个冻结 CodeNet problem family、Defects4C 六仓库、Multi-SWE C++、BugsCpp、LLVM APR 和 DebugBench 域；
+- complete 只适用于候选内容取得，训练前的 exact content/commit 去重、许可证和执行重放仍为硬门。

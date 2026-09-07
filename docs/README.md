@@ -47,6 +47,7 @@
 - Data-v2 exploratory 消融：[ADR-0011：安全增量重放混合](decisions/0011-data-v2-exploratory-replay-mix.md)
 - Data-v2 到 DPO 新轮次：[ADR-0012：分阶段治理与停止门](decisions/0012-data-v2-to-dpo-staged-governance.md)
 - GitHub discovery 语义修正：[ADR-0013：Repository→PR 两级发现](decisions/0013-correct-github-discovery-endpoint-semantics.md)
+- Data-v2 评测隔离：[ADR-0014：完整 denylist 边界](decisions/0014-evaluation-denylist-completeness-boundary.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)
