@@ -21,8 +21,12 @@ from scripts.data.audit_data_v2_commitpack_shard import (
 )
 
 
-VERSION = "data-v2-beetlebox-metadata-audit-v1.1"
-SUPPORTED_VERSIONS = {"data-v2-beetlebox-metadata-audit-v1", VERSION}
+VERSION = "data-v2-beetlebox-metadata-audit-v1.2"
+SUPPORTED_VERSIONS = {
+    "data-v2-beetlebox-metadata-audit-v1",
+    "data-v2-beetlebox-metadata-audit-v1.1",
+    VERSION,
+}
 SHA_RE = re.compile(r"[0-9a-f]{40}")
 REPO_PART_RE = re.compile(r"[A-Za-z0-9_.-]+")
 
@@ -250,8 +254,12 @@ def iter_parquet_rows(path: Path, columns: list[str]) -> Iterable[dict[str, Any]
 
 def verify_config(config: Mapping[str, Any], *, require_files: bool) -> None:
     require(config.get("version") in SUPPORTED_VERSIONS, "unexpected config version")
-    if config.get("version") == VERSION:
+    if config.get("version") in {"data-v2-beetlebox-metadata-audit-v1.1", VERSION}:
         require(config["schema"].get("published_cpp_count_is_hard_identity") is False, "dataset-card count handling changed")
+    if config.get("version") == VERSION:
+        require(config["schema"]["language_value"] == "c++", "stored language value changed")
+        for spec in config["upstream"]["files"].values():
+            require(int(spec["observed_cpp_rows_at_fixed_hash"]) > 0, "missing observed C++ count binding")
     scope = config["scope"]
     require(scope["fixed_metadata_download_authorized"] is True, "metadata download not authorized")
     for key in (
@@ -330,11 +338,15 @@ def audit(config: Mapping[str, Any]) -> dict[str, Any]:
         cpp_count_matches_card = cpp_seen == int(spec["published_cpp_rows"])
         if config["version"] == "data-v2-beetlebox-metadata-audit-v1":
             require(cpp_count_matches_card, f"{native_split} published C++ count changed")
+        observed_binding = spec.get("observed_cpp_rows_at_fixed_hash")
+        if config["version"] == VERSION:
+            require(cpp_seen == int(observed_binding), f"{native_split} observed C++ count changed")
         native[native_split] = {
             "all_rows": int(spec["published_rows"]),
             "cpp_rows": cpp_seen,
             "dataset_card_cpp_rows": int(spec["published_cpp_rows"]),
             "dataset_card_cpp_rows_match": cpp_count_matches_card,
+            "observed_cpp_rows_at_fixed_hash": observed_binding,
             "accepted_cpp_metadata": accepted,
             "repositories": len(repos),
             "post_reference_date": post_count,

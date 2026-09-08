@@ -767,3 +767,10 @@ HT-O-TA/patchalign-cpp
 - `configs/data/data_v2_beetlebox_metadata_audit_v1_1.json`：同一 Parquet 与门禁，实际/声明语言数并列报告；
 - `slurm/data_v2_beetlebox_metadata_audit_v1_1.sbatch`：消费集群已验哈希文件并写入独立 v1.1 artifact；
 - `artifacts/data-v2/logs/beetlebox-metadata-audit-97502.out` 与 `...-97503.out`：分别保留集群出口停滞和数据卡矛盾失败。
+
+### 2026-09-08：BeetleBox 固定存储 Schema v1.2
+
+- `docs/decisions/0027-bind-beetlebox-stored-language-schema.md`：冻结实际 `c++` 列值、3,317/3,865 计数与最后一次 Schema 修正边界；
+- `configs/data/data_v2_beetlebox_metadata_audit_v1_2.json`：同一固定文件、实际语言硬观测和独立输出目录；
+- `slurm/data_v2_beetlebox_metadata_audit_v1_2.sbatch`：最终 CPU-only 元数据审计入口；
+- `artifacts/data-v2/beetlebox-metadata-audit-v1-1/`：Job 97505 的展示值映射失败终态，保留且不覆盖。
