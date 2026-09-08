@@ -1,0 +1,106 @@
+{
+  "version": "a5-dpo-dev-v1",
+  "contract": {
+    "training_config": "configs/training/a5_dpo_v1_1.json",
+    "training_config_sha256": "sha256:cc4a2afa39acc85f34b37a3529502d19fad96f3c54e3bce83a8dfd004f0a1459",
+    "selection_decision": "docs/decisions/0032-dpo-selection-contract-correction.md",
+    "selection_decision_sha256": "sha256:de55d915a5df552457843eef0e6ba0e3d456bdc3dd4774698c7b2778c39bcce5"
+  },
+  "seed": 20260830,
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "dataset": {
+    "root": "/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1",
+    "manifest": "dev-exec-manifest.json",
+    "manifest_sha256": "sha256:457318d186ba056a970ac917f4161cacf98b07f2bd121327452a5eaaf601340f",
+    "case_count": 64,
+    "task_level_counts": {
+      "function": 64
+    },
+    "source_split": "train",
+    "a4_training_overlap": 0,
+    "problem_family_unique": true
+  },
+  "models": {
+    "baseline": {
+      "role": "M1-R2",
+      "adapter_path": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/checkpoints/checkpoint-step-000150-epoch-1/adapter",
+      "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+      "adapter_config_sha256": "sha256:acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69",
+      "training_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/training-manifest.json",
+      "training_manifest_sha256": "sha256:b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884"
+    },
+    "dpo_training_root": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1.1",
+    "dpo_training_git_commit": "80cf19d1bd23a49118dc5fc4bfdda9b6d65f102d",
+    "dpo_variants": {
+      "beta01": {
+        "role": "main",
+        "beta": 0.1
+      },
+      "beta03": {
+        "role": "control",
+        "beta": 0.3
+      }
+    }
+  },
+  "inference": {
+    "prompt_version": "a5-dev-cpp-repair-v1",
+    "input_mode": "raw_completion",
+    "allowed_path": "main.cpp",
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "num_return_sequences": 1,
+    "max_input_tokens": 4096,
+    "max_new_tokens": 512,
+    "determinism_probe_count": 3
+  },
+  "scoring": {
+    "protocol": "a3-scoring-v2",
+    "config": "configs/evaluation/a3_scoring_v2.json",
+    "config_sha256": "sha256:b8d9507ec7fc97c370e52230759e0b2b84591d6fb4200a50944add19ebe859e8",
+    "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+    "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
+    "sanitizer": "not_applicable_for_all_frozen_cases"
+  },
+  "environment": {
+    "lock": "/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/pip-freeze.txt",
+    "lock_sha256": "sha256:bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4"
+  },
+  "selection": {
+    "baseline": "baseline",
+    "candidates": [
+      "beta01",
+      "beta03"
+    ],
+    "priority": [
+      "pass_count_desc",
+      "hidden_test_success_desc",
+      "public_test_success_desc",
+      "compile_success_desc",
+      "apply_success_desc"
+    ],
+    "non_degradation_constraints": [
+      "timeouts_not_above_baseline",
+      "regression_failures_not_above_baseline"
+    ],
+    "positive_signal": "strict_lexicographic_improvement_over_baseline",
+    "fallback_risk_order": [
+      "regression_failures_asc",
+      "timeouts_asc",
+      "performance_priority_desc",
+      "beta03_on_exact_tie"
+    ]
+  },
+  "outputs": {
+    "preflight": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/preflight.json",
+    "prompts": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/prompts.jsonl",
+    "inference_root": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/inference",
+    "scoring_root": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/scoring",
+    "selection": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/selection.json"
+  }
+}
