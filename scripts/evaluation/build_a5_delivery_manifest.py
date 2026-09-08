@@ -21,6 +21,12 @@ from scripts.evaluation.a5_dpo_final_common import (
 from scripts.training.a3_formal_common import require, sha256_file, write_json
 
 
+BASELINE_ADAPTER_DIR = Path(
+    "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/"
+    "checkpoints/checkpoint-step-000150-epoch-1/adapter"
+)
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -50,8 +56,10 @@ def main() -> None:
     artifacts: dict[str, dict[str, Any]] = {
         "evaluation_config": entry(args.config),
         "selection": entry(Path(config["selection"]["path"])),
-        "selected_adapter": entry(Path(config["adapter"]["path"]) / "adapter_model.safetensors"),
-        "selected_adapter_config": entry(Path(config["adapter"]["path"]) / "adapter_config.json"),
+        "baseline_adapter": entry(BASELINE_ADAPTER_DIR / "adapter_model.safetensors"),
+        "baseline_adapter_config": entry(BASELINE_ADAPTER_DIR / "adapter_config.json"),
+        "dpo_candidate_adapter": entry(Path(config["adapter"]["path"]) / "adapter_model.safetensors"),
+        "dpo_candidate_adapter_config": entry(Path(config["adapter"]["path"]) / "adapter_config.json"),
         "dpo_training_manifest": entry(Path(config["adapter"]["training_manifest"])),
         "dpo_training_summary": entry(Path(config["adapter"]["training_summary"])),
         "final_preflight": entry(Path(config["outputs"]["preflight"])),
@@ -69,12 +77,16 @@ def main() -> None:
         for filename in filenames:
             artifacts[f"{name}_scoring_{filename}"] = entry(scoring / filename)
 
+    recommended_adapter_artifact_key = (
+        "dpo_candidate_adapter" if comparison["recommended_model"] == "dpo_beta03" else "baseline_adapter"
+    )
     result = {
         "version": "patchalign-cpp-delivery-manifest-v1",
         "created_at": utc_now(),
         "delivery_git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
         "evaluation_git_commit": comparison["git_commit"],
         "recommended_model": comparison["recommended_model"],
+        "recommended_adapter_artifact_key": recommended_adapter_artifact_key,
         "dpo_gate_passed": comparison["dpo_gate_passed"],
         "base": {"model_id": config["model"]["model_id"], "revision": config["model"]["revision"]},
         "baseline_adapter_sha256": comparison["baseline_adapter_sha256"],
@@ -86,7 +98,18 @@ def main() -> None:
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     write_json(args.output, result)
-    print(json.dumps({"recommended_model": result["recommended_model"], "dpo_gate_passed": result["dpo_gate_passed"], "artifact_count": len(artifacts), "output": str(args.output)}, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "recommended_model": result["recommended_model"],
+                "recommended_adapter_artifact_key": recommended_adapter_artifact_key,
+                "dpo_gate_passed": result["dpo_gate_passed"],
+                "artifact_count": len(artifacts),
+                "output": str(args.output),
+            },
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":
