@@ -54,7 +54,9 @@ export CUDA_VISIBLE_DEVICES=0
 ```
 
 CLI 固定使用 NF4、greedy decoding 和一个可见 GPU；输出必须通过 strict diff 和路径策略校验。
-这只是候选生成，不会自动执行、提交或合并补丁。正式执行必须进入 Bubblewrap 评分链。
+metadata 记录 prompt/patch、Base config、adapter config 与 adapter 权重 SHA256，以及 token 数、延迟、峰值显存
+和 seed，便于把候选追溯到具体模型 artifact。这只是候选生成，不会自动执行、提交或合并补丁；正式执行
+必须进入 Bubblewrap 评分链。
 
 ## 4. DPO 训练复现
 
