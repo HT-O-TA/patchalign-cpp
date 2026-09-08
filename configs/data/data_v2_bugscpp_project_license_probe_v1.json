@@ -1,0 +1,217 @@
+{
+  "version": "data-v2-bugscpp-project-license-probe-v1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0029-preregister-bugscpp-project-split-and-license-probe.md",
+    "sha256": "sha256:e1a6f2a78b0a9747dfcad6e76102edb55135c984b0304f5aabd77ba0c963bc87"
+  },
+  "evaluation_denylist": {
+    "path": "configs/data/data_v2_evaluation_denylist_v1.json",
+    "sha256": "sha256:45d2ad1f565e18abbea504d32c2ce6e0ae8b218c7ec29dd9256d5793fbed5f72"
+  },
+  "upstream": {
+    "repository": "https://github.com/Suresoft-GLaDOS/bugscpp.git",
+    "revision": "be5cc489cb2b3127ec3b73cb4adfdd290807f55b",
+    "partial_clone_path": "/mingli01/data/patchalign-cpp/data-v2/bugscpp/be5cc489cb2b3127ec3b73cb4adfdd290807f55b/repo",
+    "metadata_path_template": "bugscpp/taxonomy/{project_id}/meta.json",
+    "published_defects": 215,
+    "published_projects": 24
+  },
+  "scope": {
+    "project_split_frozen_before_patch_read": true,
+    "metadata_only": true,
+    "patch_blob_read": false,
+    "source_or_test_download_authorized": false,
+    "upstream_program_execution": false,
+    "heldout_license_request_authorized": false,
+    "training_data_created": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false,
+    "evaluation_gold_consumed": false
+  },
+  "license_probe": {
+    "github_repository_metadata_endpoint": "https://api.github.com/repos/{owner}/{repository}",
+    "maximum_requests": 12,
+    "minimum_seconds_between_requests": 3,
+    "allowed_spdx": [
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "BSL-1.0",
+      "ISC",
+      "MIT",
+      "Zlib"
+    ],
+    "current_license_is_historical_clearance": false,
+    "license_text_requested": false,
+    "unsupported_hosts_fail_closed": true
+  },
+  "split_policy": {
+    "seed": 20260908,
+    "algorithm": "sha256_order_then_heldout_min_4_projects_20pct_defects_then_validation_min_3_projects_15pct_defects",
+    "patch_or_test_signal_used": false,
+    "resplit_after_results_allowed": false
+  },
+  "project_registry": [
+    {
+      "id": "berry",
+      "defects": 5,
+      "url": "https://github.com/berry-lang/berry",
+      "split": "train"
+    },
+    {
+      "id": "coreutils",
+      "defects": 2,
+      "url": "https://github.com/coreutils/coreutils",
+      "split": "heldout"
+    },
+    {
+      "id": "cpp_peglib",
+      "defects": 10,
+      "url": "https://github.com/yhirose/cpp-peglib.git",
+      "split": "heldout"
+    },
+    {
+      "id": "cppcheck",
+      "defects": 30,
+      "url": "https://github.com/danmar/cppcheck.git",
+      "split": "excluded",
+      "exclude_reason": "current_defects4c_repository_overlap"
+    },
+    {
+      "id": "dlt_daemon",
+      "defects": 1,
+      "url": "https://github.com/COVESA/dlt-daemon.git",
+      "split": "train"
+    },
+    {
+      "id": "example",
+      "defects": 1,
+      "url": "https://github.com/HansolChoe/Defects4cpp-test-repo.git",
+      "split": "excluded",
+      "exclude_reason": "benchmark_example_not_real_project"
+    },
+    {
+      "id": "exiv2",
+      "defects": 20,
+      "url": "https://github.com/Exiv2/exiv2.git",
+      "split": "train"
+    },
+    {
+      "id": "jerryscript",
+      "defects": 11,
+      "url": "https://github.com/jerryscript-project/jerryscript.git",
+      "split": "train"
+    },
+    {
+      "id": "libchewing",
+      "defects": 8,
+      "url": "https://github.com/chewing/libchewing",
+      "split": "validation"
+    },
+    {
+      "id": "libssh",
+      "defects": 1,
+      "url": "https://git.libssh.org/projects/libssh.git",
+      "split": "train"
+    },
+    {
+      "id": "libtiff",
+      "defects": 5,
+      "url": "https://github.com/vadz/libtiff.git",
+      "split": "heldout"
+    },
+    {
+      "id": "libtiff_sanitizer",
+      "defects": 4,
+      "url": "https://github.com/vadz/libtiff.git",
+      "split": "train"
+    },
+    {
+      "id": "libucl",
+      "defects": 6,
+      "url": "https://github.com/vstakhov/libucl",
+      "split": "heldout"
+    },
+    {
+      "id": "libxml2",
+      "defects": 7,
+      "url": "https://gitlab.gnome.org/GNOME/libxml2.git",
+      "split": "heldout"
+    },
+    {
+      "id": "md4c",
+      "defects": 10,
+      "url": "https://github.com/mity/md4c.git",
+      "split": "train"
+    },
+    {
+      "id": "ndpi",
+      "defects": 4,
+      "url": "https://github.com/ntop/nDPI.git",
+      "split": "heldout"
+    },
+    {
+      "id": "openssl",
+      "defects": 28,
+      "url": "https://github.com/openssl/openssl",
+      "split": "train"
+    },
+    {
+      "id": "proj",
+      "defects": 28,
+      "url": "https://github.com/OSGeo/PROJ.git",
+      "split": "validation"
+    },
+    {
+      "id": "wget2",
+      "defects": 3,
+      "url": "https://gitlab.com/gnuwget/wget2.git",
+      "split": "train"
+    },
+    {
+      "id": "wireshark",
+      "defects": 6,
+      "url": "https://gitlab.com/wireshark/wireshark.git",
+      "split": "train"
+    },
+    {
+      "id": "xbps",
+      "defects": 5,
+      "url": "https://github.com/void-linux/xbps",
+      "split": "heldout"
+    },
+    {
+      "id": "yaml_cpp",
+      "defects": 10,
+      "url": "https://github.com/jbeder/yaml-cpp.git",
+      "split": "train"
+    },
+    {
+      "id": "yara",
+      "defects": 5,
+      "url": "https://github.com/VirusTotal/yara",
+      "split": "validation"
+    },
+    {
+      "id": "zsh",
+      "defects": 5,
+      "url": "https://github.com/zsh-users/zsh",
+      "split": "train"
+    }
+  ],
+  "upper_bound_gate": {
+    "train": {
+      "allowlisted_current_license_defects": 40,
+      "allowlisted_projects": 4
+    },
+    "validation": {
+      "allowlisted_current_license_defects": 20,
+      "allowlisted_projects": 2
+    },
+    "pass_authorizes_patch_header_and_historical_license_audit_only": true,
+    "pass_authorizes_training": false,
+    "pass_authorizes_gpu": false
+  },
+  "output_directory": "artifacts/data-v2/bugscpp-project-license-probe-v1"
+}

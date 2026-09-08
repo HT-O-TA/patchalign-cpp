@@ -171,3 +171,15 @@ ADR-0028 同时结束其他宽泛来源的同类搜索。2,000/200 容量探针�
 ADR-0012 的 SFT、三套评测、DPO 与交付门继续有效。下一步只对尚未读取 patch gold 的
 BugsCpp 24 个项目做预注册 split、现有评测重叠和历史许可证审计，再以真实上界建立
 “开发者修复监督层 + 本地执行层”的 Data-v2 新契约。新契约冻结前无 GPU。
+
+## 第九阶段：BugsCpp 项目 split 与许可证上界
+
+ADR-0029 在读取任何 patch blob 前，用 seed `20260908`、project ID 和公开 defect count
+冻结 train 12/104、validation 3/41、held-out 7/39；cppcheck 30 因当前 Defects4C
+重叠排除，example 1 因非真实项目排除。split 之后不因许可或 C++ 产量重分。
+
+第一道作业只 partial clone/no checkout BugsCpp，并用 `git show` 读取 24 个 meta.json；
+对 train/validation 最多请求 12 个 GitHub repository metadata endpoint，非 GitHub host
+fail-closed，held-out 不请求许可证。当前 SPDX 只计算上界：train 至少 40 defects/4
+projects、validation 至少 20/2 才允许下一道 patch-header + 历史许可证审计。它不读取
+patch、源码、测试或许可证正文，也不申请 GPU。

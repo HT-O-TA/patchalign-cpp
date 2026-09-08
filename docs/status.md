@@ -35,6 +35,7 @@
 - ADR-0024 已禁止第二分片、CommitPack 执行 pilot、训练和 GPU；下一步只做独立 buggy-fail/fixed-pass 来源的有界准入审计。
 - BeetleBox 最终 Job 97508 为 `COMPLETED 0:0`、25 秒、`417 passed`：实际 `c++` 为 3,317/3,865，元数据合格 3,534，但只覆盖 4 个非评测仓库；repo-resplit/cap 后为 160/0，门禁失败并关闭。
 - ADR-0028 结束 broad GitHub、CommitPack、BeetleBox、RunBugRun v2 与 TrickyBugs 的同类补跑；下一步唯一主路线是 BugsCpp 项目级预注册，再一次性冻结分层 Data-v2 配额。
+- ADR-0029 已在读取 patch gold 前固定 BugsCpp：train 12 项目/104 defects、validation 3/41、held-out 7/39，另排除 cppcheck 30 与 example 1；许可证上界探针最多 12 个 GitHub repository metadata 请求，不读取 LICENSE 正文或 held-out patch。
 - 后续若证据表明 2,000/200 全量可执行目标不可实现，必须新建 ADR，把静态监督层和可执行资格层显式分开，并重新冻结配额；不得静默降标。
 
 ## A3.3 当前有效链

@@ -1309,3 +1309,14 @@ summary/manifest SHA256 为 `0f1e739a...1e3af`、`8fe3dc55...43b8`。
 ADR-0028 关闭 BeetleBox 且终止 broad GitHub、CommitPack、RunBugRun v2、TrickyBugs
 的同类补跑。2,000/200 保留为失败的容量探针；下一步只做 BugsCpp 项目级预注册和
 历史许可证上界，随后一次性冻结分层 Data-v2 契约。当前没有训练数据或 GPU 作业。
+
+## 64. BugsCpp 项目预注册与许可证上界入口
+
+ADR-0029 在 patch gold 未读取时固定 BugsCpp 22 个非排除项目的 split：train 12/104、
+validation 3/41、held-out 7/39；cppcheck 30 和 example 1 单独排除。新增机器配置、
+metadata-only 审计器、3 项 split 测试和 1 小时 CPU/网络入口。
+
+作业只 partial clone/no checkout benchmark，读取 meta.json 并对 train/validation 最多
+做 12 个 GitHub repository metadata 请求；held-out 不查许可证，patch blob、LICENSE
+正文、源码、测试、执行和 GPU 全部关闭。当前许可门通过只授权历史许可证与 C++ patch
+header 审计，不授权训练。

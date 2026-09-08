@@ -780,3 +780,11 @@ HT-O-TA/patchalign-cpp
 - `docs/evidence/data_v2_beetlebox_metadata_audit_v1_2.md`：Job 97508 的实际语言、过滤、仓库与 cap 结果；
 - `docs/decisions/0028-close-beetlebox-and-end-broad-source-search.md`：关闭同类来源补跑并固定 BugsCpp 项目级下一步；
 - `artifacts/data-v2/beetlebox-metadata-audit-v1-2/`：summary 与 run manifest 已本地化，原始 Parquet 只保留集群。
+
+### 2026-09-08：BugsCpp 项目预注册与许可上界
+
+- `docs/decisions/0029-preregister-bugscpp-project-split-and-license-probe.md`：patch 前固定 train/validation/held-out 与停止门；
+- `configs/data/data_v2_bugscpp_project_license_probe_v1.json`：24 项目 URL/count/split、请求预算、allowlist 和上界门；
+- `scripts/data/audit_data_v2_bugscpp_projects.py`：只读 meta 与 GitHub repository license metadata 的审计器；
+- `tests/unit/test_data_v2_bugscpp_projects.py`：URL 规范化、固定 split 和 defect 总数测试；
+- `slurm/data_v2_bugscpp_project_license_probe.sbatch`：partial clone/no checkout 与 CPU/网络探针入口。
