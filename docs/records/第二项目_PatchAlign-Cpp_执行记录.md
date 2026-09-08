@@ -1237,3 +1237,10 @@ CPU/网络 Job `97210` 在 `gpu22` 用时 `01:24:08`，完成全仓 `395 passed`
 CPU-only Job `97278` 在 `gpu25` 用时 26 秒，完成 `398 passed` 并冻结 20 条/20 仓库，train/validation 16/4、各 split 标签均衡，失败后不允许替换。selected/summary/manifest SHA256 为 `92925952...c7227`、`f8806391...ea7e`、`a9708124...0def`。
 
 新增内容取得配置、纯投影/diff 模块、可恢复取得器、专项测试和 12 小时 CPU/网络入口。每条最多请求 merge commit、PR commits、PR files、parent/fixed LICENSE 五类 metadata，之后只 fetch 固定 parent/fixed Git 对象。静态门通过前不执行第三方构建；若少于 4/20，按数学不可达早停，不提交 Bubblewrap 构建数组。
+
+
+## 57. GitHub 固定内容终态与 CommitPack 单分片激活
+
+CPU/网络 Job `97292` 在提交 `bda0c133fc03268ad860927e937e1066b4291315` 上用时 `01:29:07`，完成 `405 passed`。固定 20 条/20 仓库经历史许可证、根 CMake、单生产 target、测试改动和 submodule 静态门后为 `0/20`；因此没有执行第三方构建、没有提交构建数组、没有使用 GPU。拒绝分布为历史许可证不在 allowlist 11、根 CMake 缺失 4、生产 target 数不等于 1 共 2、许可证 HTTP 404 共 1、submodule 1、无测试路径改动 1。content-plan/decisions/summary/manifest SHA256 分别为 `e3b0c442...b855`、`6e57452a...fbe0`、`6f35cf92...aaac`、`83548db9...e3de`；当前 broad GitHub 路线按固定停止条件关闭，不换样本或放松门槛。
+
+ADR-0022 激活 ADR-0018 的唯一固定 CommitPack C++ 分片审计，revision `5eee2c845bf88dbffcafedb6e80d2a72a43fe575`、文件 `data/c++/c++-0001.jsonl`、523,946,192 bytes、SHA256 `dfdd55f5...f367f`，禁止第二分片。审计只输出统计和身份哈希，不生成训练数据、不运行仓库代码、不申请 GPU。容量复核同时发现：70% 单来源上限把 CommitPack 贡献限制为 `1,400/140`，与 legacy 安全增量 `260/131` 合并后 train 上界为 1,660，因此即使通过也仍需至少 340 条独立来源数据；该算术已写入 ADR、机器配置和状态页，防止错误宣称单源可补齐。

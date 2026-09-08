@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-08T00:11Z；Job 97278 冻结 20 条可行性分母；内容与静态资格作业准备中
+最后核验：2026-09-08T11:05Z；Job 97292 确认 GitHub 内容路线 0/20；CommitPack 固定单分片 CPU 审计准备中
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。repository→PR v2.1 discovery 已证明 metadata 容量，但固定 detail v1 在连续完成 144 个 train 候选时只有 8 条合格；即使余下 train 全部成功也最多 24 条/23 仓库，低于冻结的 40 条/30 仓库门。Job `96959` 因 outcome 数学不可达主动停止，CPU-only Job `97150` 以 `391 passed` 独立重建并确认 8 合格、136 拒绝、1 中断、55 未开始。58 个不同仓库只因关闭 issue 缺少 bug 标签而被拒，故 ADR-0021 建立独立 evidence v2：标签只作分层，最终资格仍由历史许可证、污染隔离及断网 `buggy fail → fixed pass` 稳定重放证明。当前无 patch/source、无训练数据、无 GPU，DPO 仍未启动。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub evidence v2 的固定 20 条内容审计 Job `97292` 已完成：在历史许可证、根 CMake、单生产目标、测试改动与无 submodule 静态门后为 `0/20`，因此没有运行第三方构建，当前 broad GitHub 路线关闭。ADR-0022 已激活 CommitPack revision `5eee2c84...e575` 的唯一固定 C++ 分片 CPU 供给审计；它受单来源 70% 上限约束，最多贡献 `1,400/140`，即使成功 train 仍至少缺 340 条独立来源数据。当前没有 Data-v2 训练集、没有 GPU 作业，DPO 仍未启动。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,8 +24,15 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | 固定 20 条分母完成；内容静态资格准备中 | Job 97278 冻结 16/4、标签平衡、20 个唯一仓库；下一步核验 commit/files/历史许可证/Git diff，仍无训练或 GPU |
+| Data-v2→DPO 新轮次 | GitHub 路线关闭；CommitPack 单分片审计准备中 | Job 97292 在固定 20 条上得到静态执行候选 0；ADR-0022 仅授权固定 524 MB 分片 CPU 审计，仍无训练或 GPU |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
+
+## 当前执行点：CommitPack 固定单分片审计
+
+- 固定 revision/path/bytes/SHA256：`5eee2c84...e575` / `data/c++/c++-0001.jsonl` / `523,946,192` / `dfdd55f5...f367f`；禁止下载第二分片。
+- 只做流式 schema、许可证字段、仓库/commit/path、2～200 changed logical lines、评测 denylist、legacy 精确去重和 split/cap 审计；artifact 不写源码或仓库明文。
+- 静态份额门为 train `1,400` 条、100 新仓库、700 sampling family；validation `140`、20、70。通过只授权固定仓库执行 pilot，不授权训练。
+- 已知容量数学：legacy 安全增量 `260/131` + CommitPack 上限 `1,400/140`，train 乐观上界 `1,660/2,000`；因此另一个独立来源是硬需求，而非失败后临时扩展实验。
 
 ## A3.3 当前有效链
 

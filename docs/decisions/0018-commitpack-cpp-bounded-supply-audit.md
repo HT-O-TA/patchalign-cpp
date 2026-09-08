@@ -1,6 +1,6 @@
 # ADR-0018：CommitPack C++ 有界第三来源审计
 
-- 状态：Proposed；GitHub detail outcome gate 通过且第三来源缺口成立后再决定是否激活
+- 状态：Accepted；启动条件由 ADR-0022 修订，固定单分片审计已激活
 - 日期：2026-09-07
 
 ## 背景

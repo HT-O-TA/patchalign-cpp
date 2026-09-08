@@ -727,3 +727,13 @@ HT-O-TA/patchalign-cpp
 - 新增 feasibility content 配置、`data_v2_github_content.py` 纯投影/diff 工具、可恢复内容取得器、专项测试和 CPU/网络 Slurm 入口；
 - 大型 Git 对象只允许写入 `/mingli01/data/patchalign-cpp/data-v2/github-executable-evidence-v2/feasibility-content-v1/`，不进入 Git 或本地化清单；
 - 内容阶段不运行构建、不申请 GPU；静态候选不足 4 条时不进入执行数组。
+
+
+### 2026-09-08：GitHub 路线关闭与 CommitPack 单分片审计入口
+
+- `docs/evidence/data_v2_github_execution_feasibility_v1.md`：固定 20 条内容静态资格终态与 0/20 路线关闭证据；
+- `docs/decisions/0022-activate-bounded-commitpack-supply-after-github-closure.md`：固定单分片、70% 单来源上限和独立来源剩余缺口；
+- `configs/data/data_v2_commitpack_shard_audit_v1.json`：上游 revision/path/bytes/SHA、冻结契约、denylist、legacy、split/cap 和静态份额门；
+- `scripts/data/audit_data_v2_commitpack_shard.py`：流式静态审计，仅输出统计及身份哈希；
+- `tests/unit/test_data_v2_commitpack_shard_audit.py`：身份、diff、去重、denylist、split、cap 与无正文输出专项测试；
+- `slurm/data_v2_commitpack_shard_audit.sbatch`：CPU/网络下载、精确校验与审计入口；原始分片只写入 `/mingli01/data/patchalign-cpp/data-v2/commitpack/`，不进入 Git。
