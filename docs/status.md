@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-08T14:52Z；A5 Defects4C 替换评分 array `97901` 正常运行
+最后核验：2026-09-08T15:33Z；A5 Defects4C 替换评分运行中，评测后同步与 CLI smoke 已进入依赖队列
 
 项目状态：**简历交付版 DPO 已训练并完成独立开发集选型，正在一次性最终评测**。175 对经审计偏好已完成 beta=0.1/0.3 两组真实训练；64 条独立 executable dev 按冻结规则选择 beta=0.3。formal 500、confirmation 124、Defects4C 176 只评该胜者，随后自动执行评分、门禁、失败分析和交付整理。RLVR/GRPO 不属于本轮。
 
@@ -36,7 +36,8 @@
 - 原推理 array `97586` 在 16m43s 时被共享账号 UID 1039 同秒主动取消，非代码、OOM 或时限失败；formal/confirmation/Defects4C 已原子保存 118/112/84 条预测，下游 `97589`～`97591` 同时被取消。
 - 恢复 array `97608` 已完成三套固定分母；全部 generation status 为 `ok`，3/3 probe 稳定。C++ 评分 `97611` 也已完成：formal parse/apply/compile/Pass 为 500/437/424/19，function 17/400、file-window 2/100、regression 5、timeout 5；confirmation 为 0/124 Pass、regression 3、timeout 2。
 - 原 Defects4C 评分 `97614` 暴露 rootfs runner 的 role 白名单只含 `m0/m1_r2`：8 个 parse/policy 终止案例保存有效 checkpoint，其余 168 个在执行前秒退。恢复提交 `fbe0717be11ca55648cd4d9d69c22c0fa707471c` 只加入 `dpo_beta03` 并以 `435 passed` 验收。替换评分 `97901` 截至 14:52Z 已完成 3/176、运行 8/176，完成项均为 `ExitCode 0:0`；聚合 `97902` 正确等待全数组完成。详见 [恢复证据](evidence/a5_dpo_final_recovery.md)。
-- 最终门禁未出结果前，beta=0.3 只是候选；若不满足冻结 DPO 提升和退化上限，交付推荐仍为 M1-R2。
+- 聚合 `97902` 成功后，CPU Job `97977` 将在严格核验恢复分支、commit、工作树和聚合产物后，把集群快进到固定 main 提交 `616c9d4a55dcd40b4818a9fb07c185291a6b3271`；单 GPU CLI smoke Job `97978` 已依赖其排队。两者不会启动新训练。
+- Formal timeout 门禁已不可逆失败，交付推荐确定为 M1-R2；Defects4C 只补全外部画像与其他 gate reason。
 
 ## A3.3 当前有效链
 
