@@ -6,7 +6,7 @@
   },
   "source": {
     "candidate_directory": "/mingli01/data/patchalign-cpp/a4/executable-candidates-v1",
-    "candidate_manifest_sha256": "sha256:13e671509300e19415e59f05a40a00fc0dc69e65b1c77391f055b1c6223e3ae3",
+    "candidate_manifest_sha256": "sha256:e0337a2afe160795a5e859aff8a9390090a84bdba58cd97e974c3b97b463e5e9",
     "a4_selected_manifest": "/mingli01/data/patchalign-cpp/a4/executable-source-v1/preference-source-manifest.json",
     "a4_selected_manifest_sha256": "sha256:8cba1ec5472a4f4443b766c8fa136f6e928d3911feec9e06457a377775095495",
     "a4_qualification_progress": "/mingli01/data/patchalign-cpp/a4/executable-qualification-progress-v1",
