@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from patchalign.inference import build_prompt, validate_patch, validate_request
+from patchalign.inference import build_prompt, sha256_file, validate_patch, validate_request
 from scripts.baseline.run_a3_baseline import build_prompt as frozen_build_prompt
 
 
@@ -43,3 +45,11 @@ def test_validate_patch_rejects_another_file() -> None:
     patch = "--- a/other.cpp\n+++ b/other.cpp\n@@ -1 +1 @@\n-old\n+new\n"
     with pytest.raises(ValueError, match="outside allowed_paths"):
         validate_patch(patch, "main.cpp")
+
+
+def test_sha256_file_streams_stable_identity(tmp_path: Path) -> None:
+    artifact = tmp_path / "artifact.bin"
+    artifact.write_bytes(b"patchalign")
+    assert sha256_file(artifact) == (
+        "sha256:b34c4cb93181020cb2418c2bc6fc98d04b9dd61734486d616cb49bcf5a75c13a"
+    )

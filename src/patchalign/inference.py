@@ -21,6 +21,14 @@ def sha256_bytes(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return "sha256:" + digest.hexdigest()
+
+
 def validate_request(value: object) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("request must be a JSON object")
@@ -94,10 +102,19 @@ def generate_patch(
     local_files_only: bool = True,
 ) -> dict[str, Any]:
     request = validate_request(request)
-    if not (model_path / "config.json").is_file():
-        raise FileNotFoundError(f"model config not found: {model_path / 'config.json'}")
-    if not (adapter_path / "adapter_model.safetensors").is_file():
-        raise FileNotFoundError(f"adapter weights not found: {adapter_path / 'adapter_model.safetensors'}")
+    model_config = model_path / "config.json"
+    adapter_config = adapter_path / "adapter_config.json"
+    adapter_weights = adapter_path / "adapter_model.safetensors"
+    for label, path in (
+        ("model config", model_config),
+        ("adapter config", adapter_config),
+        ("adapter weights", adapter_weights),
+    ):
+        if not path.is_file():
+            raise FileNotFoundError(f"{label} not found: {path}")
+    model_config_sha256 = sha256_file(model_config)
+    adapter_config_sha256 = sha256_file(adapter_config)
+    adapter_sha256 = sha256_file(adapter_weights)
 
     import numpy as np
     import torch
@@ -164,6 +181,9 @@ def generate_patch(
         "patch": patch,
         "prompt_sha256": sha256_bytes(prompt.encode("utf-8")),
         "patch_sha256": sha256_bytes(patch.encode("utf-8")),
+        "model_config_sha256": model_config_sha256,
+        "adapter_config_sha256": adapter_config_sha256,
+        "adapter_sha256": adapter_sha256,
         "input_tokens": input_tokens,
         "output_tokens": int(new_ids.shape[0]),
         "latency_seconds": latency,
