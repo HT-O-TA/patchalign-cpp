@@ -21,7 +21,7 @@ from scripts.training.a5_dpo_common import (
 )
 
 
-VERSION = "a5-dpo-cpu-preflight-v1"
+VERSION = "a5-dpo-cpu-preflight-v1.1"
 
 
 def percentile(values: list[int], fraction: float) -> int:
@@ -48,7 +48,7 @@ def main() -> None:
     repo = Path(__file__).resolve().parents[2]
     config = read_json(args.config)
     validate_config(config)
-    pairs = verify_frozen_inputs(config)
+    pairs = verify_frozen_inputs(config, repo)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
     require(not subprocess.check_output(["git", "status", "--porcelain"], cwd=repo, text=True).strip(), "DPO preflight requires a clean worktree")
 

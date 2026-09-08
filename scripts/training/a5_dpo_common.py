@@ -11,7 +11,7 @@ from typing import Any
 from scripts.training.a3_formal_common import require, sha256_file
 
 
-CONFIG_VERSION = "a5-dpo-v1"
+CONFIG_VERSION = "a5-dpo-v1.1"
 EXPECTED_PACKAGES = {
     "accelerate": "1.13.0",
     "bitsandbytes": "0.49.2",
@@ -39,6 +39,11 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 def validate_config(config: dict[str, Any]) -> None:
     require(config.get("version") == CONFIG_VERSION, "wrong A5 DPO config version")
     require(config.get("seed") == 20260830, "wrong A5 DPO seed")
+    require(config["contract"] == {
+        "scope_decision": "docs/decisions/0031-resume-delivery-scope.md",
+        "scope_decision_sha256": "sha256:4ff1d3f972a0649699a1f5874e8b3c0ca1c097a77eb890303e24971d6443e003",
+        "selection_correction": "docs/decisions/0032-dpo-selection-contract-correction.md",
+    }, "A5 DPO contract binding changed")
     require(config["model"] == {
         "model_id": "Qwen/Qwen2.5-Coder-7B",
         "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
@@ -85,14 +90,22 @@ def validate_config(config: dict[str, Any]) -> None:
     require(config["selection"] == {
         "dataset": "independent-dev-exec-v1",
         "fixed_denominator": 64,
-        "candidates": ["M1-R2", "beta01", "beta03"],
+        "baseline": "M1-R2",
+        "candidates": ["beta01", "beta03"],
         "priority": [
             "pass_count_desc",
-            "regression_failure_count_asc",
-            "timeout_count_asc",
-            "parse_apply_build_success_desc",
-            "beta01_then_beta03_on_exact_tie",
+            "hidden_test_success_desc",
+            "public_test_success_desc",
+            "compile_success_desc",
+            "apply_success_desc",
         ],
+        "non_degradation_constraints": {
+            "timeout_count_not_above_m1_r2": True,
+            "regression_failure_count_not_above_m1_r2": True,
+        },
+        "positive_signal": "strict_lexicographic_improvement_over_m1_r2_on_priority",
+        "no_eligible_or_positive_signal_policy": "select_lowest_regression_then_timeout_risk_and_report_negative_result",
+        "exact_tie": "beta03_lower_divergence_risk",
         "training_data_used_for_selection": False,
     }, "A5 DPO selection contract changed")
 
@@ -103,7 +116,20 @@ def variant(config: dict[str, Any], name: str) -> dict[str, Any]:
     return values[0]
 
 
-def verify_frozen_inputs(config: dict[str, Any]) -> list[dict[str, Any]]:
+def verify_frozen_inputs(
+    config: dict[str, Any], repo: Path | None = None
+) -> list[dict[str, Any]]:
+    if repo is not None:
+        contract = config["contract"]
+        require(
+            sha256_file(repo / contract["scope_decision"])
+            == contract["scope_decision_sha256"],
+            "DPO scope decision changed",
+        )
+        require(
+            (repo / contract["selection_correction"]).is_file(),
+            "DPO selection correction missing",
+        )
     model_config = Path(config["model"]["local_path"]) / "config.json"
     require(model_config.is_file(), "base model config missing")
     require(sha256_file(model_config) == config["model"]["config_sha256"], "base model config changed")

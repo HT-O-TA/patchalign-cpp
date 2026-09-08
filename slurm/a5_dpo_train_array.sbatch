@@ -16,12 +16,12 @@ trap 'rc=$?; echo "A5 DPO training failed: line=${LINENO} exit=${rc} command=${B
 
 REPO=/mingli01/project/ht/patchalign-cpp
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
-CONFIG=${REPO}/configs/training/a5_dpo_v1.json
-CPU_PREFLIGHT=${REPO}/artifacts/a5/dpo-preflight-v1/cpu-preflight.json
-GPU_SMOKE=${REPO}/artifacts/a5/dpo-preflight-v1/gpu-smoke.json
+CONFIG=${REPO}/configs/training/a5_dpo_v1_1.json
+CPU_PREFLIGHT=${REPO}/artifacts/a5/dpo-preflight-v1.1/cpu-preflight.json
+GPU_SMOKE=${REPO}/artifacts/a5/dpo-preflight-v1.1/gpu-smoke.json
 VARIANTS=(beta01 beta03)
 VARIANT=${VARIANTS[${SLURM_ARRAY_TASK_ID}]}
-OUTPUT=${REPO}/artifacts/a5/dpo-training-v1/${VARIANT}
+OUTPUT=${REPO}/artifacts/a5/dpo-training-v1.1/${VARIANT}
 
 export PATH="${ENV_PREFIX}/bin:/usr/bin:/bin"
 export PYTHONPATH="${REPO}/src:${REPO}"

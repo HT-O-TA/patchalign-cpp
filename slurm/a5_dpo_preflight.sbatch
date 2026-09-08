@@ -14,8 +14,8 @@ trap 'rc=$?; echo "A5 DPO preflight failed: line=${LINENO} exit=${rc} command=${
 
 REPO=/mingli01/project/ht/patchalign-cpp
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
-CONFIG=${REPO}/configs/training/a5_dpo_v1.json
-OUTPUT=${REPO}/artifacts/a5/dpo-preflight-v1/cpu-preflight.json
+CONFIG=${REPO}/configs/training/a5_dpo_v1_1.json
+OUTPUT=${REPO}/artifacts/a5/dpo-preflight-v1.1/cpu-preflight.json
 
 export PATH="${ENV_PREFIX}/bin:/usr/bin:/bin"
 export PYTHONPATH="${REPO}/src:${REPO}"

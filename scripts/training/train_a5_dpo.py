@@ -24,8 +24,8 @@ from scripts.training.a5_dpo_common import (
 )
 
 
-SMOKE_VERSION = "a5-dpo-gpu-smoke-v1"
-TRAINING_VERSION = "a5-dpo-training-v1"
+SMOKE_VERSION = "a5-dpo-gpu-smoke-v1.1"
+TRAINING_VERSION = "a5-dpo-training-v1.1"
 
 
 def utc_now() -> str:
@@ -35,7 +35,7 @@ def utc_now() -> str:
 def verify_cpu_preflight(path: Path, config_path: Path, config: dict[str, Any], commit: str) -> dict[str, Any]:
     require(path.is_file(), "A5 DPO CPU preflight missing")
     report = read_json(path)
-    require(report["version"] == "a5-dpo-cpu-preflight-v1", "wrong CPU preflight version")
+    require(report["version"] == "a5-dpo-cpu-preflight-v1.1", "wrong CPU preflight version")
     require(report["status"] == "passed", "CPU preflight did not pass")
     require(report["git_commit"] == commit, "CPU preflight commit mismatch")
     require(report["config_sha256"] == sha256_file(config_path), "CPU preflight config mismatch")
@@ -168,7 +168,7 @@ def main() -> None:
     repo = Path(__file__).resolve().parents[2]
     config = read_json(args.config)
     validate_config(config)
-    pairs = verify_frozen_inputs(config)
+    pairs = verify_frozen_inputs(config, repo)
     choice = variant(config, args.variant)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
     require(not subprocess.check_output(["git", "status", "--porcelain"], cwd=repo, text=True).strip(), "DPO training requires a clean worktree")

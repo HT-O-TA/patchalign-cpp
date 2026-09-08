@@ -12,7 +12,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def frozen_config() -> dict:
-    return json.loads((REPO / "configs/training/a5_dpo_v1.json").read_text(encoding="utf-8"))
+    return json.loads((REPO / "configs/training/a5_dpo_v1_1.json").read_text(encoding="utf-8"))
 
 
 def test_frozen_a5_dpo_config_and_variants() -> None:
