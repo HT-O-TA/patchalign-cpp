@@ -1231,3 +1231,9 @@ anchor 算法，不再由另一套文本 diff 重新对齐。
 CPU/网络 Job `97210` 在 `gpu22` 用时 `01:24:08`，完成全仓 `395 passed` 和 81 个新增 GitHub metadata 请求。固定 200 条得到 104 个候选，train/validation 为 86/18、仓库为 81/14，全部 outcome gate 通过；标签分层为 31/73。正式 candidate/decisions/summary/manifest SHA256 为 `a7f67ef2...f0eb`、`20dcbf82...eb72`、`9ef07936...e484`、`4e457e99...a0df`。
 
 后续选择配置固定 20 条、20 个唯一仓库：train 的有/无标签各 8，validation 各 2，按 seed `20260908` 的哈希顺序交错。该步骤仍为 metadata-only；正式选择 Job 完成并绑定哈希后，才建立内容取得配置。
+
+## 56. 固定 20 条分母与内容静态资格准备
+
+CPU-only Job `97278` 在 `gpu25` 用时 26 秒，完成 `398 passed` 并冻结 20 条/20 仓库，train/validation 16/4、各 split 标签均衡，失败后不允许替换。selected/summary/manifest SHA256 为 `92925952...c7227`、`f8806391...ea7e`、`a9708124...0def`。
+
+新增内容取得配置、纯投影/diff 模块、可恢复取得器、专项测试和 12 小时 CPU/网络入口。每条最多请求 merge commit、PR commits、PR files、parent/fixed LICENSE 五类 metadata，之后只 fetch 固定 parent/fixed Git 对象。静态门通过前不执行第三方构建；若少于 4/20，按数学不可达早停，不提交 Bubblewrap 构建数组。

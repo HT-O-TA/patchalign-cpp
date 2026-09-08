@@ -720,3 +720,10 @@ HT-O-TA/patchalign-cpp
 - 新增早停证据页和 ADR-0021，固定以真实执行证据替代 bug 标签资格的独立 v2 路线；
 - 新增 `data_v2_github_executable_evidence_metadata_v2.json`、metadata v2 采集器、专项测试和 CPU/网络 Slurm 入口；v2 只复用或补充公开 PR/issue 元数据，不取得 patch/source 或许可证内容；
 - 当前没有 Data-v2 训练目录、GPU 作业或 DPO 产物。
+
+### 2026-09-08：固定 20 条内容可行性入口
+
+- 新增 feasibility selection 配置、构建器、测试和 CPU-only Slurm 入口；Job `97278` 的选择 artifact 已本地化，仓库内容仍为零；
+- 新增 feasibility content 配置、`data_v2_github_content.py` 纯投影/diff 工具、可恢复内容取得器、专项测试和 CPU/网络 Slurm 入口；
+- 大型 Git 对象只允许写入 `/mingli01/data/patchalign-cpp/data-v2/github-executable-evidence-v2/feasibility-content-v1/`，不进入 Git 或本地化清单；
+- 内容阶段不运行构建、不申请 GPU；静态候选不足 4 条时不进入执行数组。

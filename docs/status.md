@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-07T23:14Z；Job 97210 完成 evidence metadata v2；固定 20 条执行可行性选择准备中
+最后核验：2026-09-08T00:11Z；Job 97278 冻结 20 条可行性分母；内容与静态资格作业准备中
 
 项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。repository→PR v2.1 discovery 已证明 metadata 容量，但固定 detail v1 在连续完成 144 个 train 候选时只有 8 条合格；即使余下 train 全部成功也最多 24 条/23 仓库，低于冻结的 40 条/30 仓库门。Job `96959` 因 outcome 数学不可达主动停止，CPU-only Job `97150` 以 `391 passed` 独立重建并确认 8 合格、136 拒绝、1 中断、55 未开始。58 个不同仓库只因关闭 issue 缺少 bug 标签而被拒，故 ADR-0021 建立独立 evidence v2：标签只作分层，最终资格仍由历史许可证、污染隔离及断网 `buggy fail → fixed pass` 稳定重放证明。当前无 patch/source、无训练数据、无 GPU，DPO 仍未启动。
 
@@ -24,7 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | evidence metadata v2 通过；固定 20 条选择准备中 | Job 97210 得到 104 个候选（86/18）、95 个 split 内仓库（81/14），全部 metadata gate 通过；尚无执行资格、训练或 GPU |
+| Data-v2→DPO 新轮次 | 固定 20 条分母完成；内容静态资格准备中 | Job 97278 冻结 16/4、标签平衡、20 个唯一仓库；下一步核验 commit/files/历史许可证/Git diff，仍无训练或 GPU |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## A3.3 当前有效链
@@ -166,3 +166,9 @@ CPU/网络 Job `97210` 在提交 `76161d5` 上以 `COMPLETED 0:0` 用时 `01:24:
 固定 200 条中得到 104 个 metadata 候选：train/validation 为 86/18，仓库为 81/14；有 bug 标签 31、无标签 73。总数 50、split 40/10 和仓库 30/8 的全部门槛通过。candidate/summary/run manifest SHA256 分别为 `a7f67ef2...f0eb`、`9ef07936...e484`、`4e457e99...a0df`。
 
 本结果只授权 ADR-0021 的固定 20 条执行可行性 pilot。选择固定为 train 8 有标签 + 8 无标签、validation 2 + 2，20 个仓库互异；clone、许可证、构建或测试失败后不得替换。至少 4/20 严格通过才扩大正式 50 条。
+
+## 固定 20 条执行可行性分母
+
+CPU-only Job `97278` 在提交 `b4383db` 上以 `COMPLETED 0:0` 用时 26 秒，完整回归 `398 passed`。固定分母为 train 16、validation 4；两个 split 内有/无 bug 标签分别为 8/8 和 2/2，20 条来自 20 个不同仓库且不允许失败替换。selected/summary/run manifest SHA256 分别为 `92925952...c7227`、`f8806391...ea7e`、`a9708124...0def`。
+
+内容阶段先顺序取得固定 PR commit 列表、files 投影、merge commit、parent/fixed 历史许可证及两个 Git 对象，只保存 API response 哈希，仓库内容留在 `/mingli01/data`。静态门要求本地 parent→fixed diff 与 PR files 完全一致、无 rename/copy/binary/mode 变化、恰好一个既有 UTF-8 生产 C++ 目标、至少一个测试路径、根 CMake 存在且无不安全的测试目录外 build-manifest 改动。若静态执行候选少于 4 条，直接在编译前关闭路线。

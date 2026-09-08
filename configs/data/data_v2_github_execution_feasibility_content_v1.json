@@ -1,0 +1,87 @@
+{
+  "version": "data-v2-github-execution-feasibility-content-v1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0021-use-executable-evidence-before-bug-label.md",
+    "sha256": "sha256:b686656b77a1189471bef0758ed3d0d32dda860fc4baa802bb8799fb730bb3e2"
+  },
+  "selection": {
+    "version": "data-v2-github-execution-feasibility-selection-v1",
+    "git_commit": "b4383db87048a88d504a31109e291dbf2a0516d9",
+    "slurm_job_id": 97278,
+    "config_sha256": "sha256:976ddd43f0840778b5ca8a59073b5f9c7a29564942164d9da172f2aab2e50385",
+    "script_sha256": "sha256:d8028ebd78dcaa095e5a7aac445fa936b7c27e1771d7af12f9f3611bfe4c3b39",
+    "candidates": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/feasibility-selection-v1/selected-candidates.jsonl",
+      "sha256": "sha256:929259520feff8d959b69574062265f2ca4b5ee6718b429d30922de5335c7227",
+      "count": 20
+    },
+    "summary": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/feasibility-selection-v1/summary.json",
+      "sha256": "sha256:f88063917f990ff1f4a67b295364c8aec6ff09a661be7028a44594f36637ea7e"
+    },
+    "run_manifest": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/feasibility-selection-v1/run-manifest.json",
+      "sha256": "sha256:a97081246f8b95fe3ec96a83d986fb96980f35bfe691721c391c6462b9d80def"
+    }
+  },
+  "scope": {
+    "fixed_candidate_content_acquisition_authorized": true,
+    "github_api_metadata_and_license_only": true,
+    "git_fetch_fixed_objects_only": true,
+    "raw_api_response_stored": false,
+    "repository_content_cluster_local": true,
+    "untrusted_build_executed": false,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "api": {
+    "base_url": "https://api.github.com",
+    "version": "2022-11-28",
+    "user_agent": "patchalign-cpp-github-execution-feasibility-content-v1/1",
+    "token_environment_variable": "GITHUB_TOKEN",
+    "timeout_seconds": 30,
+    "maximum_attempts": 3,
+    "maximum_logical_requests": 100,
+    "maximum_network_attempts_per_run": 106,
+    "unauthenticated_minimum_interval_seconds": 61.0,
+    "authenticated_minimum_interval_seconds": 0.5,
+    "pr_commits_per_page": 100,
+    "pr_files_per_page": 100
+  },
+  "git": {
+    "binary": "/usr/bin/git",
+    "version": "git version 2.34.1",
+    "sha256": "sha256:587ef21868c948b883993e23209b86a72a6ddc06aab1545c697ffc31075acd4a",
+    "remote_template": "https://github.com/{repository_full_name}.git",
+    "fetch_depth": 2,
+    "fetch_timeout_seconds": 1200,
+    "maximum_fetches": 20,
+    "maximum_repository_bytes": 1610612736,
+    "maximum_total_repository_bytes": 21474836480,
+    "submodules_allowed": false
+  },
+  "commit_and_diff": {
+    "merge_commit_parent_counts": [1, 2],
+    "require_last_pr_commit_equals_head_sha": true,
+    "require_local_parent_to_fixed_diff_matches_pr_files": true,
+    "renames_copies_binary_mode_changes_allowed": false,
+    "production_extensions": [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"],
+    "test_path_components": ["test", "tests", "testing", "spec", "specs"],
+    "required_production_targets": 1,
+    "minimum_test_files": 1,
+    "production_target_must_be_modified_existing_utf8_text": true,
+    "outside_test_build_manifest_delta_allowed": false,
+    "build_manifest_names": ["CMakeLists.txt"],
+    "build_manifest_suffixes": [".cmake"],
+    "required_root_build_manifest": "CMakeLists.txt"
+  },
+  "license": {
+    "check_at_parent_and_fixed": true,
+    "allowed_spdx": ["Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "BSL-1.0", "ISC", "MIT", "Zlib"],
+    "require_nonempty_content_sha256": true
+  },
+  "content_root": "/mingli01/data/patchalign-cpp/data-v2/github-executable-evidence-v2/feasibility-content-v1",
+  "output_directory": "artifacts/data-v2/github-executable-evidence-v2/feasibility-content-v1"
+}
