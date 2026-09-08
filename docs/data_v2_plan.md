@@ -195,3 +195,14 @@ ADR-0030 用真实可得证据替换 2,000/200 容量探针：监督候选池固
 64 个双资格 function family 作为独立开发执行集，并从所有监督 split 移除整个 family。
 先完成 CPU 资格扩展和精确数据构建；Schema、token、sample/payload/family 隔离全部通过后，
 才预注册三个从 Base 重训的 SFT seed。
+
+## 第十一阶段：简历交付范围收敛
+
++项目负责人明确当前以 AI 应用开发投递为主，PatchAlign-Cpp 作为第二项目展示后训练、
++真实执行评测和工程治理能力。ADR-0031 因此停止分层 Data-v2 构建和三 seed SFT/DPO；
++上述研究门的失败事实不删除，也不包装为通过。
+
++当前只保留对简历叙事有直接价值的闭环：完成与 A4 偏好零交叉的独立执行开发集，审计
++现有 182 对，基于 M1-R2 训练单 seed DPO 主配置与一个 beta 对照，再对选中模型运行
++formal 500、confirmation 124 和 Defects4C 176 各一次。最后统一交付模型、模型卡、
++指标、失败分析、CLI demo 和复现入口。

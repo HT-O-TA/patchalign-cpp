@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-08T07:20Z；Job 97515 已完成；BugsCpp 路线关闭，进入分层 Data-v2 独立开发执行集构建
+最后核验：2026-09-08T08:16Z；Job 97530 已失败且原因明确；当前修复独立 DPO 开发执行集入口
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中，当前进入分层 Data-v2 构建**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub、CommitPack、BeetleBox 与 BugsCpp 均已得到可审计的停止结论，宽泛来源搜索结束。ADR-0030 改为使用既有 5,000+260 / 500+131 安全监督候选池，并从未进入 A4 偏好集的 train-only family 建立 64 条独立双资格开发执行集。当前没有 GPU 作业，DPO 仍未启动。
+项目状态：**简历交付版后训练闭环进行中，当前冻结独立 DPO 开发执行集**。ADR-0031 结束论文级 Data-v2 扩张、三 seed SFT/DPO 和穷尽消融；M1-R2 保持 DPO 起点，现有 182 对偏好进入严格自动审计。目标是完成单 seed DPO 主实验、一个核心对照、三套一次性评测和可复现交付。当前没有 PatchAlign GPU 作业，DPO 尚未启动。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,17 +24,17 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | 分层 Data-v2 构建中 | BugsCpp validation 许可证上界 5/1 未过门并关闭；ADR-0030 已冻结监督候选池和 64 条 family-disjoint 开发执行集方案，下一步为 CPU 资格扩展与精确数据冻结 |
-| A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
+| Data-v2 研究扩张 | 结束并保留负结果 | 新来源和 2,000/200 容量探针均已关闭；ADR-0031 不再构建或训练 Data-v2 |
+| 简历交付版 DPO | 开发集入口修复中、未训练 | M1-R2 为起点；先冻结 64/50 条独立执行开发集并审计 A4 偏好，再运行单 seed 主配置与一个 beta 对照 |
 
-## 当前执行点：分层 Data-v2 独立开发执行集
+## 当前执行点：简历交付版 DPO 前置开发集
 
-- BugsCpp Job `97515` 为 `COMPLETED 0:0`、1 分 18 秒、`420 passed`。train 当前许可上界为 64 defects/5 projects，validation 只有 5/1，低于 20/2；按 ADR-0029 关闭且不重分。
-- Job 97515 只读取 24 个 `meta.json` 和 12 个 GitHub repository metadata 响应；未读取 patch、LICENSE 正文、源码、测试或 held-out 许可证，未申请 GPU。
-- GitHub 0/20、CommitPack 236/17、BeetleBox 160/0、BugsCpp validation 5/1 已共同证明 2,000/200 全量可执行增量在当前资源和治理边界下不可实现；宽泛来源搜索结束。
-- ADR-0030 显式以分层合同替代失败容量探针：监督候选池为 train 5,000+260、validation 500+131；静态监督样本不冒充执行资格。
-- 新的 SFT 开发执行集从 A4 尚未选入偏好数据的 336 个 function 候选中，按冻结顺序扩展双重资格并取 64 个；整个 family 从监督 train/validation 排除。目标 64、硬下限 50。
-- 开发执行集与 A4 264 case、formal 500、confirmation 124、Defects4C 176 全部隔离，只用于三 seed 模型选择。Data-v2 精确规模需在 CPU 构建后落盘；当前没有 GPU 授权。
+- ADR-0031 已将当前完成条件收敛为真实 DPO、一个核心对照、三套冻结评测、失败分析和可复现交付；旧 300/150、多 seed 和 Data-v2 容量门保留为未通过的研究级历史标准。
+- 独立开发执行集仍从 A4 626 个候选中排除已用于偏好的 264 个 case；实际剩余 function 候选为 344 个，按冻结 `candidate_order` 选择目标 64、最低 50 个双资格案例。
+- Job `97528` 在资格前因错误 candidate manifest 哈希失败；修正后 Job `97530` 完成 `421 passed`，随后因 A4 已选 manifest 字段实际为 `source_candidate_order` 而非 `candidate_order` 再次 fail-closed。
+- 两次失败均未创建 progress/output，也未执行新候选；当前修正只处理字段映射，不改变样本、顺序、执行协议或 64/50 门。
+- 开发集只用于 M1-R2、DPO beta=0.1 主配置和 beta=0.3 对照的选择，与 A4 偏好、formal 500、confirmation 124、Defects4C 176 零交叉。
+- 当前无 PatchAlign 排队/运行作业，无 GPU 占用；下一步是提交修正版 CPU 双重资格作业。
 
 ## A3.3 当前有效链
 

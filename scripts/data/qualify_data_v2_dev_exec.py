@@ -67,6 +67,12 @@ def qualified_with_tokens(
     return tokens <= max_tokens, tokens
 
 
+def a4_selected_orders(cases: list[dict[str, Any]]) -> set[int]:
+    orders = {int(case["source_candidate_order"]) for case in cases}
+    require(len(orders) == len(cases), "A4 selected source order collision")
+    return orders
+
+
 def eligible_orders(
     items: list[dict[str, Any]], selected_orders: set[int]
 ) -> list[int]:
@@ -101,7 +107,7 @@ def main() -> None:
     require(sha256_file(a4_path) == source["a4_selected_manifest_sha256"], "A4 selected manifest changed")
     a4 = json.loads(a4_path.read_text(encoding="utf-8"))
     require(len(a4["cases"]) == 264, "A4 selected denominator changed")
-    selected_orders = {int(item["candidate_order"]) for item in a4["cases"]}
+    selected_orders = a4_selected_orders(a4["cases"])
     selected_case_ids = {str(item["case_id"]) for item in a4["cases"]}
     require(len(selected_orders) == len(selected_case_ids) == 264, "A4 selected identity collision")
 

@@ -1334,7 +1334,17 @@ function 开发集。开发 family 将从 SFT 数据整体排除；下一步只�
 
 ### 65.1 开发执行集首次入口的哈希绑定失败
 
-+Job `97528` 在 `421 passed` 后于资格执行前 fail-closed：配置中的 A4 candidate manifest
-+SHA256 被误写为历史值 `13e67150...e3ae3`，集群实际文件为 `e0337a2a...e5e9`。作业
-+用时 27 秒、未创建 progress/output、未执行候选，因此只修正精确输入绑定并重提；样本、
-+顺序、64/50 门槛和执行协议不变。
+Job `97528` 在 `421 passed` 后于资格执行前 fail-closed：配置中的 A4 candidate manifest
+SHA256 被误写为历史值 `13e67150...e3ae3`，集群实际文件为 `e0337a2a...e5e9`。作业
+用时 27 秒、未创建 progress/output、未执行候选，因此只修正精确输入绑定并重提；样本、
+顺序、64/50 门槛和执行协议不变。
+
+### 65.2 第二次字段映射失败与简历交付版范围
+
+修正哈希后的 Job `97530` 完成 `421 passed`，随后在资格执行前因 A4 selected manifest
+使用 `source_candidate_order` 而脚本读取 `candidate_order` 失败。作业用时 45 秒；
+progress/output 均不存在。修正只映射冻结字段，不改变实验设计。
+
+负责人随后明确项目以简历竞争力而非论文级完备性为目标。ADR-0031 停止 Data-v2
+重建与多 seed 方案，保留 M1-R2→偏好审计→单 seed DPO+一个 beta 对照→三套一次性
+评测→最终交付的完整链。未提交的 Data-v2 builder 草稿已删除，避免成为漂移入口。

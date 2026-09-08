@@ -64,6 +64,7 @@
 - BugsCpp 项目预注册：[ADR-0029：split 与许可证上界](decisions/0029-preregister-bugscpp-project-split-and-license-probe.md)
 - BugsCpp 结果：[validation 许可证上界失败证据](evidence/data_v2_bugscpp_project_license_probe_v1.md)
 - 当前分层 Data-v2：[ADR-0030：family-disjoint 监督与开发执行层](decisions/0030-close-source-search-and-freeze-layered-data-v2.md)
+- 当前交付范围：[ADR-0031：简历交付版后训练闭环](decisions/0031-resume-delivery-scope.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)
