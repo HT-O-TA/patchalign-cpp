@@ -1,0 +1,62 @@
+{
+  "version": "resume-dpo-preference-audit-v1",
+  "inputs": {
+    "scope_decision": {
+      "path": "docs/decisions/0031-resume-delivery-scope.md",
+      "sha256": "sha256:4ff1d3f972a0649699a1f5874e8b3c0ca1c097a77eb890303e24971d6443e003"
+    },
+    "a4_preferences": {
+      "path": "artifacts/a4/preference-scoring-v1/preferences.jsonl",
+      "sha256": "sha256:5e6b56e4417d49d0a9fcf85e2ec37d3a4b1e358fda870737adea5ae8c0f578bf"
+    },
+    "a4_pair_audit": {
+      "path": "artifacts/a4/preference-scoring-v1/pair-audit.jsonl",
+      "sha256": "sha256:bcaf461d09e2f54f5b68e30e9a17025ada1c6827b9cb1829556445519b8b6ad2"
+    },
+    "a4_scores": {
+      "path": "artifacts/a4/preference-scoring-v1/scores.jsonl",
+      "sha256": "sha256:c218cd58ab05a8b7fa59188163cbfaabdf206b4482185cf297e1f63ff2e1cee2"
+    },
+    "a4_summary": {
+      "path": "artifacts/a4/preference-scoring-v1/summary.json",
+      "sha256": "sha256:302e7a9aed6759373f579cee88027fc5991161a28d194e960d409a67261e6fc8"
+    },
+    "a4_run_manifest": {
+      "path": "artifacts/a4/preference-scoring-v1/run-manifest.json",
+      "sha256": "sha256:03c61f0e3a376d4879274880634d8d12f4359d03775aa4b7c726cb3d844c7cbe"
+    },
+    "a4_source_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/a4/executable-source-v1/preference-source-manifest.json",
+      "sha256": "sha256:8cba1ec5472a4f4443b766c8fa136f6e928d3911feec9e06457a377775095495"
+    },
+    "pair_schema": {
+      "path": "schemas/a4-preference-pair-v0.1.schema.json",
+      "sha256": "sha256:28db5fae2f759466987fc0630156cb9003c007a070e541ffb4a91dc43724d8e3"
+    },
+    "dev_exec_manifest": {
+      "path": "/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1/dev-exec-manifest.json",
+      "sha256": "sha256:457318d186ba056a970ac917f4161cacf98b07f2bd121327452a5eaaf601340f"
+    }
+  },
+  "policy": {
+    "source_pair_count": 182,
+    "exclude_pair_reasons": [
+      "timeout_tiebreak"
+    ],
+    "expected_excluded_count": 7,
+    "minimum_approved_pairs": 150,
+    "minimum_chosen_success_pairs": 70,
+    "maximum_pairs_per_case": 1,
+    "gold_or_test_content_in_training": false
+  },
+  "boundaries": {
+    "source_split": "train",
+    "dev_exec_overlap": 0,
+    "formal_overlap": 0,
+    "confirmation_overlap": 0,
+    "external_overlap": 0,
+    "evaluation_gold_consumed": false,
+    "overwrite_allowed": false
+  },
+  "output_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preference-v1"
+}
