@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-08T11:46Z；A5 最终评测推理 array `97586` 正在运行
+最后核验：2026-09-08T12:15Z；A5 最终评测恢复推理 array `97608` 正在运行
 
 项目状态：**简历交付版 DPO 已训练并完成独立开发集选型，正在一次性最终评测**。175 对经审计偏好已完成 beta=0.1/0.3 两组真实训练；64 条独立 executable dev 按冻结规则选择 beta=0.3。formal 500、confirmation 124、Defects4C 176 只评该胜者，随后自动执行评分、门禁、失败分析和交付整理。RLVR/GRPO 不属于本轮。
 
@@ -33,8 +33,9 @@
 - DPO CPU 预检 `97557`、GPU smoke `97558` 和训练 array `97559` 均完成；beta=0.1/0.3 各训练 2 epochs、44 steps。
 - 独立 dev 预检 `97566`、三路推理 `97567`、三路评分 `97570`、自动选择 `97571` 均完成。三者 Pass 均为 5/64；beta=0.3 的 apply/build 为 57/57，高于 baseline 53/52 且无 timeout/regression 退化，因此被选中。
 - 最终预检 `97583` 以 `434 passed` 完成，三套固定数据、prompt、基线、adapter、环境和评分器哈希全部通过。
-- GPU 推理 array `97586` 正在运行：task 0=formal 500、task 1=confirmation 124、task 2=Defects4C 176。
-- 下游已用 `afterok` 排队：C++ 评分 `97589`、Defects4C 限流评分 `97590`、最终聚合/门禁/失败转移 `97591`。
+- 原推理 array `97586` 在 16m43s 时被共享账号 UID 1039 同秒主动取消，非代码、OOM 或时限失败；formal/confirmation/Defects4C 已原子保存 118/112/84 条预测，下游 `97589`～`97591` 同时被取消。
+- 恢复 array `97608` 从同一 state/partial 哈希断点继续；confirmation task 已完成，formal 与 Defects4C 正在运行。
+- 替换下游已用 `afterok` 排队：C++ 评分 `97611`、Defects4C 限流评分 `97614`、最终聚合/门禁/失败转移 `97615`。
 - 最终门禁未出结果前，beta=0.3 只是候选；若不满足冻结 DPO 提升和退化上限，交付推荐仍为 M1-R2。
 
 ## A3.3 当前有效链
