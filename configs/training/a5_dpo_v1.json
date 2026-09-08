@@ -1,0 +1,104 @@
+{
+  "version": "a5-dpo-v1",
+  "seed": 20260830,
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "initialization": {
+    "kind": "m1_r2_adapter_continuation",
+    "source_run_id": "a34_sft_r2_nf4_s20260830",
+    "adapter_path": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/checkpoints/checkpoint-step-000150-epoch-1/adapter",
+    "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+    "adapter_config_sha256": "sha256:acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69",
+    "training_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/training-manifest.json",
+    "training_manifest_sha256": "sha256:b85f43a5edf194b2edfc57cb456459ce1b149b015d5392ee66f1ec97c2ebd884"
+  },
+  "data": {
+    "preferences": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preference-v1/preferences.jsonl",
+    "preferences_sha256": "sha256:892812ae43f551aeff06486963e75806ce6da185f8f41d3df3cff64a6f6ba43c",
+    "preference_audit_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preference-v1/run-manifest.json",
+    "preference_audit_manifest_sha256": "sha256:5f116658b815ea63d11cc6331c8d0a08e00a09822305400ec29e624d1de36ffe",
+    "expected_pairs": 175,
+    "expected_chosen_success_pairs": 75,
+    "dev_exec_manifest": "/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1/dev-exec-manifest.json",
+    "dev_exec_manifest_sha256": "sha256:457318d186ba056a970ac917f4161cacf98b07f2bd121327452a5eaaf601340f",
+    "dev_expected_count": 64,
+    "training_dev_overlap": 0
+  },
+  "environment": {
+    "lock": "/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/pip-freeze.txt",
+    "lock_sha256": "sha256:bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4",
+    "python_no_user_site": true,
+    "packages": {
+      "accelerate": "1.13.0",
+      "bitsandbytes": "0.49.2",
+      "datasets": "3.6.0",
+      "peft": "0.18.1",
+      "transformers": "4.57.6",
+      "trl": "0.28.0"
+    }
+  },
+  "training": {
+    "mode": "nf4_qlora_dpo_adapter_continuation",
+    "epochs": 2,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "expected_optimizer_steps": 44,
+    "learning_rate": 0.000005,
+    "warmup_steps": 4,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_use_reentrant": false,
+    "max_prompt_tokens": 3072,
+    "max_completion_tokens": 640,
+    "max_sequence_tokens": 4096,
+    "truncation_mode": "keep_end",
+    "optimizer": "adamw_torch",
+    "lr_scheduler_type": "linear",
+    "loss_type": "sigmoid",
+    "reference_free": false,
+    "disable_dropout": true,
+    "save_strategy": "epoch",
+    "save_total_limit": 2,
+    "logging_steps": 1
+  },
+  "variants": [
+    {
+      "name": "beta01",
+      "role": "main",
+      "beta": 0.1
+    },
+    {
+      "name": "beta03",
+      "role": "control",
+      "beta": 0.3
+    }
+  ],
+  "outputs": {
+    "preflight_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preflight-v1",
+    "cpu_preflight": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preflight-v1/cpu-preflight.json",
+    "gpu_smoke": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-preflight-v1/gpu-smoke.json",
+    "training_root": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1"
+  },
+  "selection": {
+    "dataset": "independent-dev-exec-v1",
+    "fixed_denominator": 64,
+    "candidates": [
+      "M1-R2",
+      "beta01",
+      "beta03"
+    ],
+    "priority": [
+      "pass_count_desc",
+      "regression_failure_count_asc",
+      "timeout_count_asc",
+      "parse_apply_build_success_desc",
+      "beta01_then_beta03_on_exact_tie"
+    ],
+    "training_data_used_for_selection": false
+  }
+}
