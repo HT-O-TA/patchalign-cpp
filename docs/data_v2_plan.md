@@ -145,3 +145,17 @@ v1.1 Job `97486` 已在 25 秒内完成 `412 passed`。它读取 6,291 条，cap
 固定 detail Job `96959` 在连续完成 144 个 train 候选后只有 8 条合格；train 剩余 16 条，因此记录和仓库乐观上限分别为 24/40、23/30。CPU-only Job `97150` 以 `391 passed` 独立重建这一反证，v1 正式关闭，未取得 patch/source，也未激活 ADR-0019。
 
 136 个拒绝中有 58 条来自 58 个不同仓库，唯一失败条件是关联关闭 issue 没有 bug 标签。ADR-0021 因此建立新版本：保持同一 200 条固定分母和显式 closing issue/关闭状态，小改动与评测 denylist 不变；标签只用于分层，最终缺陷资格仍要求历史许可证和断网双资格稳定重放。先补完缺失的 PR/issue metadata；只有至少 50 条、train/validation 40/10 且仓库 30/8 通过，才固定 20 条（16/4）执行可行性分母。至少 4/20 通过后再运行不重叠的正式 50 条 pilot，避免直接在异构仓库上开展无效大规模构建。
+
+## 第七阶段：独立来源可实现性裁决与 BeetleBox 固定元数据门
+
+ADR-0024 关闭 CommitPack 后，项目对 BugsCpp、CppPerf、TrickyBugs 与 BeetleBox 做一次
+官方 revision 和集群能力桌面审计。BugsCpp 保持为未来外部评测，CppPerf 因性能优化
+目标错位只作未来消融，TrickyBugs 因竞赛提交逐条权利与单仓库域问题拒绝当前训练。
+BeetleBox 以 `ac12f9cd...b4ef` 固定：数据卡声明 C++ native train/test 为
+3,868/4,783，记录含 repo、issue/PR 和 before/after SHA，但没有源码、测试或许可。
+
+ADR-0025 只授权下载两个固定 Parquet（合计 19,375,255 bytes），且读取列显式排除
+title/body。CPU 审计检查 schema、C++ 数量、SHA/URL/文件有效性、重复、评测 denylist、
+native split 仓库重叠和 repository 重分后的 40/20 cap。门槛 400/50 样本、15/4
+仓库只决定是否进入历史许可证 pilot；通过不授权内容、训练或 GPU。真实结果出来前不
+冻结新的 Data-v2 配额。

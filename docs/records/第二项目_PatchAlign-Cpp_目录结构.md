@@ -751,3 +751,12 @@ HT-O-TA/patchalign-cpp
 - `docs/evidence/data_v2_commitpack_shard_audit_v1_1.md`：Job 97486 的真实供给、拒绝分布、容量门与 artifact 哈希；
 - `docs/decisions/0024-close-commitpack-after-fixed-shard-audit.md`：禁止第二分片、执行 pilot、训练与 GPU，转向独立可执行来源；
 - `artifacts/data-v2/commitpack-shard-audit-v1-1/`：本地化的小型审计输出；原始 524 MB 分片仅保留在集群数据目录。
+
+### 2026-09-08：独立来源裁决与 BeetleBox 元数据门
+
+- `docs/evidence/data_v2_independent_source_triage_v2.md`：四个候选来源、固定 revision、集群执行能力与路线裁决；
+- `docs/decisions/0025-run-bounded-beetlebox-metadata-audit.md`：固定 20 MB 元数据下载、无正文读取与单次停止门；
+- `configs/data/data_v2_beetlebox_metadata_audit_v1.json`：Parquet bytes/SHA、Schema、denylist、repo-resplit cap 和 400/50 门；
+- `scripts/data/audit_data_v2_beetlebox_metadata.py`：只读非正文列并输出聚合哈希的审计器；
+- `tests/unit/test_data_v2_beetlebox_metadata_audit.py`：URL/SHA/文件解析、denylist、split/cap 专项测试；
+- `slurm/data_v2_beetlebox_metadata_audit.sbatch`：CPU/网络固定文件取得与审计入口；原始 Parquet 仅落集群数据目录。

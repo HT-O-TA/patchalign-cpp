@@ -1,0 +1,123 @@
+{
+  "version": "data-v2-beetlebox-metadata-audit-v1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0025-run-bounded-beetlebox-metadata-audit.md",
+    "sha256": "sha256:b56a9685307a37ff3f803210bb6442ad1e03d78d3da6fbef4704bb392a166214"
+  },
+  "bindings": {
+    "source_admission": {
+      "path": "configs/data/data_v2_source_admission_v1.json",
+      "sha256": "sha256:57a700d3902f5d84f2c36a8120a403aa33aad150a86a1450d11e522d86b6defe"
+    },
+    "evaluation_denylist": {
+      "path": "configs/data/data_v2_evaluation_denylist_v1.json",
+      "sha256": "sha256:45d2ad1f565e18abbea504d32c2ce6e0ae8b218c7ec29dd9256d5793fbed5f72"
+    }
+  },
+  "upstream": {
+    "dataset": "bug-localization/BeetleBox",
+    "revision": "ac12f9cd8afac9095498ff69cafe45ce8747b4ef",
+    "dataset_card_sha256": "sha256:20a886a16e549cf1401a7d6184db1a1abde0051651969a54978f900503324af2",
+    "files": {
+      "train": {
+        "relative_path": "data/train-00000-of-00001.parquet",
+        "url": "https://huggingface.co/datasets/bug-localization/BeetleBox/resolve/ac12f9cd8afac9095498ff69cafe45ce8747b4ef/data/train-00000-of-00001.parquet?download=true",
+        "path": "/mingli01/data/patchalign-cpp/data-v2/beetlebox/ac12f9cd8afac9095498ff69cafe45ce8747b4ef/data/train-00000-of-00001.parquet",
+        "bytes": 9775583,
+        "sha256": "sha256:976a51ba2203cf7df84f1b3c046e395feb6a4c7612b30aba292b691939ebdc09",
+        "published_rows": 10191,
+        "published_cpp_rows": 3868
+      },
+      "test": {
+        "relative_path": "data/test-00000-of-00001.parquet",
+        "url": "https://huggingface.co/datasets/bug-localization/BeetleBox/resolve/ac12f9cd8afac9095498ff69cafe45ce8747b4ef/data/test-00000-of-00001.parquet?download=true",
+        "path": "/mingli01/data/patchalign-cpp/data-v2/beetlebox/ac12f9cd8afac9095498ff69cafe45ce8747b4ef/data/test-00000-of-00001.parquet",
+        "bytes": 9599672,
+        "sha256": "sha256:a0b257e772df19cd0ccdd46a02c202d83a5295b3febf74992550e118c4d8b9d2",
+        "published_rows": 10445,
+        "published_cpp_rows": 4783
+      }
+    }
+  },
+  "scope": {
+    "fixed_metadata_download_authorized": true,
+    "title_or_body_read": false,
+    "source_or_patch_download_authorized": false,
+    "repository_checkout_authorized": false,
+    "training_data_created": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false,
+    "evaluation_gold_consumed": false
+  },
+  "schema": {
+    "required_columns": [
+      "status",
+      "repo_name",
+      "repo_url",
+      "issue_id",
+      "updated_files",
+      "title",
+      "body",
+      "issue_url",
+      "pull_url",
+      "before_fix_sha",
+      "after_fix_sha",
+      "report_datetime",
+      "language",
+      "commit_datetime"
+    ],
+    "read_columns": [
+      "status",
+      "repo_name",
+      "repo_url",
+      "issue_id",
+      "updated_files",
+      "issue_url",
+      "pull_url",
+      "before_fix_sha",
+      "after_fix_sha",
+      "report_datetime",
+      "language",
+      "commit_datetime"
+    ],
+    "prohibited_read_columns": ["title", "body"],
+    "language_value": "C++",
+    "sha_regex": "[0-9a-f]{40}",
+    "cpp_extensions": [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"]
+  },
+  "identity": {
+    "repository_host": "github.com",
+    "native_split_is_not_training_split": true,
+    "repository_resplit_seed": 20260908,
+    "validation_percent": 20,
+    "maximum_increment_per_repository": {
+      "train": 40,
+      "validation": 20
+    },
+    "candidate_identity": "canonical_repository|before_fix_sha|after_fix_sha|issue_id",
+    "exclude_evaluation_repositories": true
+  },
+  "reporting": {
+    "post_release_reference_date": "2024-10-01T00:00:00+00:00",
+    "post_release_is_contamination_proof": false,
+    "emit_repository_names": false,
+    "emit_urls": false,
+    "emit_titles_or_bodies": false,
+    "emit_source_text": false
+  },
+  "metadata_gate": {
+    "train": {
+      "samples_after_cap": 400,
+      "repositories": 15
+    },
+    "validation": {
+      "samples_after_cap": 50,
+      "repositories": 4
+    },
+    "pass_authorizes_historical_license_pilot_only": true,
+    "pass_authorizes_content_download": false,
+    "pass_authorizes_training": false
+  },
+  "output_directory": "artifacts/data-v2/beetlebox-metadata-audit-v1"
+}

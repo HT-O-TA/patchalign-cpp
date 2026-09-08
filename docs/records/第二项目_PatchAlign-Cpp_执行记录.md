@@ -1264,3 +1264,13 @@ candidate/summary/run-manifest SHA256 分别为 `46d71ba9...e7ba0`、
 仍缺 1,504/52。ADR-0024 因而关闭当前 CommitPack 路线：不下载第二分片，不做仓库
 执行 pilot，不生成 Data-v2，不提交 GPU。下一步改为独立可执行来源与 Data-v2 分层
 契约审计；若必须修改容量/执行口径，须以新 ADR 明示，不能把失败门槛事后改写。
+
+## 60. 独立来源裁决与 BeetleBox 元数据门准备
+
+CommitPack 路线关闭后，固定 revision 桌面审计比较 BugsCpp、CppPerf、TrickyBugs 和
+BeetleBox。前者分别因评测保留、性能任务错位、竞赛提交授权未闭环而不进入训练内容；
+ADR-0025 只授权 BeetleBox `ac12f9cd...b4ef` 两个 Parquet 的 metadata-only 审计。
+
+新增配置、审计器、5 项纯函数测试和 1 小时 CPU/网络 Slurm 入口。审计读取列排除
+title/body，artifact 不写 URL、仓库名或源码；400/50 样本与 15/4 仓库门只授权
+后续历史许可证 pilot，不自动下载 source/patch，不冻结训练集，不申请 GPU。
