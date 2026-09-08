@@ -1,0 +1,145 @@
+{
+  "version": "a5-dpo-final-eval-v1",
+  "seed": 20260830,
+  "selection": {
+    "path": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dev-evaluation-v1/selection.json",
+    "sha256": "sha256:248ad6dcb6783fd2e8c971b05191a87c5b5bd02b696e26f7076262631de665f4",
+    "selected": "beta03",
+    "decision": "docs/decisions/0033-select-dpo-beta03-for-final-evaluation.md",
+    "decision_sha256": "sha256:7f47f8d2c6052910b6c57462ac8fa96a0835e0838c7bbc92b9b2a6e5cc0bca69"
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "adapter": {
+    "path": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1.1/beta03/final-adapter",
+    "sha256": "sha256:2de1cb5bf0100aeba384b8cfb52fae990a77d5971d1b595cb698659f66f0683a",
+    "config_sha256": "sha256:8b271b43110c54aaeb90649f5b5c11de67e499fc331e9c542e73d8a0692c5ee0",
+    "training_manifest": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1.1/beta03/training-manifest.json",
+    "training_manifest_sha256": "sha256:25a2265bcc264054cfd0ed7a7175803bcef0de24bc90bc14aa70e0f837db2dca",
+    "training_summary": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1.1/beta03/training-summary.json",
+    "training_summary_sha256": "sha256:69863dd3ea9334e545180ca910e1cfe298839ec0e182a4d40dc53e6f5718552f",
+    "source_adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a"
+  },
+  "generation": {
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "num_return_sequences": 1,
+    "max_input_tokens": 4096,
+    "max_new_tokens": 512,
+    "determinism_probe_count": 3
+  },
+  "datasets": {
+    "formal": {
+      "kind": "cpp",
+      "root": "/mingli01/data/patchalign-cpp/a3/formal-holdout-v1",
+      "manifest": "a2-manifest.json",
+      "manifest_sha256": "sha256:5c438d36a0d4efc833dd6d0d26c67a1579f2c2e26de13f42ce01a809c07c3386",
+      "prompt_artifact_sha256": "sha256:1a1c8cb2c827c6c6325db798991bb3c9b66241520ae70520cdbdd18e6188ba1f",
+      "task_level_counts": {"function": 400, "file_window": 100},
+      "case_count": 500,
+      "allowed_path": "main.cpp",
+      "prompt_version": "a3-cpp-repair-v1",
+      "input_mode": "raw_completion",
+      "baseline": {
+        "inference_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/inference",
+        "scoring_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/inference/scoring-v2",
+        "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+        "predictions_sha256": "sha256:c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a",
+        "run_manifest_sha256": "sha256:88abe6053202e8b81e0332166c3e6b66fefca3e50a0f36b39cdffae086983878",
+        "generation_summary_sha256": "sha256:eb82f96cef4c103a4944f888f0d171307f1a25d3b35b15d780d5c18b1d26c09a",
+        "scores_sha256": "sha256:f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8",
+        "score_summary_sha256": "sha256:23ee63ff54375d200842acb392ccb6c1664e263e7ae0790820c386f53c2b1c07",
+        "score_manifest_sha256": "sha256:b6d72c856bccb512ed228978a6778464e91a2138ccfaebdfdfa08c10bc714bf2"
+      }
+    },
+    "confirmation": {
+      "kind": "cpp",
+      "root": "/mingli01/data/patchalign-cpp/a3/confirmation-v1-1",
+      "manifest": "confirmation-manifest.json",
+      "manifest_sha256": "sha256:7adf960fff4e7f1ee3ca95539ffa1196c3421805659c94bb46a29d0022690917",
+      "prompt_artifact_sha256": "sha256:cf141a9d4f90c8fd9f1a8f9cd03509cc2b2fd48905a3c1e533e93cad702ad58f",
+      "task_level_counts": {"function": 100, "file_window": 24},
+      "case_count": 124,
+      "allowed_path": "main.cpp",
+      "prompt_version": "a3-cpp-repair-v1",
+      "input_mode": "raw_completion",
+      "baseline": {
+        "inference_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/confirmation/m1_r2",
+        "scoring_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/confirmation/m1_r2/scoring-v2",
+        "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+        "predictions_sha256": "sha256:0a1427447dd5eee2e3d5ce7d58f98acaaf4cdac47a39afa09d090e81500c9d78",
+        "run_manifest_sha256": "sha256:a05c73989beb116aad8803326be95372a921614135d6a2d68f7563ae93b3c2e1",
+        "generation_summary_sha256": "sha256:480c61b85fd73c4280eb36ea3fcf6d75eaaff5e8321de8adc84adbb521526cfa",
+        "scores_sha256": "sha256:12809161d00335748b80d5370dc3a0cafaea9b39ac77dbfb61884bc3de31108e",
+        "score_summary_sha256": "sha256:13b76e3f145713073220af1153c48745405b5000b2544e6023e3a9e114773610",
+        "score_manifest_sha256": "sha256:7593621f020c64641221dc7dd7f42a2fbda685edf31f067106e7dbc626b9f001"
+      }
+    },
+    "defects4c": {
+      "kind": "defects4c",
+      "root": "/mingli01/data/patchalign-cpp/external/defects4c/qualified-v1",
+      "manifest": "manifest.json",
+      "prompts": "prompts.jsonl",
+      "manifest_sha256": "sha256:0728c6028328adfecb968e42351c909f4ea95a24f24a0e355d2739e97b028631",
+      "prompt_artifact_sha256": "sha256:b23663fcc7fc304fb8f27b4b5c7f8adfc0da01eedf429a19c707adef0f65484f",
+      "case_count": 176,
+      "prompt_version": "a3-defects4c-unified-diff-v1",
+      "input_mode": "raw_completion",
+      "baseline": {
+        "inference_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/inference-m1_r2",
+        "scoring_directory": "/mingli01/project/ht/patchalign-cpp/artifacts/a3/defects4c/external-v1",
+        "adapter_sha256": "sha256:8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a",
+        "predictions_sha256": "sha256:0b9b2288c4e4b9617f7743c92d7359bd46806eae6cb07edbe7fe596d191a1887",
+        "run_manifest_sha256": "sha256:bb5404757c58fa84b09d54c994675451f93dbb5aa55fce450bcba75ae60117a4",
+        "generation_summary_sha256": "sha256:d4ef77c2bdebb10035b7ddde94b7d56a10d5fcf151e0371c49b6d739d44bf56c",
+        "scores_sha256": "sha256:39b06ff2362be8f24c409c07a6f817d0cdfe0f06c122fedefe6ff7bccd1526ed",
+        "score_summary_sha256": "sha256:90e1ee89f7042695f33c98f926dcc3d9876cc3d79316f9d1af546e7dd20b99c2"
+      },
+      "qualification": {
+        "checkout_directory": "/mingli01/data/patchalign-cpp/external/defects4c/runtime/out",
+        "official_directory": "/mingli01/data/patchalign-cpp/external/defects4c/source/defectsc_tpl"
+      },
+      "runtime": {
+        "rootfs_directory": "/mingli01/data/patchalign-cpp/external/defects4c/rootfs-cb4efcac",
+        "rootfs_archive_sha256": "sha256:46d659c0f3dac1acb0849a17fd0cae2a18848f357847f3db2b61a5858f8f1bab",
+        "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+        "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda",
+        "conda_environment": "/mingli01/project/ht/.conda_envs/patchalign-cpp"
+      },
+      "scoring": {
+        "protocol": "a3-scoring-v2",
+        "apply_command": ["git", "apply", "--recount"],
+        "network": "unshared",
+        "sanitizer": "only_if_official_metadata_applies",
+        "cpu_count_per_case": 8,
+        "timeout_seconds": 5400
+      }
+    }
+  },
+  "scoring": {
+    "protocol": "a3-scoring-v2",
+    "config": "configs/evaluation/a3_scoring_v2.json",
+    "config_sha256": "sha256:b8d9507ec7fc97c370e52230759e0b2b84591d6fb4200a50944add19ebe859e8",
+    "bwrap": "/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap",
+    "bwrap_sha256": "sha256:c69d2514ecdcbb927af4129caccceb8bfc122954e59ab8aa6f9ec50e9a09afda"
+  },
+  "quality_gates": {
+    "path": "configs/evaluation/quality_gates_v1.json",
+    "sha256": "sha256:6ba153f1ec3d56a41eab0048595a5169816df5e404a37c44c3097b7f375f5af1"
+  },
+  "environment": {
+    "lock": "/mingli01/project/ht/.conda_envs/patchalign-cpp/repro/pip-freeze.txt",
+    "lock_sha256": "sha256:bef5b08f129a08a1f720e8698c99606832192d1f77b0f9cce1adc98e3baa43a4"
+  },
+  "outputs": {
+    "root": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/final-evaluation-v1",
+    "preflight": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/final-evaluation-v1/preflight.json",
+    "comparison": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/final-evaluation-v1/comparison.json",
+    "failure_analysis": "/mingli01/project/ht/patchalign-cpp/artifacts/a5/final-evaluation-v1/failure-analysis.json"
+  }
+}
