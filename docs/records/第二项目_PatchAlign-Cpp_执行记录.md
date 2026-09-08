@@ -1298,3 +1298,14 @@ updated_files 与时间字段编码可由现有审计器解析。
 ADR-0027 建立最终 v1.2，绑定小写值和实际计数，同时继续报告数据卡过期的
 3,868/4,783。revision、文件、hash、总行数、denylist、cap 和 400/50、15/4 门不变；
 此后若失败直接按内容或容量结论关闭，不再进行 Schema 修正。
+
+## 63. BeetleBox v1.2 终态与宽泛来源搜索关闭
+
+最终 CPU-only Job `97508` 在提交 `7c81153` 上以 `COMPLETED 0:0` 用时 25 秒，完成
+`417 passed`。固定文件实际 C++ 为 3,317/3,865；结构合格 3,534 条但仅 4 个非评测
+仓库，repository resplit/cap 后 train 160 / validation 0，400/50 与 15/4 门失败。
+summary/manifest SHA256 为 `0f1e739a...1e3af`、`8fe3dc55...43b8`。
+
+ADR-0028 关闭 BeetleBox 且终止 broad GitHub、CommitPack、RunBugRun v2、TrickyBugs
+的同类补跑。2,000/200 保留为失败的容量探针；下一步只做 BugsCpp 项目级预注册和
+历史许可证上界，随后一次性冻结分层 Data-v2 契约。当前没有训练数据或 GPU 作业。

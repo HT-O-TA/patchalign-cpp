@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-08T05:45Z；Job 97486 已完成；CommitPack 固定单分片路线按静态份额门失败关闭
+最后核验：2026-09-08T06:41Z；Job 97508 已完成；宽泛来源搜索结束，转入 BugsCpp 项目级预注册与 Data-v2 分层契约
 
 项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中，当前停在 Data-v2 独立来源与契约冻结**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub fixed 20 内容路线已在 Job `97292` 以 `0/20` 关闭。CommitPack v1.1 Job `97486` 在同一固定分片上得到 train 236、validation 17，未通过静态份额门，已由 ADR-0024 关闭；不下载第二分片、不做执行 pilot。当前没有 PatchAlign 集群作业、没有正式 Data-v2、没有 GPU 训练，DPO 仍未启动。
 
@@ -24,7 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | CommitPack 路线关闭；独立来源审计中 | Job 97486 得到 236/17，静态份额门失败；禁止第二分片、执行 pilot 和 GPU，下一步冻结独立可执行来源与可实现契约 |
+| Data-v2→DPO 新轮次 | 宽泛来源搜索关闭；BugsCpp 项目级审计待执行 | CommitPack 236/17、BeetleBox cap 后 160/0、GitHub 0/20 均未过门；下一步只做 BugsCpp train/validation/held-out 预注册和分层契约 |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## 当前执行点：独立可执行来源与 Data-v2 契约冻结
@@ -33,7 +33,8 @@
 - 静态份额门实际/目标：train `236/1,400` samples、`187/100` new repos、`236/700` families；validation `17/140`、`17/20`、`17/70`，因此总体失败。
 - legacy 与 CommitPack 真实合计只有 train 496 / validation 148；相对 2,000/200 容量探针仍缺 1,504/52，不能靠第二分片或放松门槛补考。
 - ADR-0024 已禁止第二分片、CommitPack 执行 pilot、训练和 GPU；下一步只做独立 buggy-fail/fixed-pass 来源的有界准入审计。
-- ADR-0025 已从 BugsCpp、CppPerf、TrickyBugs、BeetleBox 中只选择 BeetleBox 进入固定 20 MB metadata-only 门；该门不读取 title/body，不下载源码或测试。Job 97502 因集群 HTTPS 零字节停滞取消，文件经本机故障转移和集群复验落盘；Job 97503 的 417 项测试通过，但发现官方数据卡总行数与语言表内部矛盾。Job 97505 进一步确认存储语言值不是展示值 `C++`；只读列聚合得到实际 `c++` 为 3,317/3,865。ADR-0027 的最终 v1.2 同时绑定精确列值与实际计数，所有质量门不变；之后不再做 Schema 补跑。
+- BeetleBox 最终 Job 97508 为 `COMPLETED 0:0`、25 秒、`417 passed`：实际 `c++` 为 3,317/3,865，元数据合格 3,534，但只覆盖 4 个非评测仓库；repo-resplit/cap 后为 160/0，门禁失败并关闭。
+- ADR-0028 结束 broad GitHub、CommitPack、BeetleBox、RunBugRun v2 与 TrickyBugs 的同类补跑；下一步唯一主路线是 BugsCpp 项目级预注册，再一次性冻结分层 Data-v2 配额。
 - 后续若证据表明 2,000/200 全量可执行目标不可实现，必须新建 ADR，把静态监督层和可执行资格层显式分开，并重新冻结配额；不得静默降标。
 
 ## A3.3 当前有效链

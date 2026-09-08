@@ -159,3 +159,15 @@ title/body。CPU 审计检查 schema、C++ 数量、SHA/URL/文件有效性、�
 native split 仓库重叠和 repository 重分后的 40/20 cap。门槛 400/50 样本、15/4
 仓库只决定是否进入历史许可证 pilot；通过不授权内容、训练或 GPU。真实结果出来前不
 冻结新的 Data-v2 配额。
+
+## 第八阶段：BeetleBox 终态与宽泛来源搜索停止线
+
+最终 v1.2 Job `97508` 在 `417 passed` 后确认固定文件实际 `c++` 为 3,317/3,865；
+过滤后有 3,534 条，但只来自 4 个非评测仓库。按 repository resplit 和 40/20 cap
+得到 train 160 / validation 0，400/50 与 15/4 门全部失败。该结果关闭 BeetleBox，
+不通过换 seed、native split 或提高 cap 补考。
+
+ADR-0028 同时结束其他宽泛来源的同类搜索。2,000/200 容量探针保留为失败证据；
+ADR-0012 的 SFT、三套评测、DPO 与交付门继续有效。下一步只对尚未读取 patch gold 的
+BugsCpp 24 个项目做预注册 split、现有评测重叠和历史许可证审计，再以真实上界建立
+“开发者修复监督层 + 本地执行层”的 Data-v2 新契约。新契约冻结前无 GPU。

@@ -774,3 +774,9 @@ HT-O-TA/patchalign-cpp
 - `configs/data/data_v2_beetlebox_metadata_audit_v1_2.json`：同一固定文件、实际语言硬观测和独立输出目录；
 - `slurm/data_v2_beetlebox_metadata_audit_v1_2.sbatch`：最终 CPU-only 元数据审计入口；
 - `artifacts/data-v2/beetlebox-metadata-audit-v1-1/`：Job 97505 的展示值映射失败终态，保留且不覆盖。
+
+### 2026-09-08：BeetleBox 终态与宽泛来源停止线
+
+- `docs/evidence/data_v2_beetlebox_metadata_audit_v1_2.md`：Job 97508 的实际语言、过滤、仓库与 cap 结果；
+- `docs/decisions/0028-close-beetlebox-and-end-broad-source-search.md`：关闭同类来源补跑并固定 BugsCpp 项目级下一步；
+- `artifacts/data-v2/beetlebox-metadata-audit-v1-2/`：summary 与 run manifest 已本地化，原始 Parquet 只保留集群。
