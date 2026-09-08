@@ -1,6 +1,6 @@
 # PatchAlign-Cpp 交付说明
 
-本目录是 PatchAlign-Cpp 简历交付版的正式入口。项目已完成 SFT、执行偏好构建、真实 DPO、独立开发集选型、三套固定分母评测、最终模型回退和 CLI GPU smoke；当前只剩最终 artifact manifest 与三端一致性审计。历史的阶段性收尾决定继续保留，但不作为当前项目状态。
+本目录是 PatchAlign-Cpp 简历交付版的正式入口。项目已完成 SFT、执行偏好构建、真实 DPO、独立开发集选型、三套固定分母评测、最终模型回退、CLI GPU smoke、最终 artifact manifest 与三端一致性审计。历史的阶段性收尾决定继续保留，但不作为当前项目状态。
 
 当前默认模型是 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，但 timeout 从 2 增加到 5，`+0.6pp` 超过冻结的 `+0.5pp` 上限，因此被安全门禁否决；Defects4C 上两者同为 1/176 Pass。最终 comparison 只含 `formal_timeout_increase_exceeded`，推荐模型为 `m1_r2`。
 
@@ -67,8 +67,9 @@ GitHub、本机和集群通过 commit 同步代码，不使用跨 SSH 软链接�
 | CLI smoke patch | `artifacts/a5/delivery/cli-smoke-v1/candidate.patch` | `a5e774ca8bf8145269e0763ac021ea1d5d445d2a6ce196b3f6b9846113353883` |
 | CLI smoke metadata | `artifacts/a5/delivery/cli-smoke-v1/metadata.json` | `0e648625bee32f79036fd66faf2726c7a0e43b7f9aba6f9795b1a7d1c0aa46f5` |
 | CLI smoke summary | `artifacts/a5/delivery/cli-smoke-v1/summary.json` | `34aa9d5272a657b74010968356489e922b6b1685ecd0bb857428b11832620357` |
+| Final delivery manifest | `artifacts/a5/delivery-manifest-v1.json` | `d7629910dc1bc23f9063cc2ac6e8259745c2ef34099cebe70c919579fbd30f35` |
 
-上述外部评分、comparison、失败分析和 CLI smoke 均来自完成后的固定 artifact；delivery manifest 将在当前文档提交后生成。
+Job `98217` 在交付提交 `524cbbf268f17a77fbf6fc75706f7fa0bc096f28` 上完成 `446 passed`，并以 fail-closed 方式索引 39 个模型、数据、评测、CLI 和环境 artifact。最后的收据文档提交只记录该结果，不改变 manifest 已绑定的代码、配置或 artifact 身份。
 
 ## 接收方验证
 
@@ -99,10 +100,10 @@ sha256sum artifacts/a5/dpo-training-v1.1/beta03/final-adapter/adapter_model.safe
 - [x] M1-R2 adapter 已本地化并核验；
 - [x] DPO Defects4C 176 条替换评分与自动聚合完成；
 - [x] 最终模型 CLI GPU smoke 完成；
-- [ ] hash-complete delivery manifest、最终报告和三端一致性审计完成。
+- [x] hash-complete delivery manifest、最终报告和三端一致性审计完成。
 
 ## 发布边界
 
 本仓库原创代码和文档采用 Apache-2.0，但该许可证不自动覆盖 Base 权重、训练数据、adapter、生成补丁或第三方依赖。本轮不创建公共模型 release；大型权重、原始数据和完整预测的公开再分发仍需单独的许可、敏感信息和安全审计。
 
-RLVR/GRPO 不属于本轮交付。只有以上待办全部关闭后，才会把它作为可选扩展重新评估，而不是用它替代当前交付缺口。
+RLVR/GRPO 不属于本轮交付；本轮闭环后可把它作为可选扩展重新评估，但不影响当前项目的完成状态。

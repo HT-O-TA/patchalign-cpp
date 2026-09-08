@@ -1391,3 +1391,9 @@ C++ 评分 array `97611` 完成。beta03 formal parse/apply/compile/Pass 为 500
 Defects4C 替换评分 array `97901` 完成 176/176，聚合 Job `97902` 以 `COMPLETED 0:0` 结束并通过 `435 passed`。DPO-beta03 的 parse/apply/compile/Pass 为 `176/84/65/1`，M1-R2 为 `174/72/55/1`，双方 timeout 为 0，paired Pass 差值与 95% 区间均为 0；唯一成功样本在两者中均成功。最终 comparison 只保留 `formal_timeout_increase_exceeded`，推荐模型确定为 M1-R2。
 
 受保护同步 Job `97977` 随后把集群快进到 main 提交 `616c9d4a55dcd40b4818a9fb07c185291a6b3271`；单 GPU Job `97978` 按 comparison 自动加载 M1-R2 完成结构化 CLI smoke，生成 67 tokens 用时 7.03 秒，峰值显存 5,810,547,712 bytes。adapter、Base config、prompt、patch 与 metadata SHA256 均已本地化核验。此后不再进行训练或结果驱动实验，只生成最终 delivery manifest 并审计本机/GitHub/集群一致性。
+
+## 71. 最终 delivery manifest 与交付完成
+
+CPU-only Job `98217` 在提交 `524cbbf268f17a77fbf6fc75706f7fa0bc096f28` 上以 `COMPLETED 0:0` 用时 17 秒结束，全仓 `446 passed in 14.90s`。生成的 `artifacts/a5/delivery-manifest-v1.json` 索引 39 个模型、配置、数据、推理、评分、CLI smoke 和环境 artifact，推荐模型为 `m1_r2`、`dpo_gate_passed=false`，SHA256 为 `d7629910dc1bc23f9063cc2ac6e8259745c2ef34099cebe70c919579fbd30f35`。
+
+manifest 的 `delivery_git_commit` 固定为生成前已完成报告定稿的 `524cbbf...6f28`；后续收据提交只增加 Job、测试数、manifest 哈希和完成状态，不改变代码、配置或任何已索引 artifact。manifest 与日志已复制到本机忽略目录并核验哈希。最终三端审计完成后，本轮项目按“可验证 AI 应用 + 后训练闭环”交付，不再启动必做 GPU 任务；RLVR/GRPO 留作可选扩展。

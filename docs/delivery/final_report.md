@@ -175,4 +175,4 @@ M1-R2 是当前默认交付 adapter。它已从集群本地化到本机 `artifac
 
 ## 14. 交付状态
 
-正式 SFT、探索性 A4、真实 DPO、三套固定分母评测、失败分析、最终模型回退、adapter 本地化和 CLI GPU smoke 均已完成。剩余动作只有生成 hash-complete delivery manifest，并完成本机、GitHub、集群三端 commit、工作树和 artifact 哈希审计；不再启动训练、调参或结果驱动补考。
+正式 SFT、探索性 A4、真实 DPO、三套固定分母评测、失败分析、最终模型回退、adapter 本地化和 CLI GPU smoke 均已完成。CPU-only Job `98217` 在交付提交 `524cbbf268f17a77fbf6fc75706f7fa0bc096f28` 上以 `446 passed` 生成包含 39 个条目的 hash-complete manifest，SHA256 为 `d7629910dc1bc23f9063cc2ac6e8259745c2ef34099cebe70c919579fbd30f35`。本机、GitHub、集群的代码提交、工作树与关键 artifact 哈希已完成一致性审计；本轮不再启动训练、调参或结果驱动补考。

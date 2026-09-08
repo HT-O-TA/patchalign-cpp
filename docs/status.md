@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-09；A5 三套最终评测与推荐模型 CLI GPU smoke 已完成
+最后核验：2026-09-09；最终 delivery manifest 已生成并完成三端审计
 
-项目状态：**简历交付版训练、评测和模型决策均已完成，正在生成最终交付 manifest**。175 对经审计偏好完成 beta=0.1/0.3 两组真实 DPO，64 条独立 dev 选择 beta=0.3；formal 500 的 timeout 安全门禁否决候选，Defects4C 176 也未产生 Pass 提升，默认模型回退 M1-R2。RLVR/GRPO 不属于本轮。
+项目状态：**简历交付版已完成**。175 对经审计偏好完成 beta=0.1/0.3 两组真实 DPO，64 条独立 dev 选择 beta=0.3；formal 500 的 timeout 安全门禁否决候选，Defects4C 176 也未产生 Pass 提升，默认模型回退 M1-R2。最终 manifest 已索引 39 个 artifact，RLVR/GRPO 仅作为未来可选扩展。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -27,7 +27,7 @@
 | Data-v2 研究扩张 | 结束并保留负结果 | 新来源和 2,000/200 容量探针均已关闭；ADR-0031 不再构建或训练 Data-v2 |
 | A5 简历交付版 DPO | 完成；候选被安全门禁否决 | beta=0.3 formal Pass 19/500、confirmation 0/124、Defects4C 1/176；推荐模型为 M1-R2 |
 
-## 当前执行点：最终交付清单与一致性审计
+## 当前执行点：本轮交付完成
 
 - 偏好审计 Job `97540`：182 对源偏好排除 7 对 timeout-only，冻结 175 对，其中 chosen full-success 75 对。
 - DPO CPU 预检 `97557`、GPU smoke `97558` 和训练 array `97559` 均完成；beta=0.1/0.3 各训练 2 epochs、44 steps。
@@ -37,7 +37,7 @@
 - 恢复 array `97608` 已完成三套固定分母；全部 generation status 为 `ok`，3/3 probe 稳定。C++ 评分 `97611` 也已完成：formal parse/apply/compile/Pass 为 500/437/424/19，function 17/400、file-window 2/100、regression 5、timeout 5；confirmation 为 0/124 Pass、regression 3、timeout 2。
 - 原 Defects4C 评分 `97614` 暴露 rootfs runner 的 role 白名单断层；恢复提交 `fbe0717be11ca55648cd4d9d69c22c0fa707471c` 只加入显式 `dpo_beta03` 并以 `435 passed` 验收。替换 array `97901` 完成 176/176，聚合 `97902` 得到候选 `176/84/65/1`、M1-R2 `174/72/55/1`，双方 0 timeout、无 Pass 差异。详见 [恢复证据](evidence/a5_dpo_final_recovery.md)。
 - CPU 同步 Job `97977` 与 M1-R2 CLI GPU smoke `97978` 均为 `COMPLETED 0:0`。smoke 自动读取 comparison，验证推荐 adapter、prompt 与 patch 哈希；推理延迟 7.03 秒，峰值显存 5,810,547,712 bytes。
-- 最终 comparison 的唯一失败理由是 `formal_timeout_increase_exceeded`，推荐模型为 M1-R2。当前没有 PatchAlign GPU/CPU 作业；只剩 hash-complete delivery manifest 和三端一致性审计。
+- 最终 comparison 的唯一失败理由是 `formal_timeout_increase_exceeded`，推荐模型为 M1-R2。CPU-only Job `98217` 以 `446 passed` 生成 39 项 delivery manifest，SHA256 为 `d7629910...0f35`。当前没有 PatchAlign GPU/CPU 作业，也没有本轮必做实验。
 
 ## A3.3 当前有效链
 

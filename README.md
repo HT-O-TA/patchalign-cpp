@@ -1,6 +1,6 @@
 # PatchAlign-Cpp
 
-PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真实执行评测项目。项目已完成 LoRA/QLoRA SFT、独立确认、Defects4C 外部评测、执行偏好构建、真实 DPO、一次性正式评测和推荐模型 CLI GPU smoke；当前按简历交付范围生成最终 manifest 并执行三端一致性审计。历史负结果完整保留，RLVR/GRPO 不属于本轮。
+PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真实执行评测项目。项目已完成 LoRA/QLoRA SFT、独立确认、Defects4C 外部评测、执行偏好构建、真实 DPO、一次性正式评测、推荐模型 CLI GPU smoke 和哈希交付清单。最终推荐模型为 M1-R2；历史负结果完整保留，RLVR/GRPO 不属于本轮。
 
 项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
 
