@@ -1225,3 +1225,9 @@ anchor 算法，不再由另一套文本 diff 重新对齐。
 2026-09-08，一次性定时快照确认 Job `96959` 在前 144 个固定 train 候选中只有 8 条合格；剩余 16 条全成功也只有 24/40，因此主动取消。CPU-only Job `97150` 随后以 `COMPLETED 0:0` 用时 35 秒完成 `391 passed`，重建为 8 合格、136 拒绝、1 中断、55 未开始，并确认 train 仓库乐观上限 23/30。summary/run manifest SHA256 为 `88517d7b...fd25`、`d82b2bfc...e554`。
 
 拒绝主项 `linked_issue_without_bug_label` 为 58 条且来自 58 个仓库。ADR-0020 关闭 v1，不恢复、不换样本、不降低原门；ADR-0021 建立独立 executable-evidence v2，标签只作分层，最终资格仍由历史许可证、完整 commit 图和 Bubblewrap 断网 buggy-fail/fixed-pass 稳定重放决定。新 metadata 配置允许逐哈希复用 v1 checkpoint，只补缺失 pull/issue，不请求 license、patch/source，不使用 GPU。
+
+## 55. executable-evidence metadata v2 终态与 20 条选择
+
+CPU/网络 Job `97210` 在 `gpu22` 用时 `01:24:08`，完成全仓 `395 passed` 和 81 个新增 GitHub metadata 请求。固定 200 条得到 104 个候选，train/validation 为 86/18、仓库为 81/14，全部 outcome gate 通过；标签分层为 31/73。正式 candidate/decisions/summary/manifest SHA256 为 `a7f67ef2...f0eb`、`20dcbf82...eb72`、`9ef07936...e484`、`4e457e99...a0df`。
+
+后续选择配置固定 20 条、20 个唯一仓库：train 的有/无标签各 8，validation 各 2，按 seed `20260908` 的哈希顺序交错。该步骤仍为 metadata-only；正式选择 Job 完成并绑定哈希后，才建立内容取得配置。

@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-07T17:57Z；Job 97150 完成 GitHub detail v1 早停审计；evidence metadata v2 准备中
+最后核验：2026-09-07T23:14Z；Job 97210 完成 evidence metadata v2；固定 20 条执行可行性选择准备中
 
 项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。repository→PR v2.1 discovery 已证明 metadata 容量，但固定 detail v1 在连续完成 144 个 train 候选时只有 8 条合格；即使余下 train 全部成功也最多 24 条/23 仓库，低于冻结的 40 条/30 仓库门。Job `96959` 因 outcome 数学不可达主动停止，CPU-only Job `97150` 以 `391 passed` 独立重建并确认 8 合格、136 拒绝、1 中断、55 未开始。58 个不同仓库只因关闭 issue 缺少 bug 标签而被拒，故 ADR-0021 建立独立 evidence v2：标签只作分层，最终资格仍由历史许可证、污染隔离及断网 `buggy fail → fixed pass` 稳定重放证明。当前无 patch/source、无训练数据、无 GPU，DPO 仍未启动。
 
@@ -24,7 +24,7 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | detail v1 已关闭；evidence metadata v2 准备中 | Job 97150 确认 v1 train 乐观上限 24/40；ADR-0021 保持固定 200 条分母，以真实执行证据取代噪声标签资格 |
+| Data-v2→DPO 新轮次 | evidence metadata v2 通过；固定 20 条选择准备中 | Job 97210 得到 104 个候选（86/18）、95 个 split 内仓库（81/14），全部 metadata gate 通过；尚无执行资格、训练或 GPU |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
 ## A3.3 当前有效链
@@ -158,3 +158,11 @@ Job `96959` 在固定顺序的前 144 个 train 候选中仅得到 8 条合格�
 CPU-only Job `97150` 在提交 `a169fdf` 上用时 35 秒，完成 `391 passed`，并精确核对源 Job 的 Slurm 终态、源配置/脚本/选择哈希和 145/81/20 个 pull/issue/license checkpoint。最终连续完成前缀为 144：8 合格、136 拒绝、1 中断、55 未开始；第 145 条因只有 pull 而无 issue checkpoint 记为中断。拒绝主项为 issue 无 bug 标签 58、无显式 closing issue 34、文件数越界 20、许可证不在 allowlist 12、行数越界 9。
 
 该结果关闭 ADR-0017 v1，不激活 ADR-0019，也不授权内容或训练。ADR-0021 的新路线保持固定 200 条和全部执行硬门，只把 bug 标签改为分层字段；先完成缺失 metadata，过 40/10、30/8 门后才固定 20 条执行可行性分母。完整证据见 [GitHub detail v1 早停审计](evidence/data_v2_github_detail_early_stop.md)。
+
+## GitHub executable-evidence metadata v2 终态
+
+CPU/网络 Job `97210` 在提交 `76161d5` 上以 `COMPLETED 0:0` 用时 `01:24:08`，完整回归 `395 passed in 84.39s`。它逐哈希复用 v1 的 pull/issue checkpoint，只新增 81 次无 token API 请求，无重试；没有读取或保存 patch/source、LICENSE 内容、raw response、文本或用户身份。
+
+固定 200 条中得到 104 个 metadata 候选：train/validation 为 86/18，仓库为 81/14；有 bug 标签 31、无标签 73。总数 50、split 40/10 和仓库 30/8 的全部门槛通过。candidate/summary/run manifest SHA256 分别为 `a7f67ef2...f0eb`、`9ef07936...e484`、`4e457e99...a0df`。
+
+本结果只授权 ADR-0021 的固定 20 条执行可行性 pilot。选择固定为 train 8 有标签 + 8 无标签、validation 2 + 2，20 个仓库互异；clone、许可证、构建或测试失败后不得替换。至少 4/20 严格通过才扩大正式 50 条。

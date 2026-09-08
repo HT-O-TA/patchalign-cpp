@@ -1,0 +1,51 @@
+{
+  "version": "data-v2-github-execution-feasibility-selection-v1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0021-use-executable-evidence-before-bug-label.md",
+    "sha256": "sha256:b686656b77a1189471bef0758ed3d0d32dda860fc4baa802bb8799fb730bb3e2"
+  },
+  "source_metadata": {
+    "version": "data-v2-github-executable-evidence-metadata-v2",
+    "git_commit": "76161d56ec6a502f968cd1bf69a85d9f4e9ee6a0",
+    "slurm_job_id": 97210,
+    "config_sha256": "sha256:94eb15ae2a7a3c6ffc2d1d77d40ac6b3cd4df23a049b2a4abdb81ff315c431a1",
+    "script_sha256": "sha256:a8d3206e5ef92f0fc267680c3703aaba0412c57af4bd1adb7d1485109404293f",
+    "candidates": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/metadata/candidate-metadata.jsonl",
+      "sha256": "sha256:a7f67ef29e53ecc5984551d8aca956fc665c70da5ff727300b3cf8998deef0eb",
+      "count": 104
+    },
+    "summary": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/metadata/summary.json",
+      "sha256": "sha256:9ef07936188d2bad36945602e03d5e04a42ff0f9bee1661fa3277a589de9e484"
+    },
+    "run_manifest": {
+      "path": "artifacts/data-v2/github-executable-evidence-v2/metadata/run-manifest.json",
+      "sha256": "sha256:4e457e99d2c166641faa7d30430537dba83b646833e9e21266eac8c60bf2a0df"
+    }
+  },
+  "selection": {
+    "seed": 20260908,
+    "split_stratum_targets": {
+      "train": {"bug_label": 8, "no_bug_label": 8},
+      "validation": {"bug_label": 2, "no_bug_label": 2}
+    },
+    "split_order": ["train", "validation"],
+    "stratum_order": ["bug_label", "no_bug_label"],
+    "repository_unique_across_fixed_denominator": true,
+    "rank": "sha256(seed_nul_split_nul_stratum_nul_repository_nul_candidate_id)",
+    "replacement_after_selection": false
+  },
+  "scope": {
+    "metadata_read_only": true,
+    "network_requests": 0,
+    "patch_or_source_read": false,
+    "license_read": false,
+    "execution_performed": false,
+    "training_admitted": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false
+  },
+  "output_directory": "artifacts/data-v2/github-executable-evidence-v2/feasibility-selection-v1"
+}
