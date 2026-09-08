@@ -21,6 +21,9 @@ from scripts.external.run_defects4c_qualification_case import (
 )
 
 
+SUPPORTED_ROLES = ("m0", "m1_r2", "dpo_beta03")
+
+
 def sha256_text(value: str) -> str:
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
 
@@ -64,7 +67,7 @@ def main() -> None:
     parser.add_argument("--sha", required=True)
     parser.add_argument("--source-file", required=True)
     parser.add_argument("--patch", type=Path, required=True)
-    parser.add_argument("--role", choices=("m0", "m1_r2"), required=True)
+    parser.add_argument("--role", choices=SUPPORTED_ROLES, required=True)
     parser.add_argument("--cpu-count", type=int, required=True)
     parser.add_argument("--timeout-seconds", type=int, required=True)
     args = parser.parse_args()

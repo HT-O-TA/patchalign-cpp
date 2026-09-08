@@ -13,10 +13,15 @@ from scripts.external.score_defects4c_case import (
     parse_result,
     rootfs_environment_args,
 )
+from scripts.external.run_defects4c_prediction_case import SUPPORTED_ROLES
 
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs/external/a3_defects4c_external_v1.json"
+
+
+def test_external_prediction_runner_accepts_frozen_model_roles() -> None:
+    assert SUPPORTED_ROLES == ("m0", "m1_r2", "dpo_beta03")
 
 
 def test_external_parse_result_preserves_runner_output_on_failure() -> None:
