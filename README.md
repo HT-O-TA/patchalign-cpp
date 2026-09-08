@@ -19,6 +19,7 @@ PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真
 - [最终技术报告](docs/delivery/final_report.md)
 - [架构与数据流](docs/delivery/architecture.md)
 - [复现指南](docs/delivery/reproduction.md)
+- [简历与面试复述提纲](docs/delivery/interview_brief.md)
 - [M1-R2 模型卡](docs/delivery/model_card_m1_r2.md)
 - [A5 DPO 训练证据](docs/evidence/a5_dpo_training_v1_1.md)
 - [A5 DPO 独立开发集选型](docs/evidence/a5_dpo_dev_selection_v1.md)
