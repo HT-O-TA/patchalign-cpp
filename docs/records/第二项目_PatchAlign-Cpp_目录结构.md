@@ -760,3 +760,10 @@ HT-O-TA/patchalign-cpp
 - `scripts/data/audit_data_v2_beetlebox_metadata.py`：只读非正文列并输出聚合哈希的审计器；
 - `tests/unit/test_data_v2_beetlebox_metadata_audit.py`：URL/SHA/文件解析、denylist、split/cap 专项测试；
 - `slurm/data_v2_beetlebox_metadata_audit.sbatch`：CPU/网络固定文件取得与审计入口；原始 Parquet 仅落集群数据目录。
+
+### 2026-09-08：BeetleBox 数据卡计数 v1.1
+
+- `docs/decisions/0026-handle-beetlebox-dataset-card-count-inconsistency.md`：保留 Job 97503 并修正数据卡语言计数的错误硬身份假设；
+- `configs/data/data_v2_beetlebox_metadata_audit_v1_1.json`：同一 Parquet 与门禁，实际/声明语言数并列报告；
+- `slurm/data_v2_beetlebox_metadata_audit_v1_1.sbatch`：消费集群已验哈希文件并写入独立 v1.1 artifact；
+- `artifacts/data-v2/logs/beetlebox-metadata-audit-97502.out` 与 `...-97503.out`：分别保留集群出口停滞和数据卡矛盾失败。

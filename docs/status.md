@@ -33,7 +33,7 @@
 - 静态份额门实际/目标：train `236/1,400` samples、`187/100` new repos、`236/700` families；validation `17/140`、`17/20`、`17/70`，因此总体失败。
 - legacy 与 CommitPack 真实合计只有 train 496 / validation 148；相对 2,000/200 容量探针仍缺 1,504/52，不能靠第二分片或放松门槛补考。
 - ADR-0024 已禁止第二分片、CommitPack 执行 pilot、训练和 GPU；下一步只做独立 buggy-fail/fixed-pass 来源的有界准入审计。
-- ADR-0025 已从 BugsCpp、CppPerf、TrickyBugs、BeetleBox 中只选择 BeetleBox 进入固定 20 MB metadata-only 门；该门不读取 title/body，不下载源码或测试。
+- ADR-0025 已从 BugsCpp、CppPerf、TrickyBugs、BeetleBox 中只选择 BeetleBox 进入固定 20 MB metadata-only 门；该门不读取 title/body，不下载源码或测试。Job 97502 因集群 HTTPS 零字节停滞取消，文件经本机故障转移和集群复验落盘；Job 97503 的 417 项测试通过，但发现官方数据卡总行数与语言表内部矛盾。ADR-0026 的 v1.1 只把语言计数改为实际值报告，所有质量门不变。
 - 后续若证据表明 2,000/200 全量可执行目标不可实现，必须新建 ADR，把静态监督层和可执行资格层显式分开，并重新冻结配额；不得静默降标。
 
 ## A3.3 当前有效链

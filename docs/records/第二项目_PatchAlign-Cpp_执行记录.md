@@ -1274,3 +1274,16 @@ ADR-0025 只授权 BeetleBox `ac12f9cd...b4ef` 两个 Parquet 的 metadata-only 
 新增配置、审计器、5 项纯函数测试和 1 小时 CPU/网络 Slurm 入口。审计读取列排除
 title/body，artifact 不写 URL、仓库名或源码；400/50 样本与 15/4 仓库门只授权
 后续历史许可证 pilot，不自动下载 source/patch，不冻结训练集，不申请 GPU。
+
+## 61. BeetleBox 传输故障转移与数据卡计数修正
+
+Job `97502` 在 `gpu15` 完成 `417 passed` 和 preflight 后，访问 Hugging Face 78 秒仍为
+0 字节；它与 Job 97386 是同一集群出口故障，故在 2 分 18 秒主动取消。两个固定
+Parquet 随后由本机 `/tmp` 下载，bytes/LFS SHA256 匹配后传至集群 `.incoming`，集群
+独立复验并原子改名；本机传输与桌面审计临时目录均已删除。
+
+无下载 Job `97503` 再次完成 `417 passed`、preflight 和文件身份验证，但在 train C++
+计数处 fail-closed。固定数据卡 frontmatter 的总行数为 20,636，语言表却合计 26,321，
+两者不能同时作为文件身份。ADR-0026 保留本次失败并建立 v1.1：文件总行数、bytes、
+SHA 仍为硬门，实际 C++ 数与卡片声明同时报告；400/50、15/4 metadata gate 及所有
+无内容/GPU边界不变，结果写入独立目录。
