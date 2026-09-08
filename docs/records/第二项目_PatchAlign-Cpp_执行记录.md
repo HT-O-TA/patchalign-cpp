@@ -1348,3 +1348,10 @@ progress/output 均不存在。修正只映射冻结字段，不改变实验设�
 负责人随后明确项目以简历竞争力而非论文级完备性为目标。ADR-0031 停止 Data-v2
 重建与多 seed 方案，保留 M1-R2→偏好审计→单 seed DPO+一个 beta 对照→三套一次性
 评测→最终交付的完整链。未提交的 Data-v2 builder 草稿已删除，避免成为漂移入口。
+
+### 65.3 第三次入口失败：Bubblewrap 路径
+
+Job `97533` 完成 `422 passed` 后发现新 sbatch 使用了不存在的 `/tools/bubblewrap`；
+历史成功入口的实际路径是 `/.tools/bubblewrap/0.12.0/install/bin/bwrap`。作业用时 23 秒，
+只创建与配置绑定的 progress manifest，没有执行 evaluation checkpoint 或最终输出。修正为
+历史路径，并在 Python 前增加 `test -x`；资格协议和样本不变。

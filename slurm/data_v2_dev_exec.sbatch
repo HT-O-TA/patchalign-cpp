@@ -16,7 +16,7 @@ umask 077
 REPO=/mingli01/project/ht/patchalign-cpp
 ENV_PREFIX=/mingli01/project/ht/.conda_envs/patchalign-cpp
 CONFIG=${REPO}/configs/data/data_v2_dev_exec_v1.json
-BWRAP=/mingli01/project/ht/tools/bubblewrap/bin/bwrap
+BWRAP=/mingli01/project/ht/.tools/bubblewrap/0.12.0/install/bin/bwrap
 OUTPUT=/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1
 
 export PATH="${ENV_PREFIX}/bin:/usr/bin:/bin"
@@ -27,6 +27,7 @@ hash -r
 test "$(command -v python)" = "${ENV_PREFIX}/bin/python"
 test "$(python -c 'import sys; print(sys.prefix)')" = "${ENV_PREFIX}"
 test -z "$(cd "${REPO}" && git status --porcelain)"
+test -x "${BWRAP}"
 test ! -e "${OUTPUT}"
 
 cd "${REPO}"
