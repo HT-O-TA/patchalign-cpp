@@ -68,6 +68,14 @@ def main() -> None:
         "environment_lock": entry(Path(config["environment"]["lock"])),
         "base_config": entry(Path(config["model"]["local_path"]) / "config.json"),
     }
+    require(
+        artifacts["baseline_adapter"]["sha256"] == comparison["baseline_adapter_sha256"],
+        "baseline adapter changed since final evaluation",
+    )
+    require(
+        artifacts["dpo_candidate_adapter"]["sha256"] == comparison["candidate_adapter_sha256"],
+        "DPO candidate adapter changed since final evaluation",
+    )
     for name in DATASETS:
         inference = inference_dir(config, name)
         for filename in ("prompts.jsonl", "predictions.jsonl", "generation-summary.json", "determinism-probe.json", "run-manifest.json"):
