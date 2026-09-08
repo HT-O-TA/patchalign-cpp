@@ -72,6 +72,7 @@
 - DPO 最终候选：[ADR-0033：选择 beta=0.3 进入最终评测](decisions/0033-select-dpo-beta03-for-final-evaluation.md)
 - DPO 训练证据：[175 对、两组 beta 与真实权重](evidence/a5_dpo_training_v1_1.md)
 - DPO dev 证据：[64 条独立执行选型](evidence/a5_dpo_dev_selection_v1.md)
+- DPO 最终评测恢复：[推理取消与 rootfs role 白名单故障](evidence/a5_dpo_final_recovery.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)

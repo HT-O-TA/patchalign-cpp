@@ -1,6 +1,6 @@
 # 项目状态
 
-最后核验：2026-09-08T12:35Z；A5 最终评测恢复推理 array `97608` 正在运行
+最后核验：2026-09-08T14:24Z；A5 Defects4C 替换评分 array `97901` 已排队
 
 项目状态：**简历交付版 DPO 已训练并完成独立开发集选型，正在一次性最终评测**。175 对经审计偏好已完成 beta=0.1/0.3 两组真实训练；64 条独立 executable dev 按冻结规则选择 beta=0.3。formal 500、confirmation 124、Defects4C 176 只评该胜者，随后自动执行评分、门禁、失败分析和交付整理。RLVR/GRPO 不属于本轮。
 
@@ -25,7 +25,7 @@
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
 | Data-v2 研究扩张 | 结束并保留负结果 | 新来源和 2,000/200 容量探针均已关闭；ADR-0031 不再构建或训练 Data-v2 |
-| A5 简历交付版 DPO | 训练与 dev 选型完成；最终评测运行中 | 175 对训练；beta=0.3 在 dev 上以 apply/build 57/57 胜出；confirmation 与 Defects4C 推理完成，formal 正在恢复 |
+| A5 简历交付版 DPO | 推理与 C++ 评分完成；Defects4C 替换评分待运行 | beta=0.3 formal Pass 19/500、confirmation 0/124；rootfs role 白名单修复后，替换 array `97901` 保留固定 176 分母 |
 
 ## 当前执行点：A5 DPO 一次性最终评测
 
@@ -34,8 +34,8 @@
 - 独立 dev 预检 `97566`、三路推理 `97567`、三路评分 `97570`、自动选择 `97571` 均完成。三者 Pass 均为 5/64；beta=0.3 的 apply/build 为 57/57，高于 baseline 53/52 且无 timeout/regression 退化，因此被选中。
 - 最终预检 `97583` 以 `434 passed` 完成，三套固定数据、prompt、基线、adapter、环境和评分器哈希全部通过。
 - 原推理 array `97586` 在 16m43s 时被共享账号 UID 1039 同秒主动取消，非代码、OOM 或时限失败；formal/confirmation/Defects4C 已原子保存 118/112/84 条预测，下游 `97589`～`97591` 同时被取消。
-- 恢复 array `97608` 从同一 state/partial 哈希断点继续；confirmation 124/124 与 Defects4C 176/176 已完成且全为 `ok`、3/3 probe 稳定；formal 在本次核验时完成 293/500，仍在运行。
-- 替换下游已用 `afterok` 排队：C++ 评分 `97611`、Defects4C 限流评分 `97614`、最终聚合/门禁/失败转移 `97615`。
+- 恢复 array `97608` 已完成三套固定分母；全部 generation status 为 `ok`，3/3 probe 稳定。C++ 评分 `97611` 也已完成：formal parse/apply/compile/Pass 为 500/437/424/19，function 17/400、file-window 2/100、regression 5、timeout 5；confirmation 为 0/124 Pass、regression 3、timeout 2。
+- 原 Defects4C 评分 `97614` 暴露 rootfs runner 的 role 白名单只含 `m0/m1_r2`：8 个 parse/policy 终止案例保存有效 checkpoint，其余 168 个在执行前秒退。恢复提交 `fbe0717be11ca55648cd4d9d69c22c0fa707471c` 只加入 `dpo_beta03` 并以 `435 passed` 验收；替换评分 `97901` 与聚合 `97902` 已排队。详见 [恢复证据](evidence/a5_dpo_final_recovery.md)。
 - 最终门禁未出结果前，beta=0.3 只是候选；若不满足冻结 DPO 提升和退化上限，交付推荐仍为 M1-R2。
 
 ## A3.3 当前有效链
