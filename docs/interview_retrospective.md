@@ -128,6 +128,30 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 
 面试要点：主动展示一个“loss 看起来更好、真实 Pass 反而下降”的消融，说明自己能区分优化信号、工程指标和产品级正确性，并按预注册阈值停止包装结果。
 
+### A5：真实执行偏好 DPO 与安全 veto
+
+- 对 A4 的 182 对偏好重新做来源、Schema、防泄漏和执行终态审计，排除 7 对只由 timeout tiebreak
+  产生的弱信号，最终使用 175 对，其中 75 对 chosen 为完整 success。
+- 从同一 M1-R2 adapter 出发，只训练 beta=0.1/0.3 两个预注册变量，各 2 epochs、44 optimizer
+  steps；不在看到结果后继续补 beta 或 seed。
+- 64 条与 A4 family 零重叠的 executable dev 上，三者均为 5/64 Pass；beta=0.3 在 compile/apply
+  达到 57/57，高于基线 52/53，按冻结字典序胜出。
+- 一次性 formal 500 上，DPO 相对 M1-R2 将 apply/compile/Pass 从 412/392/14 提高到
+  437/424/19；function 从 11/400 增至 17/400，提升 +1.5pp，paired-bootstrap 95% CI 为
+  [0,+3.0pp]。
+- 同一 formal 中 timeout 从 2 增至 5，即 +0.6pp，超过预注册 +0.5pp 上限。逐例是新增 4、修复
+  1、保留 1；新增风险来自队列不出队、循环变量不增长、反向边界推进和递归入口替换。因此即使主
+  Pass 提升，DPO 仍触发安全 veto。
+- 独立 confirmation 上 DPO 改善 parse/apply/compile 并把 timeout 从 4 降到 2，但仍为 0/124
+  Pass，说明旧 formal 分布的偏好收益没有迁移为新分布语义成功。
+- Defects4C 首轮 DPO 评分又暴露跨沙箱 role 白名单断层：外层接受 `dpo_beta03`，rootfs CLI 仍只
+  接受 `m0/m1_r2`。通过“8 条 parse/policy checkpoint 正常、168 条进入 rootfs 前秒退”的对照
+  定位后，只扩展显式白名单并完成 435 项回归测试，不重跑 GPU 推理。
+
+面试要点：DPO 的 +5 Pass 是真实正收益，+3 timeout 也是同等真实的产品风险。最终回退不是“训练
+失败”，而是预注册多目标门禁在发挥作用；这比看到总 Pass 上升后临时忽略安全指标更接近线上模型
+选择。
+
 ## 代表性的工程故障与改进
 
 1. 全量资格回放在单次时限内无法完成：改为候选级原子 checkpoint 和可恢复执行。
@@ -144,8 +168,9 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 12. 同一个 family 字段同时承担隔离与采样上限，造成 800 新仓库的不可行下界：拆成仓库级 split group 和 issue/function 级 sampling family，再用独立仓库上限约束集中度；先做只落最小元数据与哈希的网络 pilot，避免在容量和污染未证明前下载补丁。
 13. GitHub 首轮查询把 `label:bug` 错放在 PR 上而得到零候选：用逐项消融查询确认触发条件，保留空结果与 Job 证据，再改为核验被显式关闭的 linked issue 标签；这比删除标签后仅凭 `fix` 关键词接纳更可靠。最终查询全集只有 34 个仓库，小于 100 仓库门槛，因此用容量上界提前结束，而不是继续扫完来制造工作量。
 14. 全仓 pytest 的 one-off 入口遗漏 `PYTHONNOUSERSITE=1`，用户目录中不完整的 boto3 污染了 conda 导入链：用 fresh-process 导入、路径证据和 `pip check` 区分环境污染与依赖损坏，按标准隔离变量重提后 276 项全过。
+15. DPO role 只在外层 scorer 注册、没有穿透 rootfs CLI：用早终止/需执行两组样本的分界定位白名单断层，最小扩展显式角色并复用有效 checkpoint。
 
-详细证据见 [`evidence/a3_3_pipeline_findings.md`](evidence/a3_3_pipeline_findings.md)。
+详细证据见 [`evidence/a3_3_pipeline_findings.md`](evidence/a3_3_pipeline_findings.md)、[DPO 正式评测恢复](evidence/a5_dpo_final_recovery.md)和[DPO 配对失败分析](evidence/a5_dpo_formal_failure_analysis.md)。
 
 ## 面试表达模板
 
@@ -167,7 +192,7 @@ PatchAlign-Cpp 是一个面向真实代码修复的可复现实验系统：以 Q
 
 可以声称：已完成可复现的数据、训练、生成、沙箱评分和比较流水线；SFT 显著改善格式遵循，并在冻结 function holdout 上达到预注册的主提升要求；超时退化得到独立复现和逐例根因。
 
-目前不能声称：完整 SFT promotion gate 已通过；模型已在新的未见确认集上泛化；M1-R2 在 Defects4C 上提高了最终 Pass；A4 已正式晋级或 DPO 已开始。可以声称 pre-A4 账本已经闭环，负责人授权的 exploratory A4 已完成 264 条数据、1,056 个候选真实评分和 182 对保守偏好数据构造；其中 123 个候选完整通过、11 个 timeout。负责人决定本轮在此收尾，A5/DPO 延后。
+可以声称 DPO 已真实训练并完成独立 dev 选型与 formal/confirmation 评分；formal Pass 从 14 增至 19，同时因 timeout 从 2 增至 5，触发冻结安全 veto。不能声称完整 DPO promotion gate 已通过、模型已在新的未见确认集上泛化，或模型可自动合并到生产仓库。A3.4 的历史 `a4_ready=false` 与后续负责人授权的简历交付版 DPO 是两个不同治理状态，不能把后者倒写成前者曾正式晋级。
 
 ## 维护规则
 
