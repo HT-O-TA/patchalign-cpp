@@ -90,10 +90,12 @@ R2 将 timeout 从 3 降到 2、regression failure 从 5 降到 3，apply/compil
 | DPO 训练输入 | 175 对 | 从 182 对排除 7 对 timeout-only；75 对 chosen 为完整 success |
 | DPO 训练 | 2 个 beta，各 2 epochs / 44 steps | 控制变量消融，不做结果驱动搜索 |
 | DPO dev | 64 条 | 三模型均 5 Pass；beta=0.3 以 apply/build 57/57 胜出 |
-| 当前自动验收基线 | 434 passed | 最终评测 preflight 的全仓测试证据 |
+| DPO formal 500 | Pass 14→19；timeout 2→5 | 正收益真实，但 `+0.6pp` timeout 超过冻结上限，候选被否决 |
+| 最终评测 preflight | 434 passed | 运行提交上的全仓测试证据 |
+| 应用交付 checkpoint | 446 passed | CLI smoke 证据链加入后的隔离集群验收 |
 
-最终 formal/confirmation/Defects4C 的 DPO 数字、门禁结果和推荐 adapter 只从最终聚合产物引用，不在
-本文提前猜测。
+上述 formal/confirmation 数字来自已完成的冻结 scores；Defects4C 数字、完整 gate reasons 和 comparison
+哈希只在最终聚合完成后补入，不用运行中的部分检查点外推。
 
 ## 常见追问
 
@@ -117,6 +119,13 @@ R2 将 timeout 从 3 降到 2、regression failure 从 5 降到 3，apply/compil
 选择规则在看结果前冻结：先要求无 regression/timeout 退化和正执行信号，再按 Pass、hidden、public、
 compile、apply 的层级比较。三者 Pass/hidden/public 相同，beta=0.3 的 compile/apply 最高，因此胜出；
 它仍必须经过一次性正式评测，不能把 dev 结果当最终结论。
+
+### 为什么 DPO 多了 5 个 Pass，最终仍推荐 M1-R2？
+
+formal 的 Pass 从 14/500 提高到 19/500，但 timeout 从 2 增加到 5，净增的 3 个超时超过预先冻结的
+`+0.5pp` 上限。逐例检查发现新增风险包括队列不收缩、循环变量不增长和递归入口替换，不是节点抖动。
+门禁本来就是为了防止实验结束后只挑有利指标，所以系统保留 DPO 正收益作为研究结论，同时回退 M1-R2
+作为应用默认模型。
 
 ### 为什么没有继续调参或做 RLVR/GRPO？
 
