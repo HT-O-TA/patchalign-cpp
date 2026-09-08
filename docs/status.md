@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-08T08:16Z；Job 97530 已失败且原因明确；当前修复独立 DPO 开发执行集入口
+最后核验：2026-09-08T11:46Z；A5 最终评测推理 array `97586` 正在运行
 
-项目状态：**简历交付版后训练闭环进行中，当前冻结独立 DPO 开发执行集**。ADR-0031 结束论文级 Data-v2 扩张、三 seed SFT/DPO 和穷尽消融；M1-R2 保持 DPO 起点，现有 182 对偏好进入严格自动审计。目标是完成单 seed DPO 主实验、一个核心对照、三套一次性评测和可复现交付。当前没有 PatchAlign GPU 作业，DPO 尚未启动。
+项目状态：**简历交付版 DPO 已训练并完成独立开发集选型，正在一次性最终评测**。175 对经审计偏好已完成 beta=0.1/0.3 两组真实训练；64 条独立 executable dev 按冻结规则选择 beta=0.3。formal 500、confirmation 124、Defects4C 176 只评该胜者，随后自动执行评分、门禁、失败分析和交付整理。RLVR/GRPO 不属于本轮。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -25,16 +25,17 @@
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
 | Data-v2 研究扩张 | 结束并保留负结果 | 新来源和 2,000/200 容量探针均已关闭；ADR-0031 不再构建或训练 Data-v2 |
-| 简历交付版 DPO | 开发集入口修复中、未训练 | M1-R2 为起点；先冻结 64/50 条独立执行开发集并审计 A4 偏好，再运行单 seed 主配置与一个 beta 对照 |
+| A5 简历交付版 DPO | 训练与 dev 选型完成；最终评测运行中 | 175 对训练；beta=0.3 在 dev 上以 apply/build 57/57 胜出；formal/confirmation/Defects4C 正在一次性评测 |
 
-## 当前执行点：简历交付版 DPO 前置开发集
+## 当前执行点：A5 DPO 一次性最终评测
 
-- ADR-0031 已将当前完成条件收敛为真实 DPO、一个核心对照、三套冻结评测、失败分析和可复现交付；旧 300/150、多 seed 和 Data-v2 容量门保留为未通过的研究级历史标准。
-- 独立开发执行集仍从 A4 626 个候选中排除已用于偏好的 264 个 case；实际剩余 function 候选为 344 个，按冻结 `candidate_order` 选择目标 64、最低 50 个双资格案例。
-- Job `97528` 在资格前因错误 candidate manifest 哈希失败；修正后 Job `97530` 完成 `421 passed`，随后因 A4 已选 manifest 字段实际为 `source_candidate_order` 而非 `candidate_order` 再次 fail-closed。
-- 两次失败均未创建 progress/output，也未执行新候选；当前修正只处理字段映射，不改变样本、顺序、执行协议或 64/50 门。
-- 开发集只用于 M1-R2、DPO beta=0.1 主配置和 beta=0.3 对照的选择，与 A4 偏好、formal 500、confirmation 124、Defects4C 176 零交叉。
-- 当前无 PatchAlign 排队/运行作业，无 GPU 占用；下一步是提交修正版 CPU 双重资格作业。
+- 偏好审计 Job `97540`：182 对源偏好排除 7 对 timeout-only，冻结 175 对，其中 chosen full-success 75 对。
+- DPO CPU 预检 `97557`、GPU smoke `97558` 和训练 array `97559` 均完成；beta=0.1/0.3 各训练 2 epochs、44 steps。
+- 独立 dev 预检 `97566`、三路推理 `97567`、三路评分 `97570`、自动选择 `97571` 均完成。三者 Pass 均为 5/64；beta=0.3 的 apply/build 为 57/57，高于 baseline 53/52 且无 timeout/regression 退化，因此被选中。
+- 最终预检 `97583` 以 `434 passed` 完成，三套固定数据、prompt、基线、adapter、环境和评分器哈希全部通过。
+- GPU 推理 array `97586` 正在运行：task 0=formal 500、task 1=confirmation 124、task 2=Defects4C 176。
+- 下游已用 `afterok` 排队：C++ 评分 `97589`、Defects4C 限流评分 `97590`、最终聚合/门禁/失败转移 `97591`。
+- 最终门禁未出结果前，beta=0.3 只是候选；若不满足冻结 DPO 提升和退化上限，交付推荐仍为 M1-R2。
 
 ## A3.3 当前有效链
 
