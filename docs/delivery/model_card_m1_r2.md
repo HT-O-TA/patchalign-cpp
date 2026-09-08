@@ -2,14 +2,14 @@
 
 模型名称：PatchAlign-Cpp M1-R2
 模型类型：Qwen2.5-Coder-7B Base 上的 LoRA adapter
-版本状态：内部研究交付；未公开发布
-日期：2026-09-06
+版本状态：最终推荐的内部研究交付模型；未公开发布
+日期：2026-09-08
 
 ## 模型摘要
 
 M1-R2 是用于局部 C++ 缺陷修复研究的 LoRA adapter。它接收固定模板中的缺陷描述、已定位代码上下文和公开失败证据，并生成一个只修改 `main.cpp` 的 unified diff。它不是完整独立模型，使用时必须与精确匹配的 Qwen2.5-Coder-7B Base 一起加载。
 
-本模型显著改善了 Base 的 diff 协议遵循、补丁应用和编译能力，但没有通过全部正式 promotion gate：旧 500 条 holdout 的内部门禁通过，独立 124 条确认集失败，Defects4C 176 条最终 Pass 与 Base 持平。因此它应被视为可复核的研究 checkpoint，而不是已验证可部署的自动修复模型。
+本模型显著改善了 Base 的 diff 协议遵循、补丁应用和编译能力，但没有通过全部正式 promotion gate：旧 500 条 holdout 的内部门禁通过，独立 124 条确认集失败，Defects4C 176 条最终 Pass 与 Base 持平。后续 DPO-beta03 虽将 formal Pass 从 14 提升到 19，却把 timeout 从 2 增加到 5，并触发冻结安全否决，因此交付默认回退到 M1-R2。这个推荐表示它在已比较候选中更符合安全门禁，不表示模型已经具备生产部署能力。
 
 ## 身份与谱系
 
@@ -20,6 +20,7 @@ M1-R2 是用于局部 C++ 缺陷修复研究的 LoRA adapter。它接收固定�
 | Base config SHA256 | `4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605` |
 | 起始 adapter（M1）SHA256 | `807fa6de2d07bf9fd5e3ebbba9879e8aab77769d3d4ed1b31d184f234297350f` |
 | M1-R2 adapter SHA256 | `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a` |
+| Adapter config SHA256 | `acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69` |
 | Adapter 大小 | 80,792,096 bytes |
 | 训练 run | `a34_sft_r2_nf4_s20260830` / Slurm Job `94524` |
 | 训练代码 commit | `8e8505cd457aff7b8397bb78c4fe04e4ac3bf68c` |
@@ -73,6 +74,8 @@ R2 数据 selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd
 
 固定推理 predictions SHA256 为 `c5fe4e6d90d59c24f749949c8df4f074e2b26f6af625e960ce95013367e7bb6a`；scoring scores SHA256 为 `f05b54a107850591c0cfc16564ef477488cacfe50cb6b703ace41fb093c650b8`。完整 promotion 状态为 internal=true、confirmation=false、external=true，`a4_ready=false`。
 
+DPO 候选的训练、formal 正收益和安全否决详见 [DPO beta=0.3 候选模型卡](model_card_dpo_beta03.md)。
+
 ## 预期用途
 
 - 在隔离环境中研究局部 C++ 补丁生成、输出协议和执行式评测；
@@ -110,4 +113,4 @@ R2 数据 selection manifest SHA256 为 `7492a3732e3b0a6546e6b733a7fbb0314a63abd
 
 ## 许可与发布状态
 
-仓库原创代码和文档采用 Apache-2.0，但该许可证不会自动覆盖 Base 权重、训练数据、adapter、生成补丁或第三方依赖。M1-R2 当前只作内部研究交付；公开发布尚未获准，逐来源许可、敏感信息、漏洞披露和 NOTICE 审计仍是前置条件。
+仓库原创代码和文档采用 Apache-2.0，但该许可证不会自动覆盖 Base 权重、训练数据、adapter、生成补丁或第三方依赖。M1-R2 当前作为正式门禁后的默认内部研究交付模型；公开发布尚未获准，逐来源许可、敏感信息、漏洞披露和 NOTICE 审计仍是前置条件。
