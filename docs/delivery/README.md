@@ -1,8 +1,8 @@
 # PatchAlign-Cpp 交付说明
 
-本目录是 PatchAlign-Cpp 简历交付版的正式入口。项目已完成 SFT、执行偏好构建、真实 DPO、独立开发集选型和 formal/confirmation 评分；Defects4C 候选评分及最终 artifact 清单正在收尾。历史的阶段性收尾决定继续保留，但不作为当前项目状态。
+本目录是 PatchAlign-Cpp 简历交付版的正式入口。项目已完成 SFT、执行偏好构建、真实 DPO、独立开发集选型、三套固定分母评测、最终模型回退和 CLI GPU smoke；当前只剩最终 artifact manifest 与三端一致性审计。历史的阶段性收尾决定继续保留，但不作为当前项目状态。
 
-当前默认模型是 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，但 timeout 从 2 增加到 5，`+0.6pp` 超过冻结的 `+0.5pp` 上限，因此被安全门禁否决。Defects4C 最终结果只会补充外部泛化画像，不能消除已经触发的 formal veto。
+当前默认模型是 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，但 timeout 从 2 增加到 5，`+0.6pp` 超过冻结的 `+0.5pp` 上限，因此被安全门禁否决；Defects4C 上两者同为 1/176 Pass。最终 comparison 只含 `formal_timeout_increase_exceeded`，推荐模型为 `m1_r2`。
 
 实时作业状态只在[项目状态](../status.md)维护；最终机器事实以 `artifacts/a5/final-evaluation-v1/comparison.json` 和 `artifacts/a5/delivery-manifest-v1.json` 为准。
 
@@ -60,8 +60,15 @@ GitHub、本机和集群通过 commit 同步代码，不使用跨 SSH 软链接�
 | DPO formal scores | `artifacts/a5/final-evaluation-v1/formal/scoring/scores.jsonl` | `787871f4b63546f9564ce8f637086600311c02b1eaa8fcbf19d767540a82abfc` |
 | DPO confirmation predictions | `artifacts/a5/final-evaluation-v1/confirmation/inference/predictions.jsonl` | `f71ec0b15d80f724ae004c1eb81badac0021cf001c3c3e0d5c33041a55910401` |
 | DPO confirmation scores | `artifacts/a5/final-evaluation-v1/confirmation/scoring/scores.jsonl` | `65b97d79dab92ad3a1127a752659e20318f9adc19b50f4399c969bca8e66b35d` |
+| DPO Defects4C scores | `artifacts/a5/final-evaluation-v1/defects4c/scoring/scores.jsonl` | `ee105851994990bbe32a2f8770120fe3c1124979859459f0f53064d76d9456e1` |
+| DPO Defects4C summary | `artifacts/a5/final-evaluation-v1/defects4c/scoring/summary.json` | `58b9e9185ec7f84220df4faf527cdb42079624aba65cb183133b34dd02f588b0` |
+| Final comparison | `artifacts/a5/final-evaluation-v1/comparison.json` | `28b9806f920bc132d234b333a4d9bea7dd3817eb686b39059922089345e09fc4` |
+| Final failure analysis | `artifacts/a5/final-evaluation-v1/failure-analysis.json` | `502a7c208d23104dd9da66a753c63294b4159c271059b3a4269592c3cb7443e0` |
+| CLI smoke patch | `artifacts/a5/delivery/cli-smoke-v1/candidate.patch` | `a5e774ca8bf8145269e0763ac021ea1d5d445d2a6ce196b3f6b9846113353883` |
+| CLI smoke metadata | `artifacts/a5/delivery/cli-smoke-v1/metadata.json` | `0e648625bee32f79036fd66faf2726c7a0e43b7f9aba6f9795b1a7d1c0aa46f5` |
+| CLI smoke summary | `artifacts/a5/delivery/cli-smoke-v1/summary.json` | `34aa9d5272a657b74010968356489e922b6b1685ecd0bb857428b11832620357` |
 
-最终 Defects4C scores、comparison、failure analysis、CLI smoke 和 delivery manifest 的完整身份在后台链完成后一次补入，不使用运行中的部分检查点推断。
+上述外部评分、comparison、失败分析和 CLI smoke 均来自完成后的固定 artifact；delivery manifest 将在当前文档提交后生成。
 
 ## 接收方验证
 
@@ -90,8 +97,8 @@ sha256sum artifacts/a5/dpo-training-v1.1/beta03/final-adapter/adapter_model.safe
 - [x] M1-R2 与 DPO-beta03 模型卡已建立，最终默认模型已按安全门禁确定；
 - [x] 应用 CLI、结构校验、provenance metadata 和固定 smoke 证据链已实现；
 - [x] M1-R2 adapter 已本地化并核验；
-- [ ] DPO Defects4C 176 条替换评分与自动聚合完成；
-- [ ] 最终模型 CLI GPU smoke 完成；
+- [x] DPO Defects4C 176 条替换评分与自动聚合完成；
+- [x] 最终模型 CLI GPU smoke 完成；
 - [ ] hash-complete delivery manifest、最终报告和三端一致性审计完成。
 
 ## 发布边界

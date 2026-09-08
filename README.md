@@ -1,6 +1,6 @@
 # PatchAlign-Cpp
 
-PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真实执行评测项目。项目已完成 LoRA/QLoRA SFT、独立确认、Defects4C 外部评测、执行偏好构建和真实 DPO；当前按简历交付范围对开发集选中的 beta=0.3 候选执行一次性 formal/confirmation/Defects4C 评测。历史负结果完整保留，RLVR/GRPO 不属于本轮。
+PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真实执行评测项目。项目已完成 LoRA/QLoRA SFT、独立确认、Defects4C 外部评测、执行偏好构建、真实 DPO、一次性正式评测和推荐模型 CLI GPU smoke；当前按简历交付范围生成最终 manifest 并执行三端一致性审计。历史负结果完整保留，RLVR/GRPO 不属于本轮。
 
 项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
 
@@ -78,7 +78,7 @@ PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真
 - A1/A2 pilot 与正式 A3.3 数据不是同一证据等级；正式运行的当前状态和身份必须从状态页及 artifact manifest 核对；
 - A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 绑定 A2/A3 内部 artifact，公开正式报告前应以新版本提升且不改写历史结果；
 - A3.4 的旧 holdout 内部门禁通过，但独立确认集失败，完整 readiness 保持 `a4_ready=false`；exploratory A4 不改变该结论；
-- 第一轮 A4 的 182 对内部偏好是历史探索产物；ADR-0031 收敛为简历交付版后，对其重新审计并排除 7 对 timeout-only，使用剩余 175 对完成单 seed DPO beta=0.1/0.3。64 条独立 dev 已选择 beta=0.3，但最终正式门禁尚未产生；
+- 第一轮 A4 的 182 对内部偏好是历史探索产物；ADR-0031 收敛为简历交付版后，对其重新审计并排除 7 对 timeout-only，使用剩余 175 对完成单 seed DPO beta=0.1/0.3。64 条独立 dev 选择 beta=0.3；最终 formal timeout 门禁否决候选，推荐模型回退 M1-R2；
 - 基础模型预训练污染未知，只能披露，不能声称完全排除。
 
 ## 许可证与发布边界

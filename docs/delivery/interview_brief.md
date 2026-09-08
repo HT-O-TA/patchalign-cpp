@@ -91,11 +91,12 @@ R2 将 timeout 从 3 降到 2、regression failure 从 5 降到 3，apply/compil
 | DPO 训练 | 2 个 beta，各 2 epochs / 44 steps | 控制变量消融，不做结果驱动搜索 |
 | DPO dev | 64 条 | 三模型均 5 Pass；beta=0.3 以 apply/build 57/57 胜出 |
 | DPO formal 500 | Pass 14→19；timeout 2→5 | 正收益真实，但 `+0.6pp` timeout 超过冻结上限，候选被否决 |
+| DPO Defects4C 176 | Pass 1→1；apply 72→84；compile 55→65 | 外部前置漏斗改善，端到端泛化无提升 |
 | 最终评测 preflight | 434 passed | 运行提交上的全仓测试证据 |
 | 应用交付 checkpoint | 446 passed | CLI smoke 证据链加入后的隔离集群验收 |
 
-上述 formal/confirmation 数字来自已完成的冻结 scores；Defects4C 数字、完整 gate reasons 和 comparison
-哈希只在最终聚合完成后补入，不用运行中的部分检查点外推。
+上述数字均来自固定分母的最终聚合。comparison SHA256 为 `28b9806f...fc4`，唯一 gate reason 为
+`formal_timeout_increase_exceeded`；Defects4C 的 176/176 与 CLI GPU smoke 均已完成。
 
 ## 常见追问
 

@@ -42,8 +42,15 @@ run_defects4c_prediction_case.py: error: argument --role: invalid choice:
   `80eeed7eb9adacef858e7688635ea85bccb1da26` 建立 `a5-eval-recovery-97614` 分支，只 cherry-pick
   角色修复，形成恢复提交 `fbe0717be11ca55648cd4d9d69c22c0fa707471c`。
 - 恢复提交在项目 Conda 环境中完成全仓 `435 passed in 28.38s`。
-- 替换评分 array 为 `97901`，聚合作业为 `97902`。评分器对已存在 checkpoint 做完整 identity 比较后
-  直接复用，因此 8 条有效结果不会重复改写；168 条缺失结果按原索引执行。
+- 替换评分 array `97901` 完成 176/176，全部 task 为 `COMPLETED 0:0`；评分器对已存在 checkpoint
+  做完整 identity 比较后直接复用，因此 8 条有效结果没有重复改写。
+- 聚合作业 `97902` 以 `COMPLETED 0:0` 结束，并通过 435 项测试。候选 parse/apply/compile/Pass 为
+  `176/84/65/1`，M1-R2 为 `174/72/55/1`，双方 timeout 均为 0；paired Pass 差值及 95% 区间均为 0。
+- 最终 comparison 仅包含 `formal_timeout_increase_exceeded`，推荐模型为 `m1_r2`。scores、summary、
+  comparison、failure-analysis SHA256 分别为 `ee105851...e1`、`58b9e918...8b0`、
+  `28b9806f...fc4`、`502a7c20...3e0`。
+- 后续同步 Job `97977` 与 M1-R2 CLI GPU smoke `97978` 均完成；smoke 用时 7.03 秒生成 67 tokens，
+  峰值显存 5,810,547,712 bytes，并逐字节验证推荐 adapter 与 patch provenance。
 
 ## 3. 结果解释边界
 

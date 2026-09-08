@@ -1,7 +1,7 @@
 # A5 DPO formal/confirmation 配对失败分析
 
 本文只消费冻结的 M1-R2 与 DPO beta=0.3 predictions/scoring artifact，不重新生成、不重评分，也不
-读取 gold/fixed source。Defects4C 结果由最终聚合补充；本页聚焦已完成的 formal 500 与 confirmation 124。
+读取 gold/fixed source。分析覆盖 formal 500、confirmation 124 与 Defects4C 176 三套固定分母。
 
 ## 1. Formal 500 漏斗
 
@@ -68,7 +68,22 @@ DPO 改变了 86/124 个 completion，并改善格式、应用、编译和 timeo
 净提升形成清晰边界：DPO 学到的局部可执行偏好在旧 formal 分布上有效，但没有转化为独立确认分布的
 修复语义泛化。
 
-## 6. 工程结论
+## 6. Defects4C 176
+
+| 指标 | M1-R2 | DPO beta=0.3 | 变化 |
+|---|---:|---:|---:|
+| Parse | 174 | 176 | +2 |
+| Apply | 72 | 84 | +12 |
+| Compile | 55 | 65 | +10 |
+| Pass | 1 | 1 | 0 |
+| Timeout | 0 | 0 | 0 |
+
+候选与基线的 paired bootstrap Pass 差值为 0，95% 区间 `[0,0]`。唯一成功案例
+`d4c-0c3518e84b668975df03ac8b9620d7bf181bd349` 在两者中都成功，没有 success gained 或 lost。DPO 再次
+改善 parse/apply/compile 漏斗，却没有提高外部端到端 Pass；这与 confirmation 结果共同限制了 formal
+内部净收益的外推。外部评分双方均无 timeout，因此没有增加新的 gate reason。
+
+## 7. 工程结论
 
 1. DPO 的正结果真实存在：formal Pass 从 14 增至 19，不能因为最终门禁失败而抹去。
 2. DPO 的退化也真实存在：净增 3 个 formal timeout 足以触发预注册 veto，不能用总 Pass 提升覆盖。

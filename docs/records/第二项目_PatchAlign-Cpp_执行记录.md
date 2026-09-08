@@ -1385,3 +1385,9 @@ C++ 评分 array `97611` 完成。beta03 formal parse/apply/compile/Pass 为 500
 最终推荐 M1-R2 adapter 已复制到本机忽略目录 `artifacts/delivery/model/m1_r2/`：权重 80,792,096 bytes，SHA256 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`；配置 SHA256 `acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69`，本地 `PROVENANCE.json` 已逐字节复核。
 
 为避免 Defects4C 结束后重新等待 GPU，已提交依赖链：聚合 `97902` → 受保护的 main 快进 Job `97977` → 单 GPU 最终模型 CLI smoke Job `97978`。同步 Job 固定目标提交 `616c9d4a55dcd40b4818a9fb07c185291a6b3271`，并在切换前验证恢复分支、commit、工作树和聚合产物；任何漂移都 fail closed。delivery manifest 留到最终文档补齐后再生成，以记录真实最终交付 commit。
+
+## 70. A5 最终外部评测与 CLI smoke 完成
+
+Defects4C 替换评分 array `97901` 完成 176/176，聚合 Job `97902` 以 `COMPLETED 0:0` 结束并通过 `435 passed`。DPO-beta03 的 parse/apply/compile/Pass 为 `176/84/65/1`，M1-R2 为 `174/72/55/1`，双方 timeout 为 0，paired Pass 差值与 95% 区间均为 0；唯一成功样本在两者中均成功。最终 comparison 只保留 `formal_timeout_increase_exceeded`，推荐模型确定为 M1-R2。
+
+受保护同步 Job `97977` 随后把集群快进到 main 提交 `616c9d4a55dcd40b4818a9fb07c185291a6b3271`；单 GPU Job `97978` 按 comparison 自动加载 M1-R2 完成结构化 CLI smoke，生成 67 tokens 用时 7.03 秒，峰值显存 5,810,547,712 bytes。adapter、Base config、prompt、patch 与 metadata SHA256 均已本地化核验。此后不再进行训练或结果驱动实验，只生成最终 delivery manifest 并审计本机/GitHub/集群一致性。

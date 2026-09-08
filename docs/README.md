@@ -28,7 +28,7 @@
 - 系统架构：[架构与数据流](delivery/architecture.md)
 - 复现入口：[复现指南](delivery/reproduction.md)
 - 求职表达：[简历与面试复述提纲](delivery/interview_brief.md)
-- 当前 SFT 基线：[M1-R2 模型卡](delivery/model_card_m1_r2.md)
+- 当前推荐交付模型：[M1-R2 模型卡](delivery/model_card_m1_r2.md)
 - DPO 实验候选：[beta=0.3 候选模型卡](delivery/model_card_dpo_beta03.md)
 - 全程总览：[项目全程总结与核心结论](项目全程总结与核心结论.md)
 - 当前进度：[项目状态](status.md)

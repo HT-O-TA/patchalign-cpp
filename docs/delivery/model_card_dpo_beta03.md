@@ -12,7 +12,7 @@
 
 DPO-beta03 是 PatchAlign-Cpp 在 M1-R2 监督微调 adapter 上继续进行直接偏好优化得到的候选模型。它接收冻结模板中的缺陷描述、已定位代码上下文和公开失败证据，输出一个仅修改 `main.cpp` 的 unified diff。模型的目标是利用真实执行结果构造的偏好对，改善局部 C++ 补丁的协议遵循和端到端成功率。
 
-独立开发集在 beta=0.1 与 beta=0.3 之间选择了 beta=0.3，但一次性正式评测发现：相对 M1-R2，500 条 formal 上 Pass 从 14 提升到 19，同时 timeout 从 2 增加到 5，超过冻结的 `+0.5pp` 退化上限；124 条 confirmation 仍为 0 Pass。因此该候选不能晋级，推荐交付模型仍为 M1-R2。外部 Defects4C 结果只用于补全泛化画像，不能推翻已经触发的正式安全否决。
+独立开发集在 beta=0.1 与 beta=0.3 之间选择了 beta=0.3，但一次性正式评测发现：相对 M1-R2，500 条 formal 上 Pass 从 14 提升到 19，同时 timeout 从 2 增加到 5，超过冻结的 `+0.5pp` 退化上限；124 条 confirmation 仍为 0 Pass。Defects4C 上候选虽将 parse/apply/compile 从 `174/72/55` 提高到 `176/84/65`，双方仍同为 1/176 Pass。因此该候选不能晋级，推荐交付模型仍为 M1-R2。
 
 ## 身份与谱系
 
@@ -78,7 +78,7 @@ DPO-beta03 是 PatchAlign-Cpp 在 M1-R2 监督微调 adapter 上继续进行直�
 | DPO dev 64 | Pass 5；apply/build 57/57 | Pass 5；apply/build 53/52 | beta=0.3 按冻结次级规则入选 |
 | Formal 500 | parse/apply/compile/Pass = 500/437/424/19；timeout 5 | 499/412/392/14；timeout 2 | Pass `+1.0pp`，但 timeout `+0.6pp`，触发安全否决 |
 | Confirmation 124 | parse/apply/compile/Pass = 124/110/109/0；timeout 2 | 123/104/103/0；timeout 4 | 前置阶段改善，最终 Pass 无提升 |
-| Defects4C 176 | 最终聚合进行中 | Pass 1/176 | 仅补全外部画像，不参与推翻 formal 安全否决 |
+| Defects4C 176 | parse/apply/compile/Pass = 176/84/65/1；timeout 0 | 174/72/55/1；timeout 0 | 前置漏斗改善，最终 Pass 无提升 |
 
 Formal 的配对 bootstrap Pass 差值为 `+1.5pp`，95% 区间 `[0.0pp, 3.0pp]`；共有 8 个成功获得、3 个成功丢失、11 个共同成功。虽然总体补丁可应用和可编译数量提升，但新增的 4 个 timeout 分别表现为队列不收缩、循环变量不增长、链表边界翻转和递归入口替换。这说明执行偏好可以把错误推进到更深的执行阶段，却不自动保证终止性和语义安全。
 

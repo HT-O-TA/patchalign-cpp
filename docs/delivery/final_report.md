@@ -1,6 +1,6 @@
 # PatchAlign-Cpp 最终技术报告
 
-报告日期：2026-09-08
+报告日期：2026-09-09
 
 交付口径：面向简历展示的可验证 AI 应用与后训练闭环；RLVR/GRPO 不属于本轮
 
@@ -10,7 +10,7 @@ PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证 AI 系统。�
 
 项目完成了 Qwen2.5-Coder-7B Base 的环境验证、Schema 与评分闭环、隔离数据构建、NF4 QLoRA SFT、独立确认与 Defects4C 外部评测、泛化失败诊断、可执行偏好构造、两组 beta 的真实 DPO、独立开发集选型和一次性正式评测。应用侧提供结构化 CLI、严格 diff 校验、模型与补丁 provenance metadata、Slurm 编排、原子恢复和 hash-complete 交付索引。
 
-最终默认模型为 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，并明显改善 apply/compile；但 timeout 从 2 增加到 5，`+0.6pp` 超过预注册的 `+0.5pp` 上限，触发不可被其他指标抵消的安全否决。该决策保留 DPO 的真实正收益，也不隐藏无限循环与递归风险。DPO 的 Defects4C 176 条评分仍在完成最终聚合，其结果只补充外部画像，不会改变 formal veto。
+最终默认模型为 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，并明显改善 apply/compile；但 timeout 从 2 增加到 5，`+0.6pp` 超过预注册的 `+0.5pp` 上限，触发不可被其他指标抵消的安全否决。Defects4C 上候选将 apply/compile 从 72/55 提高到 84/65，但双方仍同为 1/176 Pass。该决策保留 DPO 的真实正收益，也不隐藏无限循环、递归和外部泛化不足。
 
 ## 2. 项目目标与范围
 
@@ -133,7 +133,7 @@ DPO 改变 86/124 个 completion，并改善格式、应用、编译和 timeout�
 
 ### Defects4C 176
 
-M1-R2 基线为 parse/apply/build/Pass `174/72/55/1`、0 timeout。DPO 候选预测已完成 176/176，CPU rootfs 替换评分与自动聚合正在运行；本报告不从部分 checkpoint 外推最终结果。完成后将补入候选漏斗、paired transition、comparison/failure-analysis SHA256 和最终交付 manifest。
+替换评分 array `97901` 与聚合 `97902` 已完成固定 176 条。DPO-beta03 的 parse/apply/compile/Pass 为 `176/84/65/1`，M1-R2 为 `174/72/55/1`，双方 timeout 均为 0。paired Pass 差值及 95% 区间均为 0；唯一成功案例为 retained success，没有 gained 或 lost。候选改善了前置漏斗，但没有外部端到端收益。scores、summary、comparison、failure-analysis SHA256 分别为 `ee105851...e1`、`58b9e918...8b0`、`28b9806f...fc4`、`502a7c20...3e0`。
 
 ## 10. 工程故障与恢复
 
@@ -152,7 +152,7 @@ M1-R2 基线为 parse/apply/build/Pass `174/72/55/1`、0 timeout。DPO 候选预
 
 M1-R2 是当前默认交付 adapter。它已从集群本地化到本机 `artifacts/delivery/model/m1_r2/`，权重为 80,792,096 bytes，SHA256 为 `8437acca…3425a`；配置 SHA256 为 `acd214f4…2c69`，本地 `PROVENANCE.json` 已与实际字节核验。大型权重继续由 Git 忽略。
 
-应用 CLI 提供 `prompt` 和 `infer` 两个入口。最终 GPU smoke 会读取自动 comparison 决定 adapter，验证 metadata 中的 Base、adapter 和 patch 哈希，并将固定 `cli-smoke-v1` 纳入 delivery manifest。CLI 只生成并结构校验候选，不自动执行或合并。
+应用 CLI 提供 `prompt` 和 `infer` 两个入口。Job `97978` 已读取最终 comparison 并自动选择 M1-R2，完成真实 GPU smoke：推理延迟 7.03 秒、峰值显存 5,810,547,712 bytes，adapter SHA256 与推荐权重一致，固定 prompt 和 patch 的 SHA256 均写入 metadata。CLI 只生成并结构校验候选，不自动执行或合并。
 
 ## 12. 核心结论
 
@@ -173,6 +173,6 @@ M1-R2 是当前默认交付 adapter。它已从集群本地化到本机 `artifac
 
 仓库原创代码和文档采用 Apache-2.0，但该许可证不会自动覆盖 Base 权重、数据、adapter、生成补丁或第三方依赖。本报告不是公开模型 release 或生产部署批准。
 
-## 14. 尚待自动收尾
+## 14. 交付状态
 
-本报告主体已按真实 DPO 结果更新。最终交付还需等待 Job `97901/97902` 完成 Defects4C 候选聚合，随后执行一次最终模型 CLI GPU smoke、生成 hash-complete delivery manifest、补入最终哈希和外部失败分析，并完成本机、GitHub、集群三端 commit/工作树审计。上述步骤不包含新训练或结果驱动实验。
+正式 SFT、探索性 A4、真实 DPO、三套固定分母评测、失败分析、最终模型回退、adapter 本地化和 CLI GPU smoke 均已完成。剩余动作只有生成 hash-complete delivery manifest，并完成本机、GitHub、集群三端 commit、工作树和 artifact 哈希审计；不再启动训练、调参或结果驱动补考。
