@@ -75,7 +75,7 @@ DPO-beta03 是 PatchAlign-Cpp 在 M1-R2 监督微调 adapter 上继续进行直�
 
 | 数据 | DPO-beta03 | M1-R2 | 结论 |
 |---|---:|---:|---|
-| DPO dev 64 | Pass 5；apply/build 57 | Pass 5；apply/build 57 | beta=0.3 按冻结次级规则入选 |
+| DPO dev 64 | Pass 5；apply/build 57/57 | Pass 5；apply/build 53/52 | beta=0.3 按冻结次级规则入选 |
 | Formal 500 | parse/apply/compile/Pass = 500/437/424/19；timeout 5 | 499/412/392/14；timeout 2 | Pass `+1.0pp`，但 timeout `+0.6pp`，触发安全否决 |
 | Confirmation 124 | parse/apply/compile/Pass = 124/110/109/0；timeout 2 | 123/104/103/0；timeout 4 | 前置阶段改善，最终 Pass 无提升 |
 | Defects4C 176 | 最终聚合进行中 | Pass 1/176 | 仅补全外部画像，不参与推翻 formal 安全否决 |

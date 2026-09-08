@@ -48,11 +48,12 @@ export CUDA_VISIBLE_DEVICES=0
 "$ENV_PREFIX/bin/python" -m patchalign.cli infer \
   --request examples/repair_request.json \
   --model-path /mingli01/models/Qwen2.5-Coder-7B \
-  --adapter-path /mingli01/project/ht/patchalign-cpp/artifacts/a5/dpo-training-v1.1/beta03/final-adapter \
+  --adapter-path /mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/checkpoints/checkpoint-step-000150-epoch-1/adapter \
   --output /tmp/patchalign-demo.patch \
   --metadata /tmp/patchalign-demo.json
 ```
 
+示例使用正式门禁后保留的推荐模型 M1-R2；DPO-beta03 只作为失败门禁的研究 checkpoint，不是默认推理模型。
 CLI 固定使用 NF4、greedy decoding 和一个可见 GPU；输出必须通过 strict diff 和路径策略校验。
 metadata 记录 prompt/patch、Base config、adapter config 与 adapter 权重 SHA256，以及 token 数、延迟、峰值显存
 和 seed，便于把候选追溯到具体模型 artifact。这只是候选生成，不会自动执行、提交或合并补丁；正式执行

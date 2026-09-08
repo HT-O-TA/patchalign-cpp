@@ -15,7 +15,10 @@ def read_request(path: Path) -> dict:
 
 
 def parser() -> argparse.ArgumentParser:
-    root = argparse.ArgumentParser(prog="patchalign-cpp", description="Generate a verified single-file C++ repair patch")
+    root = argparse.ArgumentParser(
+        prog="patchalign-cpp",
+        description="Generate and structurally validate a single-file C++ repair candidate",
+    )
     commands = root.add_subparsers(dest="command", required=True)
     prompt = commands.add_parser("prompt", help="render the frozen repair prompt without loading a model")
     prompt.add_argument("--request", type=Path, required=True)
