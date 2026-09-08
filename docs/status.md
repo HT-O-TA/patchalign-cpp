@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-08T06:41Z；Job 97508 已完成；宽泛来源搜索结束，转入 BugsCpp 项目级预注册与 Data-v2 分层契约
+最后核验：2026-09-08T07:20Z；Job 97515 已完成；BugsCpp 路线关闭，进入分层 Data-v2 独立开发执行集构建
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中，当前停在 Data-v2 独立来源与契约冻结**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub fixed 20 内容路线已在 Job `97292` 以 `0/20` 关闭。CommitPack v1.1 Job `97486` 在同一固定分片上得到 train 236、validation 17，未通过静态份额门，已由 ADR-0024 关闭；不下载第二分片、不做执行 pilot。当前没有 PatchAlign 集群作业、没有正式 Data-v2、没有 GPU 训练，DPO 仍未启动。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中，当前进入分层 Data-v2 构建**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub、CommitPack、BeetleBox 与 BugsCpp 均已得到可审计的停止结论，宽泛来源搜索结束。ADR-0030 改为使用既有 5,000+260 / 500+131 安全监督候选池，并从未进入 A4 偏好集的 train-only family 建立 64 条独立双资格开发执行集。当前没有 GPU 作业，DPO 仍未启动。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,19 +24,17 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | 宽泛来源搜索关闭；BugsCpp 项目级审计待执行 | CommitPack 236/17、BeetleBox cap 后 160/0、GitHub 0/20 均未过门；下一步只做 BugsCpp train/validation/held-out 预注册和分层契约 |
+| Data-v2→DPO 新轮次 | 分层 Data-v2 构建中 | BugsCpp validation 许可证上界 5/1 未过门并关闭；ADR-0030 已冻结监督候选池和 64 条 family-disjoint 开发执行集方案，下一步为 CPU 资格扩展与精确数据冻结 |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
-## 当前执行点：独立可执行来源与 Data-v2 契约冻结
+## 当前执行点：分层 Data-v2 独立开发执行集
 
-- CommitPack v1.1 Job `97486` 为 `COMPLETED 0:0`、25 秒、`412 passed`；读取 6,291 条，cap 前 253 条，cap 后 train 236 / validation 17。
-- 静态份额门实际/目标：train `236/1,400` samples、`187/100` new repos、`236/700` families；validation `17/140`、`17/20`、`17/70`，因此总体失败。
-- legacy 与 CommitPack 真实合计只有 train 496 / validation 148；相对 2,000/200 容量探针仍缺 1,504/52，不能靠第二分片或放松门槛补考。
-- ADR-0024 已禁止第二分片、CommitPack 执行 pilot、训练和 GPU；下一步只做独立 buggy-fail/fixed-pass 来源的有界准入审计。
-- BeetleBox 最终 Job 97508 为 `COMPLETED 0:0`、25 秒、`417 passed`：实际 `c++` 为 3,317/3,865，元数据合格 3,534，但只覆盖 4 个非评测仓库；repo-resplit/cap 后为 160/0，门禁失败并关闭。
-- ADR-0028 结束 broad GitHub、CommitPack、BeetleBox、RunBugRun v2 与 TrickyBugs 的同类补跑；下一步唯一主路线是 BugsCpp 项目级预注册，再一次性冻结分层 Data-v2 配额。
-- ADR-0029 已在读取 patch gold 前固定 BugsCpp：train 12 项目/104 defects、validation 3/41、held-out 7/39，另排除 cppcheck 30 与 example 1；许可证上界探针最多 12 个 GitHub repository metadata 请求，不读取 LICENSE 正文或 held-out patch。
-- 后续若证据表明 2,000/200 全量可执行目标不可实现，必须新建 ADR，把静态监督层和可执行资格层显式分开，并重新冻结配额；不得静默降标。
+- BugsCpp Job `97515` 为 `COMPLETED 0:0`、1 分 18 秒、`420 passed`。train 当前许可上界为 64 defects/5 projects，validation 只有 5/1，低于 20/2；按 ADR-0029 关闭且不重分。
+- Job 97515 只读取 24 个 `meta.json` 和 12 个 GitHub repository metadata 响应；未读取 patch、LICENSE 正文、源码、测试或 held-out 许可证，未申请 GPU。
+- GitHub 0/20、CommitPack 236/17、BeetleBox 160/0、BugsCpp validation 5/1 已共同证明 2,000/200 全量可执行增量在当前资源和治理边界下不可实现；宽泛来源搜索结束。
+- ADR-0030 显式以分层合同替代失败容量探针：监督候选池为 train 5,000+260、validation 500+131；静态监督样本不冒充执行资格。
+- 新的 SFT 开发执行集从 A4 尚未选入偏好数据的 336 个 function 候选中，按冻结顺序扩展双重资格并取 64 个；整个 family 从监督 train/validation 排除。目标 64、硬下限 50。
+- 开发执行集与 A4 264 case、formal 500、confirmation 124、Defects4C 176 全部隔离，只用于三 seed 模型选择。Data-v2 精确规模需在 CPU 构建后落盘；当前没有 GPU 授权。
 
 ## A3.3 当前有效链
 

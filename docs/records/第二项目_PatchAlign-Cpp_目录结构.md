@@ -788,3 +788,11 @@ HT-O-TA/patchalign-cpp
 - `scripts/data/audit_data_v2_bugscpp_projects.py`：只读 meta 与 GitHub repository license metadata 的审计器；
 - `tests/unit/test_data_v2_bugscpp_projects.py`：URL 规范化、固定 split 和 defect 总数测试；
 - `slurm/data_v2_bugscpp_project_license_probe.sbatch`：partial clone/no checkout 与 CPU/网络探针入口。
+
+### 2026-09-08：分层 Data-v2 开发执行集
+
+- `configs/data/data_v2_dev_exec_v1.json`：A4 未选 family、64/50 数量门和执行边界；
+- `scripts/data/qualify_data_v2_dev_exec.py`：复用已绑定资格证据并扩展剩余 train-only function case；
+- `slurm/data_v2_dev_exec.sbatch`：16 CPU 的 Bubblewrap 双资格入口；
+- `/mingli01/data/patchalign-cpp/data-v2/dev-exec-progress-v1/`：可恢复资格 checkpoint；
+- `/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1/`：冻结开发执行集（完成后生成）。

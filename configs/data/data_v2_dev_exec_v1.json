@@ -1,0 +1,52 @@
+{
+  "version": "data-v2-dev-exec-v1",
+  "decision": {
+    "path": "docs/decisions/0030-close-source-search-and-freeze-layered-data-v2.md",
+    "sha256": "sha256:936659c9b1b2f768f687b2be6882459a8bcc3e9534d8c36273d8025ee23cb81e"
+  },
+  "source": {
+    "candidate_directory": "/mingli01/data/patchalign-cpp/a4/executable-candidates-v1",
+    "candidate_manifest_sha256": "sha256:13e671509300e19415e59f05a40a00fc0dc69e65b1c77391f055b1c6223e3ae3",
+    "a4_selected_manifest": "/mingli01/data/patchalign-cpp/a4/executable-source-v1/preference-source-manifest.json",
+    "a4_selected_manifest_sha256": "sha256:8cba1ec5472a4f4443b766c8fa136f6e928d3911feec9e06457a377775095495",
+    "a4_qualification_progress": "/mingli01/data/patchalign-cpp/a4/executable-qualification-progress-v1",
+    "a4_progress_manifest_sha256": "sha256:bb98abd90b96369fae8aa8380ec6dd05170a9fb6be72f8699ab030e6d32a64fc",
+    "formal_train_sha256": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400"
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-Coder-7B",
+    "revision": "0396a76181e127dfc13e5c5ec48a8cee09938b02",
+    "local_path": "/mingli01/models/Qwen2.5-Coder-7B",
+    "config_sha256": "sha256:4e84bfb30ca9a8b765c1a13db4f7aa98be479a2315b1f0c24f53668f95239605"
+  },
+  "selection": {
+    "split": "train",
+    "source_dataset": "RunBugRun",
+    "task_level": "function",
+    "target_count": 64,
+    "minimum_count": 50,
+    "order": "ascending frozen A4 candidate_order after excluding all A4 selected cases",
+    "model_output_or_score_used": false
+  },
+  "qualification": {
+    "workers": 16,
+    "batch_size": 16,
+    "double_replay_required": true,
+    "max_input_tokens": 4096,
+    "allowed_path": "main.cpp",
+    "sanitizer": "only_if_explicitly_applicable",
+    "network": "unshared"
+  },
+  "paths": {
+    "progress_directory": "/mingli01/data/patchalign-cpp/data-v2/dev-exec-progress-v1",
+    "output_directory": "/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1"
+  },
+  "boundaries": {
+    "a4_selected_cases_reused": false,
+    "evaluation_content_read": false,
+    "evaluation_gold_consumed": false,
+    "training_data_created": false,
+    "gpu_authorized": false,
+    "overwrite_allowed": false
+  }
+}

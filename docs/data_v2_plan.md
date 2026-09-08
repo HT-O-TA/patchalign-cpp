@@ -183,3 +183,15 @@ ADR-0029 在读取任何 patch blob 前，用 seed `20260908`、project ID 和�
 fail-closed，held-out 不请求许可证。当前 SPDX 只计算上界：train 至少 40 defects/4
 projects、validation 至少 20/2 才允许下一道 patch-header + 历史许可证审计。它不读取
 patch、源码、测试或许可证正文，也不申请 GPU。
+
+## 第十阶段：停止来源搜索并构建分层 Data-v2
+
+Job 97515 的 train 许可证上界通过、validation 仅 5 defects/1 project，低于冻结的
+20/2，BugsCpp 路线按 ADR-0029 关闭。由此 GitHub、CommitPack、BeetleBox、BugsCpp
+四条最后候选路线都已经得到终态，项目不再用换查询、分片或 split 搜索数据。
+
+ADR-0030 用真实可得证据替换 2,000/200 容量探针：监督候选池固定为旧 formal
+5,000/500 加安全增量 260/131；另从未进入 A4 偏好集的 train-only A4 候选中取得
+64 个双资格 function family 作为独立开发执行集，并从所有监督 split 移除整个 family。
+先完成 CPU 资格扩展和精确数据构建；Schema、token、sample/payload/family 隔离全部通过后，
+才预注册三个从 Base 重训的 SFT seed。

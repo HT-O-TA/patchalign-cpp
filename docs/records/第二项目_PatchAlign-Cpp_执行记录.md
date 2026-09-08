@@ -1320,3 +1320,14 @@ metadata-only 审计器、3 项 split 测试和 1 小时 CPU/网络入口。
 做 12 个 GitHub repository metadata 请求；held-out 不查许可证，patch blob、LICENSE
 正文、源码、测试、执行和 GPU 全部关闭。当前许可门通过只授权历史许可证与 C++ patch
 header 审计，不授权训练。
+
+## 65. BugsCpp 终态与分层 Data-v2 决策
+
+CPU-only Job `97515` 在提交 `62575ffea6caf4246691c9de2fa2b11719c216bc` 上以
+`COMPLETED 0:0` 用时 1 分 18 秒，完成 `420 passed`、partial clone/no checkout、24 个
+meta 校验和 12 次当前许可证 metadata 请求。train 上界 64/5 通过，validation 5/1
+未达到 20/2，因此按预注册规则关闭 BugsCpp；未读取 patch/源码/测试或 held-out 许可证。
+
+ADR-0030 随后结束全部宽泛来源搜索，并采用分层 Data-v2：5,000+260 / 500+131 为
+监督候选池，另从 A4 未选择的 train-only family 建立目标 64、最低 50 的独立双资格
+function 开发集。开发 family 将从 SFT 数据整体排除；下一步只运行 CPU 资格与构建。
