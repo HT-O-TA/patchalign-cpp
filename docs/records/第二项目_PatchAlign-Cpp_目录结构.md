@@ -36,7 +36,8 @@
 │   │   │   ├── a3_sft_r2_v1.json           # A3.4 安全子集选择与哈希契约
 │   │   │   ├── a3_confirmation_v1.json     # A3.4 新确认集来源与配额
 │   │   │   ├── a3_confirmation_qualification_v1_1.json # 最终确认集资格契约
-│   │   │   └── a4_executable_preference_v1.json # A4 train-only 偏好数据契约
+│   │   │   ├── a4_executable_preference_v1.json # A4 train-only 偏好数据契约
+│   │   │   └── a5_resume_dpo_preference_v1.json # 175 对 DPO 恢复审计与防泄漏契约
 │   │   ├── evaluation/
 │   │   │   ├── quality_gates_v1.json       # SFT/DPO/pilot 机器门禁
 │   │   │   ├── a3_baseline_v1.json         # A3.0 模型、prompt 与生成参数
@@ -49,7 +50,9 @@
 │   │   │   ├── a3_confirmation_inference_v1.json # 新确认集 M0/R2 推理绑定
 │   │   │   ├── a3_confirmation_comparison_v1.json # 新确认集门禁绑定
 │   │   │   ├── pre_a4_readiness_v1.json    # 外部完成后生成的最终 readiness 绑定
-│   │   │   └── a4_preference_scoring_v1.json # A4 执行评分、排序与输出绑定
+│   │   │   ├── a4_preference_scoring_v1.json # A4 执行评分、排序与输出绑定
+│   │   │   ├── a5_dpo_dev_v1.json       # 三模型、64 条独立开发集与选择规则
+│   │   │   └── a5_dpo_final_v1.json     # beta03 一次性三数据集正式评测绑定
 │   │   ├── external/
 │   │   │   ├── a3_defects4c_sources_v1.json # 官方源与 203 候选计划
 │   │   │   ├── a3_defects4c_qualification_v1.json # 离线双资格契约
@@ -59,7 +62,8 @@
 │   │       ├── a3_sft_pilot_v1.json         # A3.2 公平训练与评测配置
 │   │       ├── a3_sft_formal_v1.json        # A3.3 NF4 QLoRA 训练与正式评测契约
 │   │       ├── a3_sft_r2_v1.json           # A3.4 adapter continuation 训练与评测契约
-│   │       └── data_v2_exploratory_replay_v0_1.json # M1-R2 单 seed、98-step 探索性 continuation
+│   │       ├── data_v2_exploratory_replay_v0_1.json # M1-R2 单 seed、98-step 探索性 continuation
+│   │       └── a5_dpo_v1_1.json          # 175 对、beta=0.1/0.3 的 DPO 正式训练契约
 │   ├── docs/                               # 协议、状态、证据、复盘与历史记录
 │   │   ├── README.md                       # 文档职责、权威来源与防漂移规则
 │   │   ├── status.md                       # 唯一实时阶段与作业状态页
@@ -67,12 +71,15 @@
 │   │   ├── data_v2_plan.md                 # 后续泛化增强、供给审计与决策门
 │   │   ├── interview_retrospective.md       # 面试复述：个人职责、故障归因和表达素材
 │   │   ├── a4_preference_data.md            # A4 输入、执行排序、配对与解释边界
-│   │   ├── delivery/                       # 最终报告、M1-R2 模型卡与交付验证入口
+│   │   ├── delivery/                       # 架构、复现、最终报告、模型卡与交付验证入口
 │   │   ├── decisions/                      # 不静默改写的架构/实验决策记录
 │   │   ├── evidence/                       # 可复核实验问题、论文证据与泛化失败诊断
 │   │   └── records/                        # 历史执行记录和目录结构台账
 │   ├── schemas/                            # A0/A2/A3、A4 candidate 与 preference-pair Schema
-│   ├── src/patchalign/evaluation/          # parser、评分器、paired bootstrap 与质量门禁
+│   ├── src/patchalign/
+│   │   ├── cli.py                         # 结构化请求的 prompt/infer 应用入口
+│   │   ├── inference.py                   # 冻结 prompt、NF4+LoRA 推理与输出校验
+│   │   └── evaluation/                    # parser、评分器、paired bootstrap 与质量门禁
 │   ├── tests/
 │   │   ├── fixtures/a0/                    # A0 Schema 正例
 │   │   ├── fixtures/scoring/               # 微型 C++ repo、sample、prediction 和失败 patch
@@ -104,6 +111,7 @@
 │   │   ├── external/                        # Defects4C 下载、资格、推理、评分、聚合与 readiness
 │   │   ├── preference/                      # A4 train-only 选择、资格、生成、评分、配对与提交
 │   │   ├── diagnostics/                     # 冻结 artifact 的只读泛化诊断与逐例审计
+│   │   ├── evaluation/                      # DPO dev 选型、正式评测、聚合与交付索引
 │   │   └── smoke/
 │   │       └── patchalign_g0_smoke.py      # BF16 LoRA / NF4 QLoRA 真实模型综合 smoke
 │   ├── slurm/
@@ -150,6 +158,13 @@
 │   │   ├── data_v2_exploratory_formal_infer_preflight.sbatch # CPU-only formal 推理身份预检
 │   │   ├── data_v2_exploratory_formal_infer.sbatch # 单 GPU、分段可恢复 formal 500 推理
 │   │   ├── data_v2_exploratory_formal_score.sbatch # CPU-only formal 500 真实执行评分
+│   │   ├── a5_resume_dpo_preference_audit.sbatch # CPU-only 175 对偏好数据恢复审计
+│   │   ├── a5_dpo_preflight.sbatch          # CPU-only DPO 训练身份与全仓预检
+│   │   ├── a5_dpo_gpu_smoke.sbatch          # 单 GPU 一步训练与显存 smoke
+│   │   ├── a5_dpo_train_array.sbatch        # beta=0.1/0.3 两组单卡训练数组
+│   │   ├── a5_dpo_dev_*.sbatch              # 独立 dev 推理、执行评分与唯一选型链
+│   │   ├── a5_dpo_final_*.sbatch            # 三数据集正式推理、评分与聚合链
+│   │   ├── a5_delivery_manifest.sbatch      # 全仓测试后的哈希完整交付索引
 │   │   ├── a3_1_compare.sbatch              # CPU-only A3.1 可比性审计
 │   │   ├── a3_2_preflight.sbatch            # CPU-only A3.2 fail-closed 预检
 │   │   ├── a3_2_train.sbatch                # 单 GPU 训练、重载和生成
@@ -181,6 +196,7 @@
 │       │   ├── preference-scoring-v1/       # 评分 checkpoints、scores、pairs、audit 与汇总
 │       │   ├── failed/                      # 失败运行的保留证据
 │       │   └── logs/                        # A4 CPU/GPU Slurm 日志
+│       ├── a5/                              # DPO 审计、训练、dev 选型、最终评测与交付清单
 │       └── smoke/
 │           ├── g0/
 │           │   └── 90719/                  # 成功 G0 的 JSON、BF16/NF4 adapter 与哈希证据
@@ -796,3 +812,13 @@ HT-O-TA/patchalign-cpp
 - `slurm/data_v2_dev_exec.sbatch`：16 CPU 的 Bubblewrap 双资格入口；
 - `/mingli01/data/patchalign-cpp/data-v2/dev-exec-progress-v1/`：可恢复资格 checkpoint；
 - `/mingli01/data/patchalign-cpp/data-v2/dev-exec-v1/`：冻结开发执行集（完成后生成）。
+
+### 2026-09-08：A5 DPO 训练、独立开发集选型与应用交付结构
+
+- 新增 `configs/data/a5_resume_dpo_preference_v1.json` 与审计入口，从 182 对历史 A4 偏好中排除 7 对 timeout-only，冻结 175 对训练输入；
+- 新增 `configs/training/a5_dpo_v1_1.json`、训练/预检代码和 Slurm array，beta=0.1/0.3 两组 adapter 均已形成独立训练 artifact；
+- 新增 `configs/evaluation/a5_dpo_dev_v1.json` 与 `scripts/evaluation/`，64 条独立 executable dev 完成三模型推理、执行评分和唯一选型，选择 beta=0.3；
+- 新增 `configs/evaluation/a5_dpo_final_v1.json` 及 formal、confirmation、Defects4C 的一次性推理/评分/聚合入口；最终 artifact 使用独立 `artifacts/a5/final-evaluation-v1/`，不覆盖 A3 基线；
+- 新增 `src/patchalign/cli.py`、`src/patchalign/inference.py` 和 `examples/repair_request.json`，形成结构化请求到冻结 prompt、Base+adapter 推理、strict diff/路径校验的应用入口；CLI 不自动执行或合并补丁；
+- 新增 `docs/delivery/architecture.md`、`docs/delivery/reproduction.md` 与哈希完整交付清单生成器；大型权重、预测、评分和日志仍位于被 Git 忽略的 `artifacts/`；
+- 本次没有移动或删除历史 SFT/A4/Data-v2 artifact。正式评测运行状态只在 `docs/status.md` 维护，最终模型与指标在聚合完成后再写入交付文档。
