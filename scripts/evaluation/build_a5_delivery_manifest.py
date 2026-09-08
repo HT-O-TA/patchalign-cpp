@@ -25,6 +25,9 @@ BASELINE_ADAPTER_DIR = Path(
     "/mingli01/project/ht/patchalign-cpp/artifacts/a3/sft-r2/training/"
     "checkpoints/checkpoint-step-000150-epoch-1/adapter"
 )
+CLI_SMOKE_DIR = Path(
+    "/mingli01/project/ht/patchalign-cpp/artifacts/a5/delivery/cli-smoke-v1"
+)
 
 
 def utc_now() -> str:
@@ -52,6 +55,9 @@ def main() -> None:
     require(comparison["version"] == "a5-dpo-final-comparison-v1", "wrong final comparison version")
     require(comparison["config_sha256"] == sha256_file(args.config), "final comparison config changed")
     require(failure["config_sha256"] == sha256_file(args.config), "failure analysis config changed")
+    recommended_adapter_artifact_key = (
+        "dpo_candidate_adapter" if comparison["recommended_model"] == "dpo_beta03" else "baseline_adapter"
+    )
 
     artifacts: dict[str, dict[str, Any]] = {
         "evaluation_config": entry(args.config),
@@ -67,6 +73,9 @@ def main() -> None:
         "failure_analysis": entry(Path(config["outputs"]["failure_analysis"])),
         "environment_lock": entry(Path(config["environment"]["lock"])),
         "base_config": entry(Path(config["model"]["local_path"]) / "config.json"),
+        "cli_smoke_patch": entry(CLI_SMOKE_DIR / "candidate.patch"),
+        "cli_smoke_metadata": entry(CLI_SMOKE_DIR / "metadata.json"),
+        "cli_smoke_summary": entry(CLI_SMOKE_DIR / "summary.json"),
     }
     require(
         artifacts["baseline_adapter"]["sha256"] == comparison["baseline_adapter_sha256"],
@@ -76,6 +85,14 @@ def main() -> None:
         artifacts["dpo_candidate_adapter"]["sha256"] == comparison["candidate_adapter_sha256"],
         "DPO candidate adapter changed since final evaluation",
     )
+    cli_metadata = read_json(CLI_SMOKE_DIR / "metadata.json")
+    cli_summary = read_json(CLI_SMOKE_DIR / "summary.json")
+    require(cli_summary["version"] == "patchalign-cpp-cli-smoke-v1", "wrong CLI smoke version")
+    require(cli_summary["recommended_model"] == comparison["recommended_model"], "CLI smoke model decision changed")
+    require(cli_summary["adapter_sha256"] == artifacts[recommended_adapter_artifact_key]["sha256"], "CLI smoke adapter changed")
+    require(cli_metadata["adapter_sha256"] == cli_summary["adapter_sha256"], "CLI smoke metadata adapter changed")
+    require(cli_summary["patch_sha256"] == artifacts["cli_smoke_patch"]["sha256"], "CLI smoke patch changed")
+    require(cli_metadata["patch_sha256"] == cli_summary["patch_sha256"], "CLI smoke metadata patch changed")
     for name in DATASETS:
         inference = inference_dir(config, name)
         for filename in ("prompts.jsonl", "predictions.jsonl", "generation-summary.json", "determinism-probe.json", "run-manifest.json"):
@@ -85,9 +102,6 @@ def main() -> None:
         for filename in filenames:
             artifacts[f"{name}_scoring_{filename}"] = entry(scoring / filename)
 
-    recommended_adapter_artifact_key = (
-        "dpo_candidate_adapter" if comparison["recommended_model"] == "dpo_beta03" else "baseline_adapter"
-    )
     result = {
         "version": "patchalign-cpp-delivery-manifest-v1",
         "created_at": utc_now(),
