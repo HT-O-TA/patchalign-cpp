@@ -15,7 +15,8 @@ import re
 import subprocess
 from typing import Any, Iterable, Mapping
 
-VERSION = "data-v2-commitpack-shard-audit-v1"
+VERSION = "data-v2-commitpack-shard-audit-v1.1"
+SUPPORTED_VERSIONS = {"data-v2-commitpack-shard-audit-v1", VERSION}
 SHA_RE = re.compile(r"[0-9a-f]{40}")
 REPO_PART_RE = re.compile(r"[A-Za-z0-9_.-]+")
 LICENSE_ALIASES = {
@@ -321,8 +322,8 @@ def load_legacy_identity(path: Path) -> dict[str, Any]:
 
 
 def validate_config(config: Mapping[str, Any], *, verify_heavy_inputs: bool) -> dict[str, Any]:
-    require(config.get("version") == VERSION, "unexpected CommitPack audit version")
-    verify_file(config["decision"], "ADR-0022")
+    require(config.get("version") in SUPPORTED_VERSIONS, "unexpected CommitPack audit version")
+    verify_file(config["decision"], "governing decision")
     bindings = {name: load_json(verify_file(spec, name)) for name, spec in config["bindings"].items()}
     contract = bindings["contract"]
     require(contract["version"] == "data-v2-contract-v2.1", "contract version changed")
@@ -372,7 +373,8 @@ def project_candidate(
     required = set(schema["required_fields"])
     if not required.issubset(row):
         return None, "schema_missing_fields"
-    if row.get("lang") != schema["language"]:
+    language_values = schema.get("language_values", [schema.get("language")])
+    if row.get("lang") not in language_values:
         return None, "language_mismatch"
     repository = canonical_repository(row.get("repos"), require_single=True)
     if repository is None:
@@ -551,7 +553,7 @@ def audit(config: Mapping[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any
         b"".join((row["stable_id"] + "\n").encode() for row in capped)
     ).hexdigest()
     summary = {
-        "version": VERSION,
+        "version": config["version"],
         "status": "static_supply_audit_only",
         "raw_records_seen": raw_rows,
         "legacy_commitpackft_records_seen": legacy["rows"],
@@ -591,7 +593,7 @@ def audit(config: Mapping[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any
         ],
     }
     manifest = {
-        "version": VERSION,
+        "version": config["version"],
         "git_commit": current_commit(),
         "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
         "config_sha256": None,
@@ -624,13 +626,13 @@ def write_json(path: Path, value: object) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_commitpack_shard_audit_v1.json"))
+    parser.add_argument("--config", type=Path, default=Path("configs/data/data_v2_commitpack_shard_audit_v1_1.json"))
     parser.add_argument("--preflight-only", action="store_true")
     args = parser.parse_args()
     config = load_json(args.config)
     validate_config(config, verify_heavy_inputs=args.preflight_only)
     if args.preflight_only:
-        print(json.dumps({"status": "preflight_passed", "version": VERSION}, sort_keys=True))
+        print(json.dumps({"status": "preflight_passed", "version": config["version"]}, sort_keys=True))
         return
     summary, candidates, manifest = audit(config)
     output = Path(config["output_directory"])

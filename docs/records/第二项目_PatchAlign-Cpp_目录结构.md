@@ -737,3 +737,11 @@ HT-O-TA/patchalign-cpp
 - `scripts/data/audit_data_v2_commitpack_shard.py`：流式静态审计，仅输出统计及身份哈希；
 - `tests/unit/test_data_v2_commitpack_shard_audit.py`：身份、diff、去重、denylist、split、cap 与无正文输出专项测试；
 - `slurm/data_v2_commitpack_shard_audit.sbatch`：CPU/网络下载、精确校验与审计入口；原始分片只写入 `/mingli01/data/patchalign-cpp/data-v2/commitpack/`，不进入 Git。
+
+
+### 2026-09-08：CommitPack v1.1 Schema 修正
+
+- `docs/decisions/0023-correct-commitpack-record-language-value.md`：记录 v1 把 `c++` 配置名误作实际 `C++` 字段值及单点修正边界；
+- `configs/data/data_v2_commitpack_shard_audit_v1_1.json`：同一分片与门禁，仅冻结精确语言值和独立输出目录；
+- `slurm/data_v2_commitpack_shard_audit_v1_1.sbatch`：消费已验哈希分片的 CPU-only 重跑入口，不含网络下载；
+- `artifacts/data-v2/commitpack-shard-audit-v1/`：Job 97473 的无效 Schema 映射结果，作为负面工程证据保留，不覆盖；v1.1 使用独立 `commitpack-shard-audit-v1-1/`。

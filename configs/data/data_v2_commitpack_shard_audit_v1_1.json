@@ -1,0 +1,126 @@
+{
+  "version": "data-v2-commitpack-shard-audit-v1.1",
+  "as_of": "2026-09-08",
+  "decision": {
+    "path": "docs/decisions/0023-correct-commitpack-record-language-value.md",
+    "sha256": "sha256:98e0ed6f76744db32e8afa14a56ba3261c820cd73fdd5e015e0874b6667de7dc"
+  },
+  "bindings": {
+    "contract": {
+      "path": "configs/data/data_v2_contract_v2_1.json",
+      "sha256": "sha256:6ea9ec52650a9944ccc385ddbd71ba8da2bbfe708686b15552dc4eee0fd060f2"
+    },
+    "source_admission": {
+      "path": "configs/data/data_v2_source_admission_v1.json",
+      "sha256": "sha256:57a700d3902f5d84f2c36a8120a403aa33aad150a86a1450d11e522d86b6defe"
+    },
+    "evaluation_denylist": {
+      "path": "configs/data/data_v2_evaluation_denylist_v1.json",
+      "sha256": "sha256:45d2ad1f565e18abbea504d32c2ce6e0ae8b218c7ec29dd9256d5793fbed5f72"
+    }
+  },
+  "upstream": {
+    "dataset": "bigcode/commitpack",
+    "revision": "5eee2c845bf88dbffcafedb6e80d2a72a43fe575",
+    "relative_path": "data/c++/c++-0001.jsonl",
+    "url": "https://huggingface.co/datasets/bigcode/commitpack/resolve/5eee2c845bf88dbffcafedb6e80d2a72a43fe575/data/c%2B%2B/c%2B%2B-0001.jsonl?download=true",
+    "local_path": "/mingli01/data/patchalign-cpp/data-v2/commitpack/5eee2c845bf88dbffcafedb6e80d2a72a43fe575/data/c++/c++-0001.jsonl",
+    "bytes": 523946192,
+    "sha256": "sha256:dfdd55f56f7be3bf4b8d2ccad8ea39910b4dd2c18ee296f5a991d134e57f367f",
+    "additional_shards_authorized": false
+  },
+  "legacy_commitpackft": {
+    "path": "/mingli01/data/patchalign-cpp/a1/raw/commitpackft/data/c++/data.jsonl",
+    "sha256": "sha256:ee59eb0dca07dadb74bde829134e0d3c42176e198773f125a14554a5547df4f2"
+  },
+  "frozen_sft": {
+    "train": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/train.jsonl",
+      "sha256": "sha256:c1cd80868632b845fa80a249ef8083ad2f5cf709e54dad63bcfe492a3ee3b400",
+      "count": 5000
+    },
+    "validation": {
+      "path": "/mingli01/data/patchalign-cpp/a3/formal-sft-v1/validation.jsonl",
+      "sha256": "sha256:6ee5cbed97c487ad5a0561b5f4b5179665137f6537dc411b81af91cbf5d13980",
+      "count": 500
+    }
+  },
+  "scope": {
+    "single_fixed_shard_download_authorized": true,
+    "streaming_static_audit_only": true,
+    "source_content_in_git": false,
+    "source_text_in_artifacts": false,
+    "repository_checkout_or_execution": false,
+    "training_data_created": false,
+    "gpu_authorized": false,
+    "dpo_authorized": false,
+    "evaluation_gold_consumed": false
+  },
+  "schema": {
+    "required_fields": [
+      "commit",
+      "old_file",
+      "new_file",
+      "old_contents",
+      "new_contents",
+      "subject",
+      "message",
+      "lang",
+      "license",
+      "repos"
+    ],
+    "language_values": ["C++"],
+    "ignored_upstream_fields": ["returncode", "stderr"],
+    "cpp_extensions": [".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"],
+    "require_exactly_one_repository": true,
+    "commit_regex": "[0-9a-f]{40}",
+    "minimum_changed_logical_lines": 2,
+    "maximum_changed_logical_lines": 200
+  },
+  "license": {
+    "allowed_spdx": ["Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "BSL-1.0", "ISC", "MIT", "Zlib"],
+    "dataset_field_is_static_supply_evidence_only": true,
+    "historical_repository_license_recheck_required_before_admission": true
+  },
+  "identity": {
+    "repository_host": "github.com",
+    "split_seed": 20260906,
+    "new_repository_validation_percent": 10,
+    "existing_v1_mapping_wins": true,
+    "sampling_family": "repository_split_group|canonical_new_path|stable_changed_anchor_hash",
+    "maximum_samples_per_sampling_family_across_v1_plus_increment": 2,
+    "maximum_increment_per_repository": {
+      "train": 40,
+      "validation": 20
+    }
+  },
+  "features": {
+    "long_code_min_lines": 100,
+    "long_prompt_min_estimated_tokens": 1024,
+    "complex_edit_types": ["multi_line_local", "add_helper", "localized_refactor"],
+    "structural_edit_types": ["add_helper", "localized_refactor"],
+    "bug_fix_terms": ["bug", "fix", "fault", "error", "crash", "incorrect", "wrong", "regression", "overflow", "underflow", "leak", "race", "deadlock", "null", "nullptr", "segfault", "failure", "broken"]
+  },
+  "static_share_gate": {
+    "train": {
+      "samples": 1400,
+      "new_repositories": 100,
+      "sampling_families": 700
+    },
+    "validation": {
+      "samples": 140,
+      "new_repositories": 20,
+      "sampling_families": 70
+    },
+    "bug_keyword_is_execution_evidence": false,
+    "pass_authorizes_training": false,
+    "pass_authorizes_fixed_execution_pilot_only": true
+  },
+  "known_supply": {
+    "github_executable": {"train": 0, "validation": 0},
+    "safe_legacy_increment": {"train": 260, "validation": 131},
+    "provisional_increment": {"train": 2000, "validation": 200},
+    "minimum_remaining_independent_train_after_commitpack_cap": 340
+  },
+  "output_directory": "artifacts/data-v2/commitpack-shard-audit-v1-1"
+}

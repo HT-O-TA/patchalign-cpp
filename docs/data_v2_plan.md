@@ -136,7 +136,7 @@ Multi-SWE-RL revision `97776489...6f32` 的 9 个 C++ 仓库全部属于保留�
 
 ADR-0016 的 casefold 修正由 Job `96939` 完成独立重跑：7,721 条 metadata 候选覆盖 train/validation 143/29 个仓库，容量门通过。该结果不能直接转成训练数据。ADR-0017 进一步固定 200 条 PR detail 分母，只验证小改动、显式同仓库 bug issue、仓库身份和 allowlist LICENSE；详情门至少 50 条通过后才允许取得固定 50 条的 commit/source/test 内容，并要求至少 10 条稳定 buggy-fail/fixed-pass。
 
-Data-v2 单一新来源仍最多占 70%。GitHub evidence v2 的固定内容 Job `97292` 在静态执行门后为 0/20，当前 broad GitHub 路线关闭且不换样本。ADR-0022 因此激活 CommitPack revision `5eee2c84...e575` 的唯一固定分片 `c++-0001.jsonl`：先做 CPU 流式供给审计，禁止追加其余 364 个分片。CommitPack 最多贡献 `1,400/140`；与 legacy 安全增量 `260/131` 合并后 train 仍至少缺 340 条独立来源数据，所以单分片通过只会授权固定仓库执行 pilot，同时必须继续寻找另一条独立可执行来源。RunBugRun v2 继续受 ADR-0015 限制，不作为本轮训练来源。
+Data-v2 单一新来源仍最多占 70%。GitHub evidence v2 的固定内容 Job `97292` 在静态执行门后为 0/20，当前 broad GitHub 路线关闭且不换样本。ADR-0022 因此激活 CommitPack revision `5eee2c84...e575` 的唯一固定分片 `c++-0001.jsonl`：先做 CPU 流式供给审计，禁止追加其余 364 个分片。CommitPack 最多贡献 `1,400/140`；与 legacy 安全增量 `260/131` 合并后 train 仍至少缺 340 条独立来源数据，所以单分片通过只会授权固定仓库执行 pilot，同时必须继续寻找另一条独立可执行来源。v1 Job `97473` 的 0/0 已确认为 `lang` 值大小写映射错误，不是容量结果；ADR-0023 的 v1.1 只接受实际精确值 `C++`，保持同一分片和全部硬门。RunBugRun v2 继续受 ADR-0015 限制，不作为本轮训练来源。
 
 ## 第六阶段：detail v1 早停与 executable-evidence v2
 

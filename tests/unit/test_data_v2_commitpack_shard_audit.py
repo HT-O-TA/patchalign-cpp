@@ -154,3 +154,13 @@ def test_family_retention_and_share_gate_are_deterministic() -> None:
     report = share_gate(rows, split, config())
     assert report["checks"]["samples"] is True
     assert report["checks"]["new_repositories"] is True
+
+def test_v1_1_language_value_is_exact() -> None:
+    cfg = config()
+    cfg["schema"].pop("language")
+    cfg["schema"]["language_values"] = ["C++"]
+    frozen, legacy, seen = state()
+    candidate, reason = project_candidate(row(lang="C++"), cfg, frozen, denylist(), legacy, seen)
+    assert candidate is not None and reason is None
+    frozen, legacy, seen = state()
+    assert project_candidate(row(lang="c++"), cfg, frozen, denylist(), legacy, seen)[1] == "language_mismatch"

@@ -59,6 +59,7 @@
 - GitHub evidence v2 结果：[104 条 metadata 候选与执行 pilot 授权](evidence/data_v2_github_executable_metadata_v2.md)
 - GitHub 固定内容终态：[0/20 静态执行候选与路线关闭](evidence/data_v2_github_execution_feasibility_v1.md)
 - CommitPack 审计激活：[ADR-0022：固定单分片与 70% 容量边界](decisions/0022-activate-bounded-commitpack-supply-after-github-closure.md)
+- CommitPack Schema 修正：[ADR-0023：记录语言值 `C++`](decisions/0023-correct-commitpack-record-language-value.md)
 - 项目复盘：[面试复述与工程经历](interview_retrospective.md)
 - Git 同步：[本机—集群同步规范](development/git-sync.md)
 - 目录职责：[目录结构台账](records/第二项目_PatchAlign-Cpp_目录结构.md)
