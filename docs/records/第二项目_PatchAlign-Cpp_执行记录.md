@@ -1251,3 +1251,16 @@ ADR-0022 激活 ADR-0018 的唯一固定 CommitPack C++ 分片审计，revision 
 CPU/网络 Job `97386` 在 `gpu15` 先完成 `411 passed` 和全部 preflight，随后计算节点对 `huggingface.co:443` 连续六次连接超时，以 `FAILED 28:0` 用时 `00:14:30` 结束；没有 partial 数据或审计 artifact。按预定故障转移，本机专用 `/tmp` 目录从同一 URL 可续传下载固定文件，字节数 `523946192`、SHA256 `dfdd55f5...f367f` 均匹配后，以 `.incoming` 传入集群、集群独立验哈希并原子改名；本机 524 MB 临时副本随后删除。
 
 跳过下载的 Job `97473` 在 `gpu15` 以 `COMPLETED 0:0` 用时 23 秒结束，全仓 `411 passed`。它读取 6,291 条但全部记为 `language_mismatch`；只聚合 `lang` 和字段名后确认所有记录均为精确 `C++`，v1 将 builder 配置名 `c++` 误作记录值。v1 的空 candidate/summary/manifest SHA256 为 `e3b0c442...b855`、`2ad41a9e...0b12`、`f505dda5...1b87`，保留但不得用作来源容量结论。ADR-0023 建立 v1.1，只修正这一精确 Schema 值；同一 revision、分片、哈希、阈值、去重与 cap 均不变。
+
+## 59. CommitPack v1.1 终态与路线关闭
+
+CPU-only Job `97486` 在提交 `d9d8ab6f927d6cb3b8912d8e21f87498124ae72c` 上以
+`COMPLETED 0:0` 用时 25 秒完成，全仓 `412 passed`。固定分片读取 6,291 条，cap 前
+253 条、cap 后 train 236 / validation 17；静态份额门除 train 新仓库数外全部失败。
+candidate/summary/run-manifest SHA256 分别为 `46d71ba9...e7ba0`、
+`b579ce80...19765`、`61631ab5...4206`。
+
+真实供给与 legacy 合并后仅为 train 496 / validation 148，相对 2,000/200 容量探针
+仍缺 1,504/52。ADR-0024 因而关闭当前 CommitPack 路线：不下载第二分片，不做仓库
+执行 pilot，不生成 Data-v2，不提交 GPU。下一步改为独立可执行来源与 Data-v2 分层
+契约审计；若必须修改容量/执行口径，须以新 ADR 明示，不能把失败门槛事后改写。

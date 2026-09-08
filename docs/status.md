@@ -1,8 +1,8 @@
 # 项目状态
 
-最后核验：2026-09-08T13:14Z；CommitPack 固定分片已验哈希；v1 Schema 映射失败保留，v1.1 准备中
+最后核验：2026-09-08T05:45Z；Job 97486 已完成；CommitPack 固定单分片路线按静态份额门失败关闭
 
-项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub fixed 20 内容路线已在 Job `97292` 以 `0/20` 关闭。CommitPack 唯一固定分片已通过 bytes/SHA256 双端校验；集群直连下载 Job `97386` 仅因 HTTPS 连接超时失败，本机故障转移传输完成。v1 Job `97473` 为 `411 passed`，但把 builder 配置名 `c++` 错当记录值，6,291 条全部被 `lang="C++"` 的大小写差异误拒；该 0/0 保留但不作来源结论。ADR-0023 只修正精确 Schema 值的 v1.1 已准备。当前没有 Data-v2 训练集、没有 GPU 作业，DPO 仍未启动。
+项目状态：**Data-v2→正式 SFT→正式 DPO 的新研究轮次进行中，当前停在 Data-v2 独立来源与契约冻结**。旧 exploratory replay 因 formal `13/500` 未过门而封存。GitHub fixed 20 内容路线已在 Job `97292` 以 `0/20` 关闭。CommitPack v1.1 Job `97486` 在同一固定分片上得到 train 236、validation 17，未通过静态份额门，已由 ADR-0024 关闭；不下载第二分片、不做执行 pilot。当前没有 PatchAlign 集群作业、没有正式 Data-v2、没有 GPU 训练，DPO 仍未启动。
 
 本页是项目当前阶段和 Slurm 作业状态的唯一说明性入口。冻结配额、训练参数和质量阈值以[文档索引](README.md)列出的机器配置为准；单次运行的最终事实以集群 artifact manifest 为准。
 
@@ -24,16 +24,16 @@
 | Data-v2 供给审计 | 完成；现有来源不足 | CPU-only Job `96256` 仅找到 260 train + 131 validation 可用增量，不能冻结训练集 |
 | Data-v2 来源准入 | metadata pilot 完成；当前查询容量失败 | v1/v1.1/v1.2 均 0 条准入；冻结查询仅 34 个仓库，小于 train 最低 100；未下载补丁 |
 | Data-v2 exploratory replay | formal 500 评分完成；formal 门槛未通过 | Job `96780` 得到 13/500 Pass、1 timeout；Pass 低于预注册下限 14，新 adapter 的 confirmation/Defects4C 尚未运行 |
-| Data-v2→DPO 新轮次 | CommitPack v1.1 Schema 修正准备中 | 固定分片已验哈希；Job 97473 的 0/0 仅为语言值映射错误；v1.1 不改数据、筛选门或阈值，仍无训练或 GPU |
+| Data-v2→DPO 新轮次 | CommitPack 路线关闭；独立来源审计中 | Job 97486 得到 236/17，静态份额门失败；禁止第二分片、执行 pilot 和 GPU，下一步冻结独立可执行来源与可实现契约 |
 | A5 / 正式 DPO | 新路线前置门未到、未启动 | 旧 `a5_started=false` 保持；只有正式 Data-v2、三 seed SFT 和 staged 三套评测全部通过后才构造并审计正式偏好数据 |
 
-## 当前执行点：CommitPack 固定单分片审计
+## 当前执行点：独立可执行来源与 Data-v2 契约冻结
 
-- 固定 revision/path/bytes/SHA256：`5eee2c84...e575` / `data/c++/c++-0001.jsonl` / `523,946,192` / `dfdd55f5...f367f`；分片已落入集群并双端验哈希，禁止下载第二分片。
-- v1 Job `97473` 的 `0/0` 是单点 Schema 映射错误：实际 6,291 条均为 `lang="C++"`；ADR-0023 的 v1.1 只修正该精确值，旧 artifact 不覆盖。
-- 只做流式 schema、许可证字段、仓库/commit/path、2～200 changed logical lines、评测 denylist、legacy 精确去重和 split/cap 审计；artifact 不写源码或仓库明文。
-- 静态份额门为 train `1,400` 条、100 新仓库、700 sampling family；validation `140`、20、70。通过只授权固定仓库执行 pilot，不授权训练。
-- 已知容量数学：legacy 安全增量 `260/131` + CommitPack 上限 `1,400/140`，train 乐观上界 `1,660/2,000`；因此另一个独立来源是硬需求，而非失败后临时扩展实验。
+- CommitPack v1.1 Job `97486` 为 `COMPLETED 0:0`、25 秒、`412 passed`；读取 6,291 条，cap 前 253 条，cap 后 train 236 / validation 17。
+- 静态份额门实际/目标：train `236/1,400` samples、`187/100` new repos、`236/700` families；validation `17/140`、`17/20`、`17/70`，因此总体失败。
+- legacy 与 CommitPack 真实合计只有 train 496 / validation 148；相对 2,000/200 容量探针仍缺 1,504/52，不能靠第二分片或放松门槛补考。
+- ADR-0024 已禁止第二分片、CommitPack 执行 pilot、训练和 GPU；下一步只做独立 buggy-fail/fixed-pass 来源的有界准入审计。
+- 后续若证据表明 2,000/200 全量可执行目标不可实现，必须新建 ADR，把静态监督层和可执行资格层显式分开，并重新冻结配额；不得静默降标。
 
 ## A3.3 当前有效链
 

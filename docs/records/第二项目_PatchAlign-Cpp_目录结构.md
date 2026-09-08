@@ -745,3 +745,9 @@ HT-O-TA/patchalign-cpp
 - `configs/data/data_v2_commitpack_shard_audit_v1_1.json`：同一分片与门禁，仅冻结精确语言值和独立输出目录；
 - `slurm/data_v2_commitpack_shard_audit_v1_1.sbatch`：消费已验哈希分片的 CPU-only 重跑入口，不含网络下载；
 - `artifacts/data-v2/commitpack-shard-audit-v1/`：Job 97473 的无效 Schema 映射结果，作为负面工程证据保留，不覆盖；v1.1 使用独立 `commitpack-shard-audit-v1-1/`。
+
+### 2026-09-08：CommitPack v1.1 终态与路线关闭
+
+- `docs/evidence/data_v2_commitpack_shard_audit_v1_1.md`：Job 97486 的真实供给、拒绝分布、容量门与 artifact 哈希；
+- `docs/decisions/0024-close-commitpack-after-fixed-shard-audit.md`：禁止第二分片、执行 pilot、训练与 GPU，转向独立可执行来源；
+- `artifacts/data-v2/commitpack-shard-audit-v1-1/`：本地化的小型审计输出；原始 524 MB 分片仅保留在集群数据目录。

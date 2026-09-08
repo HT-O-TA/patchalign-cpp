@@ -138,6 +138,8 @@ ADR-0016 的 casefold 修正由 Job `96939` 完成独立重跑：7,721 条 metad
 
 Data-v2 单一新来源仍最多占 70%。GitHub evidence v2 的固定内容 Job `97292` 在静态执行门后为 0/20，当前 broad GitHub 路线关闭且不换样本。ADR-0022 因此激活 CommitPack revision `5eee2c84...e575` 的唯一固定分片 `c++-0001.jsonl`：先做 CPU 流式供给审计，禁止追加其余 364 个分片。CommitPack 最多贡献 `1,400/140`；与 legacy 安全增量 `260/131` 合并后 train 仍至少缺 340 条独立来源数据，所以单分片通过只会授权固定仓库执行 pilot，同时必须继续寻找另一条独立可执行来源。v1 Job `97473` 的 0/0 已确认为 `lang` 值大小写映射错误，不是容量结果；ADR-0023 的 v1.1 只接受实际精确值 `C++`，保持同一分片和全部硬门。RunBugRun v2 继续受 ADR-0015 限制，不作为本轮训练来源。
 
+v1.1 Job `97486` 已在 25 秒内完成 `412 passed`。它读取 6,291 条，cap 前 253 条、cap 后 train 236 / validation 17；train 只满足新仓库数量，样本与 family 不足，validation 三项均不足。legacy 与该分片合计为 496/148，相对 2,000/200 容量探针仍缺 1,504/52。ADR-0024 因此关闭 CommitPack 路线：禁止第二分片、执行 pilot、Data-v2 构造和 GPU。下一步先对独立、已发布 buggy-fail/fixed-pass 证据的来源做有界桌面审计；只有来源身份、历史许可证、执行可复现性、评测污染和真实容量同时可行，才下载内容。若严格全量可执行的 2,000/200 被证明确实不可实现，必须以新 ADR 显式建立“静态监督层 + 可执行资格层”，再冻结新的训练配额和三 seed 方案。
+
 ## 第六阶段：detail v1 早停与 executable-evidence v2
 
 固定 detail Job `96959` 在连续完成 144 个 train 候选后只有 8 条合格；train 剩余 16 条，因此记录和仓库乐观上限分别为 24/40、23/30。CPU-only Job `97150` 以 `391 passed` 独立重建这一反证，v1 正式关闭，未取得 patch/source，也未激活 ADR-0019。
