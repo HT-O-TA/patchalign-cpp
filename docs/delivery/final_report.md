@@ -1,119 +1,178 @@
 # PatchAlign-Cpp 最终技术报告
 
-报告日期：2026-09-06
-交付口径：完成 SFT 与探索性研究；A5/DPO 延后
-决策依据：[ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md)
+报告日期：2026-09-08
+
+交付口径：面向简历展示的可验证 AI 应用与后训练闭环；RLVR/GRPO 不属于本轮
 
 ## 1. 执行摘要
 
-PatchAlign-Cpp 建立了一套面向局部 C++ 缺陷修复的可验证后训练系统：模型只接收缺陷描述、已定位代码上下文和公开失败证据，只输出一个 unified diff；后端在 rootless Bubblewrap 中依次验证解析、路径策略、`git apply --recount`、编译、公开测试、隐藏测试、回归测试和明确适用时的 sanitizer。
+PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证 AI 系统。输入是结构化的 buggy code、任务级别和公开失败示例，模型只输出一个 unified diff；系统对输出执行严格格式与路径策略校验，再在 rootless、禁网、限时的 Bubblewrap 中依次完成 `git apply --recount`、编译、公开测试、隐藏测试、回归测试和明确适用时的 sanitizer。最终质量由真实执行决定，而不是由 loss、文本相似度或“能编译”替代。
 
-本轮完成了真实 Base 模型 smoke、任务与 Schema 冻结、数据隔离、沙箱执行、基线、SFT pilot、正式 NF4 QLoRA SFT、安全修正轮次、独立确认集、Defects4C 外部评测，以及一次负责人授权的 exploratory A4 偏好数据研究。最终模型候选 M1-R2 在旧 500 条 holdout 上相对 Base 的 function Pass@1 提升 `+2.75pp`，但在新 124 条确认集上 M0 与 M1-R2 均为 `0/124`，且 R2 新增 regression failure 与 timeout；在 Defects4C 176 条上双方均为 `1/176`。因此完整 promotion gate 未通过，`a4_ready=false` 保持不变。
+项目完成了 Qwen2.5-Coder-7B Base 的环境验证、Schema 与评分闭环、隔离数据构建、NF4 QLoRA SFT、独立确认与 Defects4C 外部评测、泛化失败诊断、可执行偏好构造、两组 beta 的真实 DPO、独立开发集选型和一次性正式评测。应用侧提供结构化 CLI、严格 diff 校验、模型与补丁 provenance metadata、Slurm 编排、原子恢复和 hash-complete 交付索引。
 
-探索性 A4 对 264 个 train-only 可执行案例各采样 4 次，完成 1,056 个候选的真实执行评分，得到 123 个完整 Pass 和 182 对保守偏好数据。该结果证明执行反馈能够产生可复现的同题偏好信号，但不能证明未见分布泛化，也没有启动 DPO。本轮按负责人决定在 SFT 与探索性研究处收尾。
+最终默认模型为 **M1-R2**。DPO-beta03 在 formal 500 上将 Pass 从 14 提升到 19，并明显改善 apply/compile；但 timeout 从 2 增加到 5，`+0.6pp` 超过预注册的 `+0.5pp` 上限，触发不可被其他指标抵消的安全否决。该决策保留 DPO 的真实正收益，也不隐藏无限循环与递归风险。DPO 的 Defects4C 176 条评分仍在完成最终聚合，其结果只补充外部画像，不会改变 formal veto。
 
-## 2. 研究问题与范围
+## 2. 项目目标与范围
 
-核心问题是：在固定数据、提示、生成预算和评分协议下，局部 C++ 修复 SFT 能否提高开放权重 Base 模型生成可应用、可编译并通过隐藏与回归测试补丁的能力；当正式晋级失败时，真实执行反馈能否仍形成可审计的探索性偏好信号。
+核心问题分成两层：
 
-本轮范围以 function-level 为主，并兼容固定 file-window 上下文。只允许修改 `main.cpp`，不包含仓库自主探索、联网搜索、长程 Agent、多文件修改或生产环境自动合并。
+1. 工程层：能否把开放权重代码模型接入一个可约束、可隔离执行、可恢复、可追溯的补丁生成服务；
+2. 后训练层：在固定数据、prompt、生成预算和评分协议下，SFT 与真实执行偏好优化能否提高端到端修复成功率，同时不突破预注册安全退化上限。
 
-## 3. 已完成阶段
+本轮以 function-level 为主，并兼容固定 file-window 上下文。只允许修改 `main.cpp`，不包含仓库自主探索、联网搜索、长程 Agent、多文件修改、生产自动合并或自动部署。项目定位优先服务 AI 应用开发求职，同时保留完整后训练证据作为能力补充。
 
-| 阶段 | 结果 | 证据等级 |
+## 3. 系统架构
+
+```text
+raw defect/test data
+  → Schema normalization
+  → family/split isolation + immutable manifests
+  → NF4 QLoRA SFT (M1/M1-R2)
+  → train-only multi-candidate generation
+  → Bubblewrap execution ranking
+  → audited chosen/rejected pairs
+  → DPO beta ablation + independent dev selection
+  → one selected candidate on frozen formal/confirmation/Defects4C
+  → paired gates + failure analysis
+  → model cards + CLI smoke + delivery manifest
+```
+
+模型生成与不可信代码执行被有意拆开。CLI 只负责请求校验、冻结 prompt、Base + adapter 推理和 strict diff/path validation；真实应用、编译和测试进入最小权限沙箱。run manifest 绑定 Git commit、Base revision、配置、数据、环境、预测和评分 SHA256。
+
+## 4. 阶段与结果
+
+| 阶段 | 主要结果 | 证据等级 |
 |---|---|---|
-| G0 | Qwen2.5-Coder-7B 的 BF16 LoRA、NF4 QLoRA、adapter 保存和重载通过 | Smoke |
-| A0 | 任务契约、Schema、评分 fixture、质量门禁和治理边界冻结 | Synthetic test / contract |
-| A1 | 300/50 isolated pilot，跨 split 多维零重叠 | Pilot |
-| A2 | 50 function + 20 file-window 的 rootless 双资格与三次稳定回放通过 | Pilot |
-| A3.0～A3.2 | Base/外部基线、scoring v2、BF16/NF4 公平 pilot 完成 | Pilot |
-| A3.3 | 正式 NF4 QLoRA SFT、500 条固定推理和评分完成；timeout 上限失败 | Frozen evaluation |
-| A3.4 | SFT-R2、旧 holdout、独立确认集和 Defects4C 完成；最终 readiness 失败 | Frozen evaluation |
-| exploratory A4 | 1,056 候选全量执行评分和 182 对偏好数据完成 | Exploratory, train-only |
-| A5 | 未启动，`a5_started=false` | Deferred |
+| G0 | 7B Base 的 BF16 LoRA、NF4 QLoRA、adapter 保存与重载 smoke 通过 | GPU smoke |
+| A0 | 任务契约、Schema v0.2、评分 fixture、质量门禁和治理边界冻结 | Contract/unit test |
+| A1 | 300/50 isolated-v2 pilot，跨 split 多维零重叠 | Data pilot |
+| A2 | 50 function + 20 file-window 的 rootless 双资格与三次稳定回放 | Execution pilot |
+| A3.0～A3.2 | Base/外部基线、scoring v2、BF16/NF4 公平 pilot | Controlled pilot |
+| A3.3 | 5,000/500 正式 SFT、500 条固定推理和评分；主提升通过但 timeout 退化 | Frozen evaluation |
+| A3.4 | SFT-R2、旧 holdout、124 条独立确认、176 条 Defects4C | Frozen evaluation |
+| 泛化诊断与 Data-v2 | 六项失败诊断；来源扩张和单轮 replay 均保留负结果并早停 | Diagnostic/exploratory |
+| A4 | 1,056 个候选全量执行评分，182 对源偏好 | Train-only exploratory |
+| A5 | 175 对审计偏好、两组 DPO、64 条 dev、一次性正式评测 | Frozen DPO evaluation |
+| 交付 | CLI、模型卡、复现指南、面试材料、最终 manifest | Application delivery |
 
-## 4. 数据与隔离
+## 5. 数据与隔离
 
-| 用途 | 规模与组成 | 关键边界 |
+| 用途 | 规模与组成 | 隔离边界 |
 |---|---|---|
-| A3.3 SFT | 5,000 train + 500 validation；CommitPackFT/RunBugRun | 与正式 holdout problem family 零重叠；hidden/gold 不进 prompt |
-| A3.3 internal holdout | 400 function + 100 file-window | 不参与 checkpoint 选择；固定 greedy Pass@1 |
-| A3.4 R2 continuation | 1,200 train + 117 validation | 只从既有 train/validation 静态选择风险模式，不读取 holdout 修复答案 |
-| 独立 confirmation | 100 function + 24 file-window | 不参与 R2 checkpoint 选择 |
-| Defects4C external | 176 function | 排除与训练来源 family 重叠；139/176 来自 LLVM，分布偏斜 |
-| exploratory A4 | 256 function + 8 file-window | 只来自冻结 train 的 RunBugRun；每例 4 候选 |
+| A3.3 SFT | 5,000 train + 500 validation；CommitPackFT/RunBugRun C++ | 与 formal family 零重叠；hidden/gold 不进 prompt |
+| Formal holdout | 400 function + 100 file-window | 不参与 checkpoint 选择；greedy Pass@1 |
+| A3.4 R2 | 1,200 train + 117 validation | 只从既有 train/validation 静态选择风险模式 |
+| Confirmation | 100 function + 24 file-window | 不参与 R2 或 DPO checkpoint 选择 |
+| Defects4C | 176 function | 排除训练 family；LLVM 139/176，披露分布偏斜 |
+| A4 执行候选 | 256 function + 8 file-window，各 4 候选 | 只来自冻结 train；执行结果不写入 prompt |
+| DPO dev | 64 executable cases | 与 175 对 preference case/family 零重叠 |
 
-基础模型预训练语料不可完全审计，因此项目只声称控制了本人后训练数据的隔离，不声称“完全无污染”。原始数据和重打包样本没有进入 Git。
+基础模型预训练语料无法完全审计，因此项目只声称控制本人后训练数据的 split/family 隔离，不声称“完全无污染”。原始数据、重打包样本和完整运行产物不进入 Git。
 
-## 5. 训练设置
+## 6. SFT 主链
 
-基础模型固定为 `Qwen/Qwen2.5-Coder-7B` revision `0396a76181e127dfc13e5c5ec48a8cee09938b02`。正式 M1 使用 NF4 QLoRA，在 5,000 条 train 上训练 3 epochs、1,875 optimizer steps；最佳 checkpoint 为 epoch 2 / step 1,250。
+Base 固定为 `Qwen/Qwen2.5-Coder-7B` revision `0396a76181e127dfc13e5c5ec48a8cee09938b02`。正式 M1 使用 NF4 QLoRA，在 5,000 条 train 上训练 3 epochs、1,875 optimizer steps；M1-R2 从最佳 M1 adapter 继续，以 learning rate `2e-5`、micro batch 1、gradient accumulation 8、LoRA rank 8 / alpha 16 训练 1 epoch、150 steps。
 
-M1-R2 从 M1 最佳 adapter 继续，以 NF4 QLoRA、learning rate `2e-5`、micro batch 1、gradient accumulation 8、LoRA rank 8 / alpha 16 训练 1 epoch、150 optimizer steps。训练 Job `94524` 用时 `00:15:15`，峰值 GPU 显存 `17,933,322,752` bytes。M1-R2 adapter SHA256 为 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`。
-
-## 6. 正式评测结果
-
-### 6.1 旧 500 条 internal holdout
-
-| 模型 | Parse | Apply | Compile | Pass | Function Pass | Regression failure | Timeout |
+| 模型 | Parse | Apply | Compile | Pass | Function Pass | Regression | Timeout |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | M0 Base | 0 | 0 | 0 | 0/500 | 0/400 | 0 | 0 |
 | M1 SFT | 499 | 391 | 373 | 15/500 | 12/400 | 5 | 3 |
 | M1-R2 | 499 | 412 | 392 | 14/500 | 11/400 | 3 | 2 |
 
-M1 相对 M0 的 function 提升为 `+3.0pp`，paired bootstrap 95% 区间 `+1.5pp～+4.75pp`，但 timeout 增加 `+0.6pp`，超过冻结的 `+0.5pp` 上限。M1-R2 相对 M0 的 function 提升为 `+2.75pp`，95% 区间 `+1.25pp～+4.5pp`，旧 holdout 内部门禁通过；相对 M1，它改善 apply/compile 和汇总风险数，却少了一个最终 Pass，且 timeout 样本发生迁移。
+M1-R2 的 function Pass 相对 Base 为 `+2.75pp`，paired bootstrap 95% CI 为 `+1.25pp～+4.5pp`，旧 holdout 内部门禁通过。但 confirmation 上 M0/M1-R2 均为 0/124，M1-R2 新增 regression 和 timeout；Defects4C 上 M1-R2 虽将 parse/apply/build 提高到 174/72/55，最终仍与 Base 同为 1/176。结论是协议学习成立，语义泛化未被证明。
 
-### 6.2 独立确认与外部评测
+## 7. 泛化诊断与停止无效扩张
 
-| 数据 | M0 | M1-R2 | 结论 |
-|---|---:|---:|---|
-| Confirmation 124 | 0/124 Pass | 0/124 Pass；新增 3 regression failure、4 timeout | 确认门禁失败 |
-| Defects4C 176 | parse/apply/build/Pass = 94/24/17/1 | 174/72/55/1 | 前置阶段改善，最终 Pass 无提升；无退化门禁通过 |
+六项诊断检查了数据身份、prompt 长度、语言/任务切片、终止阶段、成功与输入长度关系、confirmation 和 Defects4C 分布。主要瓶颈是 public/hidden 语义测试，而不是 diff 解析；旧集成功偏向较短输入，外部唯一成功也不具跨项目代表性。
 
-pre-A4 合取门禁为 internal=true、confirmation=false、external=true，唯一 blocker 为 `supplementary_confirmation_passed`；最终 ledger 保持 `a4_ready=false`。这项负结果不能被 exploratory A4 覆盖。
+项目随后审计 GitHub、CommitPack、RunBugRun v2、BeetleBox、BugsCpp 等来源。固定许可、provenance、family 隔离和可执行资格后，新增供给不足以达到正式 Data-v2 容量门；单轮 780 条安全 replay 消融在 formal 仅 13/500 Pass，低于 M1-R2 的 14/500。按预注册停止线终止宽泛来源搜索和追加训练，避免用更多低质量数据或结果驱动补考制造虚假进步。
 
-## 7. Exploratory A4 结果
+## 8. 可执行偏好与 DPO
 
-M1-R2 以 temperature 0.7、top-p 0.95 对 264 个已筛选 train-only 案例各生成 4 个候选。执行排序在看见结果前冻结，只按终止阶段和同阶段 timeout 区分；同题最高档与最低档相同则不配对。
+A4 对 264 个 train-only 案例各生成 4 个候选，共 1,056 个。所有候选进入真实执行漏斗，得到 123 个完整 Pass、11 个 timeout 和 182 对保守偏好；75 对 chosen 为完整 success，107 对只提供更后终止阶段信号。
 
-| 指标 | 结果 |
-|---|---:|
-| 候选总数 | 1,056 |
-| Parse / Apply / Compile | 1,055 / 805 / 780 |
-| 完整 Pass | 123（11.65%） |
-| Regression failure / Timeout | 4 / 11 |
-| 至少一次成功的案例 | 77/264（经验 Pass@4 29.17%） |
-| 偏好对 | 182；另有 82 个案例无严格差异 |
-| Chosen 为完整 success | 75 |
-| 非 success 阶段信号 | 107 |
+A5 重新审计 182 个 source group，排除 7 对 timeout-only，冻结 175 对 DPO 输入。偏好与 DPO dev、formal、confirmation 和 Defects4C 均无重叠。M1-R2 起点 adapter SHA256 为 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`。
 
-file-window 候选 Pass 为 11/32，但只来自 8 个案例，不能宣称其优于 function。训练文件只含 prompt、chosen/rejected 原始 completion、身份与内容哈希；终态和排序理由保存在独立 audit，未向训练输入泄漏 gold、fixed、测试内容或执行反馈。
+| 变体 | Beta | Epochs / steps | Train loss | Dev Pass | Dev apply/build | 结果 |
+|---|---:|---:|---:|---:|---:|---|
+| DPO-beta01 | 0.1 | 2 / 44 | 0.67567 | 5/64 | 55/55 | 合格但未入选 |
+| DPO-beta03 | 0.3 | 2 / 44 | 0.64335 | 5/64 | 57/57 | 按冻结次级规则入选正式评测 |
 
-## 8. 核心结论
+两组训练只改变 beta，不在看见 dev 后重训或补充超参数搜索。beta=0.3 adapter SHA256 为 `2de1cb5bf0100aeba384b8cfb52fae990a77d5971d1b595cb698659f66f0683a`。
 
-1. SFT 最显著的收益是协议遵循：M0 在正式 500 条上全部 parse failed，M1/M1-R2 达到 499/500 可解析；但前置阶段改善远大于最终正确率改善。
-2. Apply、compile 和 public success 都不是补丁正确性的替代指标，hidden 与 regression 才暴露行为错误。
-3. 旧 holdout 上的正结果没有在新确认集上复现；独立确认是本项目最重要的反过拟合证据。
-4. R2 的风险修正存在权衡：汇总 regression/timeout 下降，但最终 Pass 下降且风险样本迁移，不能称为“已修复”。
-5. 多候选真实执行能产生有信息量的选择信号，但 A4 来自筛选后的 train-only 分布，经验 Pass@4 不能与未见集 greedy Pass@1 直接比较。
-6. 固定分母、预注册门禁、不可变预测、原子 checkpoint、哈希绑定和失败保留，使负结果仍可复核并具有研究价值。
-7. 收尾后的六项诊断进一步定位：确认集最大瓶颈是 public 语义测试，旧集成功偏向短输入，外部唯一成功不具跨项目代表性；综合结论是“协议学习成立，但尚未证明修复语义泛化”。详见 [M1-R2 泛化失败诊断](../evidence/generalization_failure_diagnostic.md)。
+## 9. DPO 一次性正式评测
 
-## 9. 已知限制
+### Formal 500
 
-- 任务只覆盖局部、单文件 C++ 修复，不能外推到多文件仓库级修复。
-- confirmation 为 124 条且最终 Pass 全零，现有实验没有证明未见分布上的端到端提升。
-- Defects4C 样本明显偏向 LLVM，不能代表均衡的 C++ 项目生态。
-- A4 只有 8 个 file-window 案例，且 107/182 偏好对不包含完整 success，信号强度有限。
-- 只完成单 seed 主链，没有多 seed replicated result。
-- 基础模型预训练污染未知；训练数据和 adapter 的公开再分发许可尚未完成逐来源审计。
+| 指标 | M1-R2 | DPO-beta03 | 变化 |
+|---|---:|---:|---:|
+| Parse | 499 | 500 | +1 |
+| Apply | 412 | 437 | +25 |
+| Compile | 392 | 424 | +32 |
+| Public success | 22 | 28 | +6 |
+| Pass | 14 | 19 | +5 |
+| Function Pass | 11/400 | 17/400 | +1.5pp |
+| File-window Pass | 3/100 | 2/100 | -1.0pp |
+| Regression failure | 3 | 5 | +0.4pp |
+| Timeout | 2 | 5 | +0.6pp |
 
-## 10. 工程与故障经验
+Function Pass 的 paired bootstrap 为 observed `+1.5pp`、95% CI `[0,+3.0pp]`。主提升、parse/apply/compile、regression 和 file-window 限制均通过，但 timeout 超过冻结上限，因此 `formal_timeout_increase_exceeded` 已足以否决候选。
 
-项目中有效的非模型发现包括：Slurm 脚本解释器与依赖关系必须显式；长资格任务应按候选保存原子 checkpoint；推理与训练跨提交消费必须通过 manifest 桥接；rootfs 内路径必须使用沙箱可见路径；同一代码在 `gpu16` 零日志而在 `gpu25` 正常，证明节点故障应通过跨节点对照归因；timeout 长尾必须保留，不能为缩短作业事后删除困难样本。
+成功迁移为 8 gained、3 lost、11 retained，500 个 completion 中 363 个变化。四个 DPO 新增 timeout 分别来自队列不收缩、循环变量不增长、链表边界翻转和递归入口替换；它们均可 apply/compile，却在 public tests 稳定超时。
 
-## 11. 交付与复现
+### Confirmation 124
 
-Git 交付包含代码、配置、Schema、测试、Slurm 入口、决策和报告；大型 artifact 继续留在集群并由路径和 SHA256 索引。模型身份、用途和限制见 [M1-R2 模型卡](model_card_m1_r2.md)，文件位置、校验命令和接收清单见[交付说明](README.md)。
+| 指标 | M1-R2 | DPO-beta03 |
+|---|---:|---:|
+| Parse / Apply / Compile | 123/104/103 | 124/110/109 |
+| Public success | 6 | 5 |
+| Pass | 0 | 0 |
+| Regression / Timeout | 3/4 | 3/2 |
 
-本报告不等同于 adapter 或数据的公开发布批准，也不宣称 A5/DPO 已完成。
+DPO 改变 86/124 个 completion，并改善格式、应用、编译和 timeout，但没有产生端到端成功。这界定了 formal 内收益与独立分布泛化之间的差距。
+
+### Defects4C 176
+
+M1-R2 基线为 parse/apply/build/Pass `174/72/55/1`、0 timeout。DPO 候选预测已完成 176/176，CPU rootfs 替换评分与自动聚合正在运行；本报告不从部分 checkpoint 外推最终结果。完成后将补入候选漏斗、paired transition、comparison/failure-analysis SHA256 和最终交付 manifest。
+
+## 10. 工程故障与恢复
+
+项目保留了会改变复现设计的失败，而不是只展示成功 Job：
+
+- 早期 A2 作业因 Slurm 入口和环境假设秒退，后续显式验证解释器、prefix 和工作目录；
+- 长资格与评分任务改为逐案例原子 checkpoint，支持固定身份的断点恢复；
+- Defects4C rootfs 曾缺少 `/patchalign` Python 路径，通过沙箱内外路径对照定位；
+- GPU 节点零日志通过跨节点对照归因，固定排除 `gpu12/gpu16`，不把节点故障算作模型失败；
+- A5 原推理 Job `97586` 被共享 UID 主动取消，恢复 Job `97608` 只续跑缺失 segment；
+- A5 Defects4C 原评分 Job `97614` 暴露沙箱内 role 白名单断层，恢复提交 `fbe0717…` 只加入显式 `dpo_beta03`，以 435 项测试验收后由 Job `97901/97902` 重做缺失评分。
+
+所有恢复均保持数据、prompt、模型、生成参数、评分协议、timeout 和固定分母不变。基础设施失败不伪装成模型 failure，也不通过删样本获得更好指标。
+
+## 11. 最终模型与应用交付
+
+M1-R2 是当前默认交付 adapter。它已从集群本地化到本机 `artifacts/delivery/model/m1_r2/`，权重为 80,792,096 bytes，SHA256 为 `8437acca…3425a`；配置 SHA256 为 `acd214f4…2c69`，本地 `PROVENANCE.json` 已与实际字节核验。大型权重继续由 Git 忽略。
+
+应用 CLI 提供 `prompt` 和 `infer` 两个入口。最终 GPU smoke 会读取自动 comparison 决定 adapter，验证 metadata 中的 Base、adapter 和 patch 哈希，并将固定 `cli-smoke-v1` 纳入 delivery manifest。CLI 只生成并结构校验候选，不自动执行或合并。
+
+## 12. 核心结论
+
+1. SFT 最确定的收益是输出协议学习：Base 在 formal 500 上 0 parse，M1/M1-R2 达到 499；但协议遵循不等于语义正确。
+2. DPO 的正收益真实：formal Pass 14→19、apply 412→437、compile 392→424；不能因最终否决而抹去。
+3. DPO 的安全退化也真实：timeout 2→5，且逐例存在明确非终止控制流；不能用总 Pass 提升覆盖。
+4. 独立 confirmation 的 0 Pass 和 Defects4C 的低成功率说明当前模型没有证明广泛语义泛化。
+5. 多阶段漏斗、固定分母、预注册 gate、不可变预测、原子恢复和 SHA256 绑定，使正负结果都可审计。
+6. 对简历级 AI 应用交付，遵守安全门禁并回退 M1-R2，比继续调 beta、扩大低质量数据或提前做 RLVR/GRPO 更合理。
+
+## 13. 限制与发布边界
+
+- 任务只覆盖局部、单文件 C++ 修复，不能外推到多文件仓库级 Agent；
+- confirmation 最终 Pass 为零，Defects4C 又明显偏向 LLVM；
+- DPO 只有单 seed 与两组 beta，不等价于 replicated research；
+- Base 预训练污染未知；训练数据、adapter 和生成补丁的公开再分发许可尚未逐项完成；
+- 模型可能生成逻辑错误、无限循环、资源消耗或不安全代码，必须在最小权限沙箱和人工复核下使用。
+
+仓库原创代码和文档采用 Apache-2.0，但该许可证不会自动覆盖 Base 权重、数据、adapter、生成补丁或第三方依赖。本报告不是公开模型 release 或生产部署批准。
+
+## 14. 尚待自动收尾
+
+本报告主体已按真实 DPO 结果更新。最终交付还需等待 Job `97901/97902` 完成 Defects4C 候选聚合，随后执行一次最终模型 CLI GPU smoke、生成 hash-complete delivery manifest、补入最终哈希和外部失败分析，并完成本机、GitHub、集群三端 commit/工作树审计。上述步骤不包含新训练或结果驱动实验。
