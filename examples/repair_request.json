@@ -1,0 +1,9 @@
+{
+  "task_level": "function",
+  "allowed_path": "main.cpp",
+  "buggy_code": "#include <iostream>\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    std::cout << a - b << '\\n';\n}\n",
+  "public_test": {
+    "input": "2 3\n",
+    "output": "5\n"
+  }
+}
