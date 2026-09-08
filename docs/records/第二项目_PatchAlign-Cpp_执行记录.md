@@ -1355,3 +1355,33 @@ Job `97533` 完成 `422 passed` 后发现新 sbatch 使用了不存在的 `/tool
 历史成功入口的实际路径是 `/.tools/bubblewrap/0.12.0/install/bin/bwrap`。作业用时 23 秒，
 只创建与配置绑定的 progress manifest，没有执行 evaluation checkpoint 或最终输出。修正为
 历史路径，并在 Python 前增加 `test -x`；资格协议和样本不变。
+
+## 66. A5 偏好复审与真实 DPO 训练
+
+ADR-0031 将项目目标收敛为简历交付版后，CPU-only Job `97540` 用时 19 秒完成 `424 passed` 和偏好复审。182 个 A4 source group 中，7 个只由 timeout 差异形成的 pair 被排除；最终冻结 175 对，其中 75 对 chosen 为完整 success。偏好与 DPO dev、formal、confirmation、Defects4C 的 case/family 均零重叠，`preferences.jsonl` SHA256 为 `892812ae43f551aeff06486963e75806ce6da185f8f41d3df3cff64a6f6ba43c`。
+
+CPU preflight Job `97557` 以 `427 passed` 验证 175 对输入、token 上限、M1-R2 起点、Base revision、环境和训练配置；最长输入也没有截断。单步 GPU smoke Job `97558` 在最长 pair 上完成真实前向、反向、更新和 adapter 保存，loss 为 `0.6816868`，峰值显存约 29.47 GB。
+
+正式 DPO array `97559` 只包含 beta=0.1/0.3，两组均从相同 M1-R2 adapter 出发，训练 2 epochs / 44 optimizer steps，用时约 6 分钟且无 OOM、NaN 或保存失败。beta01/beta03 loss 分别为 `0.675672`、`0.643354`，adapter SHA256 分别为 `ac66be3432e0aa77f134f120e087aa9a7d23234dab474d5eccdd7b2c03bc869f`、`2de1cb5bf0100aeba384b8cfb52fae990a77d5971d1b595cb698659f66f0683a`。这一轮不在看见 dev 结果后重训或增加 beta。
+
+## 67. 独立 DPO dev 选型
+
+CPU preflight `97566` 完成 `431 passed`；推理 array `97567_0..2` 和评分 array `97570_0..2` 全部 `COMPLETED 0:0`，三路各生成 64/64 个严格 diff，3/3 deterministic probe 稳定。
+
+M1-R2、beta01、beta03 的 Pass 均为 5/64，regression 与 timeout 也相同；apply/build 分别为 53/52、55/55、57/57。冻结选择 Job `97571` 按 Pass→hidden→public→compile→apply 的预注册层级选择 beta03，selection SHA256 为 `248ad6dcb6783fd2e8c971b05191a87c5b5bd02b696e26f7076262631de665f4`。开发集平局后的次级执行漏斗只产生一个候选，不能被写成正式质量提升。
+
+## 68. 一次性最终评测与两次恢复
+
+最终 preflight Job `97583` 以 `434 passed` 核验 formal 500、confirmation 124、Defects4C 176、prompt、M1-R2 baseline、beta03 adapter、环境和评分器身份。原推理 array `97586` 运行 16 分 43 秒后，三个 task 在同一秒被共享账号 UID 1039 主动取消；没有 traceback、OOM 或时限证据。formal/confirmation/Defects4C 已原子保存 118/112/84 条预测，恢复 array `97608` 只生成缺失 segment，最终三套固定分母全部 `status=ok` 且 3/3 probe 稳定。
+
+C++ 评分 array `97611` 完成。beta03 formal parse/apply/compile/Pass 为 500/437/424/19，M1-R2 为 499/412/392/14；function 提升 `+1.5pp`，paired bootstrap 95% CI `[0,+3.0pp]`。但 timeout 从 2 增加到 5，`+0.6pp` 超过冻结上限，触发 `formal_timeout_increase_exceeded`。confirmation 中 beta03 为 parse/apply/compile/Pass 124/110/109/0，M1-R2 为 123/104/103/0；前置漏斗改善没有产生最终成功。
+
+原 Defects4C 评分 `97614` 中，8 个 parse/policy 早停样本可正常写 checkpoint，其余 168 个在进入 rootfs 时因内部 CLI role 白名单缺少 `dpo_beta03` 而秒退；这些不能算作模型失败。恢复分支 `a5-eval-recovery-97614` 只 cherry-pick 显式三角色修正，形成 `fbe0717be11ca55648cd4d9d69c22c0fa707471c`，完成 `435 passed` 后推送到 GitHub。替换 array `97901` 与聚合 `97902` 保持相同预测、评分协议、timeout 和 176 条固定分母。
+
+## 69. 应用交付与等待链
+
+主分支新增 `patchalign-cpp` CLI、结构化请求示例、Base/adapter/prompt/patch provenance metadata、双模型卡、架构、复现、面试提纲和最终报告。CLI 只生成并校验 strict single-file diff，不在宿主机执行、提交或合并模型输出。集群 `/tmp` 的隔离 main checkout 在链接真实忽略 artifacts 后完成 `446 passed`，正在运行的评测分支保持干净。
+
+最终推荐 M1-R2 adapter 已复制到本机忽略目录 `artifacts/delivery/model/m1_r2/`：权重 80,792,096 bytes，SHA256 `8437acca7208ffc984b739a1f965c253899f7c8462a21b6af10c1c6dd153425a`；配置 SHA256 `acd214f4b504e6134ad464968dfebb762b8b9f49760be024ab8dcc3a494d2c69`，本地 `PROVENANCE.json` 已逐字节复核。
+
+为避免 Defects4C 结束后重新等待 GPU，已提交依赖链：聚合 `97902` → 受保护的 main 快进 Job `97977` → 单 GPU 最终模型 CLI smoke Job `97978`。同步 Job 固定目标提交 `616c9d4a55dcd40b4818a9fb07c185291a6b3271`，并在切换前验证恢复分支、commit、工作树和聚合产物；任何漂移都 fail closed。delivery manifest 留到最终文档补齐后再生成，以记录真实最终交付 commit。

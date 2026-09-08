@@ -822,3 +822,16 @@ HT-O-TA/patchalign-cpp
 - 新增 `src/patchalign/cli.py`、`src/patchalign/inference.py` 和 `examples/repair_request.json`，形成结构化请求到冻结 prompt、Base+adapter 推理、strict diff/路径校验的应用入口；CLI 不自动执行或合并补丁；
 - 新增 `docs/delivery/architecture.md`、`docs/delivery/reproduction.md` 与哈希完整交付清单生成器；大型权重、预测、评分和日志仍位于被 Git 忽略的 `artifacts/`；
 - 本次没有移动或删除历史 SFT/A4/Data-v2 artifact。正式评测运行状态只在 `docs/status.md` 维护，最终模型与指标在聚合完成后再写入交付文档。
+
+### 2026-09-08：A5 最终应用交付与模型本地化
+
+- `src/patchalign/cli.py` 与 `src/patchalign/inference.py`：结构化请求、冻结 prompt、Base+LoRA NF4 greedy 推理、strict diff/路径策略和 provenance metadata；
+- `scripts/evaluation/summarize_a5_cli_smoke.py`：绑定最终 comparison、Base、推荐 adapter 与 patch 哈希的 smoke 摘要器；
+- `scripts/evaluation/build_a5_delivery_manifest.py`：索引两套 adapter、三套最终评测、环境和 CLI smoke 的 hash-complete 交付清单；
+- `slurm/a5_delivery_sync_main.sbatch`：只在最终聚合成功后执行的受保护 main 快进；
+- `slurm/a5_delivery_cli_smoke.sbatch`：读取最终推荐模型并生成固定、不可覆盖的 `artifacts/a5/delivery/cli-smoke-v1/`；
+- `slurm/a5_delivery_manifest.sbatch`：最终全仓测试和交付 manifest 生成入口；
+- `docs/delivery/`：交付说明、最终报告、架构、复现、求职提纲以及 M1-R2/DPO-beta03 双模型卡；
+- `/home/lenovo/A/patchalign-cpp/artifacts/delivery/model/m1_r2/`：最终推荐 adapter 的本机忽略副本和 `PROVENANCE.json`，不进入 Git；
+- GitHub `a5-eval-recovery-97614`：保留最终评测使用的最小恢复提交，不作为日常开发分支；
+- 运行中 Job ID 与分钟级进度仍只写入 `docs/status.md`，目录台账只记录稳定路径和职责。
