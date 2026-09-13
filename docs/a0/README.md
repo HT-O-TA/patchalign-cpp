@@ -21,11 +21,12 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 | [ADR-0006](../decisions/0006-owner-authorized-exploratory-a4.md) | 确认集失败后的 owner-authorized exploratory A4 边界 | Accepted; pre-A4 完成后执行 |
 | [ADR-0007](../decisions/0007-a4-testable-candidate-pool-correction.md) | A4 可执行候选池的输入可行性修正 | Accepted implementation correction |
 | [ADR-0008](../decisions/0008-a4-execution-ranked-preference-pairs.md) | A4 候选执行阶段排序与保守偏好对构造 | Accepted for exploratory A4 |
-| [ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md) | 本轮在 SFT + exploratory A4 收尾，A5/DPO 延后 | Accepted by project owner |
+| [ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md) | 当时决定在 SFT + exploratory A4 收尾 | 历史决策；后被 ADR-0031 覆盖 |
 | [ADR-0010](../decisions/0010-data-v2-hierarchical-family-contract.md) | Data-v2 分离仓库 split group 与细粒度 sampling family | Accepted by project owner |
 | [ADR-0011](../decisions/0011-data-v2-exploratory-replay-mix.md) | 新来源容量失败后的安全增量 + function replay GPU 消融 | Accepted exploratory |
+| [ADR-0031](../decisions/0031-resume-delivery-scope.md) | 恢复并完成简历交付版 DPO 闭环 | Accepted；当前终态 |
 
-自动验收、fixture 和质量门禁的合并证据见 [`a0-validation.md`](../evidence/a0-validation.md)。历史执行细节保留在[执行记录](../records/第二项目_PatchAlign-Cpp_执行记录.md)，不在本索引重复展开。
+自动验收、fixture 和质量门禁的合并证据见 [`a0-validation.md`](../evidence/a0-validation.md)。历史执行细节可通过证据目录与 Git 历史追溯，不在公开索引重复展开。
 
 机器可校验 Schema：
 
@@ -39,7 +40,7 @@ A0 的目标是在下载正式数据和运行基线之前，冻结项目要解�
 
 ## 已冻结
 
-> 本节保留 A0 立项时冻结的完整研究设计；实际执行在 A5 前按 ADR-0009 收尾，不能把计划中的 DPO 写成已完成。
+> 本节保留 A0 立项时冻结的研究设计。项目曾按 ADR-0009 暂停在 A5 前，随后由 ADR-0031 调整为简历交付范围并完成 DPO；终态以 [项目状态](../status.md) 为准。
 
 - 项目名称：PatchAlign-Cpp；
 - 第一阶段以函数级修复为主，Schema 兼容文件上下文；

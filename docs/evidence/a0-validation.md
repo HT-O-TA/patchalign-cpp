@@ -90,8 +90,8 @@ A0 已确认 C/C++ localized patch repair 的任务协议、sample/prediction/ru
 - 集群复验：项目专属 Python 环境，`PYTHONNOUSERSITE=1`，`75 passed in 9.70s`。
 - 本机复验：`74 passed, 1 skipped`。
 - 质量门禁配置：`configs/evaluation/quality_gates_v1.json`。
-- 协议与治理：`docs/a0/core_protocol.md`、`docs/a0/governance.md`、`docs/development/git-sync.md`。
-- 运行证据：本文档、`docs/records/第二项目_PatchAlign-Cpp_执行记录.md`、`docs/records/第二项目_PatchAlign-Cpp_目录结构.md`。
+- 协议与治理：`docs/a0/core_protocol.md`、`docs/a0/governance.md`。
+- 运行证据：本文档及 `docs/evidence/` 下的阶段回执；早期操作流水可通过对应 Git 历史追溯。
 - 文档记录提交：`195c819`。
 
 ### 5.4 项目责任

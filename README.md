@@ -1,86 +1,82 @@
 # PatchAlign-Cpp
 
-PatchAlign-Cpp 是一个面向局部 C++ 缺陷修复的可验证后训练与真实执行评测项目。项目已完成 LoRA/QLoRA SFT、独立确认、Defects4C 外部评测、执行偏好构建、真实 DPO、一次性正式评测、推荐模型 CLI GPU smoke 和哈希交付清单。最终推荐模型为 M1-R2；历史负结果完整保留，RLVR/GRPO 不属于本轮。
+PatchAlign-Cpp 是一个面向 C/C++ 程序修复的模型微调与真实执行评测项目。项目以 Qwen2.5-Coder-7B 为基座，完成了数据治理、LoRA/QLoRA SFT、执行沙箱、偏好数据构造、DPO 训练、消融实验和冻结交付。
 
-项目的实时阶段与作业状态只在 [`docs/status.md`](docs/status.md) 维护，文档职责与冲突优先级见 [`docs/README.md`](docs/README.md)。
+> 当前状态：实验与交付已冻结。默认交付模型为 **M1-R2（BF16 LoRA SFT）**；DPO-beta0.3 作为研究模型保留，不替代默认模型。
 
-## 第一阶段范围
+## 项目目标
 
-- 以函数级 C++ 修复为主；
-- Schema 兼容给定文件上下文；
-- 输入包含缺陷描述、已定位上下文和失败证据；
-- 输出严格限制为一个 unified diff；
-- 通过 patch 解析、应用、编译、公开测试、隐藏测试和回归测试验证；
-- 仓库自主探索、联网搜索和长程 Agent 不属于第一版。
+输入包含缺陷的 C/C++ 代码与任务信息，模型生成补丁；补丁随后经过结构校验、应用、编译、公开测试、隐藏测试、回归测试和资源限制检查。项目关注的不只是“生成看起来合理的代码”，而是补丁能否在隔离环境中真实执行并通过测试。
 
-## 当前入口
+核心流程：
 
-- [最终交付说明](docs/delivery/README.md)
-- [最终技术报告](docs/delivery/final_report.md)
-- [架构与数据流](docs/delivery/architecture.md)
-- [复现指南](docs/delivery/reproduction.md)
-- [简历与面试复述提纲](docs/delivery/interview_brief.md)
+```text
+CommitPackFT + RunBugRun
+        ↓ 清洗、去重、分组切分
+SFT（BF16 LoRA / NF4 QLoRA）
+        ↓
+沙箱执行评测（apply → compile → test）
+        ↓
+真实执行轨迹构造偏好对
+        ↓
+DPO 与消融实验
+        ↓
+冻结模型、报告和复现材料
+```
+
+## 最终结果
+
+正式测试集共 500 条，确认集 124 条，外部 Defects4C 集 176 条。`Pass` 表示补丁成功应用、编译并通过规定测试。
+
+| 模型 | 正式集 Pass | Apply | Compile | Timeout | 交付结论 |
+|---|---:|---:|---:|---:|---|
+| M0 Base | 0/500 | 4 | 0 | 0 | 原始基线 |
+| M1 SFT | 15/500 | 378 | 361 | 3 | 首个有效模型 |
+| **M1-R2 SFT** | **14/500** | **412** | **392** | **2** | **默认模型** |
+| DPO-beta0.3 | 19/500 | 437 | 424 | 5 | Pass 更高，但超时门禁失败 |
+
+确认集上 M1-R2 与 DPO-beta0.3 均为 0/124；Defects4C 上均为 1/176。结果说明训练显著改善了补丁格式、应用率和编译率，但跨分布语义修复能力仍然有限。DPO-beta0.3 将正式集 Pass 从 14 提高到 19，同时 Timeout 从 2 增加到 5，超过预设门禁，因此没有替代更稳定的 M1-R2。
+
+## 工程与实验要点
+
+- 数据治理：按来源、仓库家族和上游划分隔离数据，执行去重、许可证和长度过滤，降低直接泄漏风险。
+- 参数高效训练：比较 BF16 LoRA 与 NF4 QLoRA 的效果、显存和稳定性，最终选择 BF16 LoRA 作为主线。
+- 真实执行评分：评分链覆盖补丁解析、应用、编译、测试、回归与超时，不以文本相似度代替正确性。
+- 偏好对齐：使用执行结果构造 chosen/rejected 对，比较不同 DPO beta，并设置 Pass、回归和超时门禁。
+- 可复现交付：冻结配置、Schema、测试、模型卡、评测报告和带校验和的交付清单。
+
+## 快速验证
+
+```bash
+python -m pip install -e ".[dev]"
+pytest -q
+python -m patchalign.cli prompt --help
+python -m patchalign.cli evaluate --help
+```
+
+模型权重与大规模数据不提交到 Git；集群路径、环境和完整复现步骤见复现文档。
+
+## 公开文档
+
+- [最终实验报告](docs/delivery/final_report.md)
+- [系统架构](docs/delivery/architecture.md)
+- [复现说明](docs/delivery/reproduction.md)
+- [项目讲解与面试提纲](docs/delivery/interview_brief.md)
 - [M1-R2 模型卡](docs/delivery/model_card_m1_r2.md)
-- [DPO beta=0.3 候选模型卡](docs/delivery/model_card_dpo_beta03.md)
-- [A5 DPO 训练证据](docs/evidence/a5_dpo_training_v1_1.md)
-- [A5 DPO 独立开发集选型](docs/evidence/a5_dpo_dev_selection_v1.md)
-- [项目全程总结与核心结论](docs/项目全程总结与核心结论.md)
-- [项目状态（唯一实时状态页）](docs/status.md)
-- [文档索引与防漂移规则](docs/README.md)
-- [A0 阶段索引](docs/a0/README.md)
-- [核心任务与评测协议](docs/a0/core_protocol.md)
-- [样本与运行 Schema](docs/a0/sample_schema.md)
-- [实验与复现协议](docs/a0/experiment_protocol.md)
-- [真实性、许可与发布治理](docs/a0/governance.md)
-- [决策记录](docs/decisions/)
-- [A0 自动验收证据](docs/evidence/a0-validation.md)
-- [A2 沙箱与真实执行入口](docs/a2_sandbox.md)
-- [A3.0 冻结基线协议](docs/a3_baseline.md)
-- [A3.1 评分协议与重评分](docs/a3_1_scoring.md)
-- [A3.2 LoRA/QLoRA SFT 训练 pilot](docs/a3_2_sft_pilot.md)
-- [A3.3 正式 SFT](docs/a3_3_formal_sft.md)
-- [A3.4 SFT-R2 安全修正轮次](docs/a3_4_sft_r2.md)
-- [项目复盘与面试复述](docs/interview_retrospective.md)
-- [执行记录](docs/records/第二项目_PatchAlign-Cpp_执行记录.md)
-- [目录结构台账](docs/records/第二项目_PatchAlign-Cpp_目录结构.md)
-- [本机—集群 Git 同步规范](docs/development/git-sync.md)
-- [G0 Job 90719 证据摘要](docs/evidence/g0-smoke-90719.md)
-- [CommitPack 固定单分片供给审计 v1.1](docs/evidence/data_v2_commitpack_shard_audit_v1_1.md)
-- [Data-v2 独立来源可实现性审计 v2](docs/evidence/data_v2_independent_source_triage_v2.md)
-- [BeetleBox C++ 元数据审计 v1.2](docs/evidence/data_v2_beetlebox_metadata_audit_v1_2.md)
+- [DPO-beta0.3 模型卡](docs/delivery/model_card_dpo_beta03.md)
+- [任务与评分协议](docs/a0/core_protocol.md)
+- [数据和实验治理](docs/a0/governance.md)
+- [最终冻结状态](docs/status.md)
 
-## 环境与模型
+完整文档导航见 [docs/README.md](docs/README.md)。
 
-祝融项目路径：
+## 已知限制
 
-```text
-/mingli01/project/ht/patchalign-cpp
-```
+- 正式集上的绝对 Pass 率仍低，项目尚未证明具备通用 C/C++ 自动修复能力。
+- 确认集与 Defects4C 的结果显示明显的跨分布泛化瓶颈。
+- RunBugRun 与 CommitPackFT 的任务形态、上下文和测试可执行性并不完全一致。
+- 当前结论只适用于已冻结的数据、模板、沙箱、推理参数和评分协议。
 
-专属 Conda prefix：
+## License
 
-```text
-/mingli01/project/ht/.conda_envs/patchalign-cpp
-```
-
-主训练 Base：
-
-```text
-/mingli01/models/Qwen2.5-Coder-7B
-```
-
-所有 Slurm 作业必须设置 `PYTHONNOUSERSITE=1`，并验证 `command -v python` 与 `sys.prefix` 都指向项目专属 prefix。模型目录只读，环境、权重、数据和大型 artifact 不进入 Git。
-
-## 真实性边界
-
-- G0 仅证明环境、BF16 LoRA、NF4 QLoRA 和 adapter 生命周期兼容；
-- A3.2 的 70 条 executable training pilot 中，BF16 LoRA 与 NF4 QLoRA 均为 1/70 Pass；该结果只用于选择训练方案，不能形成正式 Base/SFT/DPO 质量结论；
-- A1/A2 pilot 与正式 A3.3 数据不是同一证据等级；正式运行的当前状态和身份必须从状态页及 artifact manifest 核对；
-- A2 的 rootless Bubblewrap、官方兼容输出匹配、真实结果分区和三次稳定重放已闭环；`0.2.0-draft` execution Schema 绑定 A2/A3 内部 artifact，公开正式报告前应以新版本提升且不改写历史结果；
-- A3.4 的旧 holdout 内部门禁通过，但独立确认集失败，完整 readiness 保持 `a4_ready=false`；exploratory A4 不改变该结论；
-- 第一轮 A4 的 182 对内部偏好是历史探索产物；ADR-0031 收敛为简历交付版后，对其重新审计并排除 7 对 timeout-only，使用剩余 175 对完成单 seed DPO beta=0.1/0.3。64 条独立 dev 选择 beta=0.3；最终 formal timeout 门禁否决候选，推荐模型回退 M1-R2；
-- 基础模型预训练污染未知，只能披露，不能声称完全排除。
-
-## 许可证与发布边界
-
-本仓库原创代码、文档、Schema、配置和脚本按 [Apache License 2.0](LICENSE) 发布，版权标识为 `Copyright 2026 PatchAlign-Cpp contributors`。模型、数据集、benchmark repository、生成补丁和第三方依赖仍受各自条款约束，详见 [治理规范](docs/a0/governance.md) 与 [第三方声明](THIRD_PARTY_NOTICES.md)。
+代码采用 [Apache License 2.0](LICENSE)。上游数据和模型分别遵循其原始许可证与使用条款。
