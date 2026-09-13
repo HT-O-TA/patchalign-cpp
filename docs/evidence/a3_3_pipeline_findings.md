@@ -134,7 +134,7 @@ Job 94337 在 Git 提交 `b9aa00248d4264eca0f75c378b004f462ddea9a6` 上完成最
 - train/validation 最大编码长度分别为 3,461/2,198；holdout 500 条实际 prompt 为 170～3,589；
 - 修改类型仍为 train 2,703/2,150/64/83、validation 255/235/6/4（single/multi/add-helper/refactor）。
 
-Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 SFT 和 Job 94305 不完整 M0 均保留在 history，不进入正式结果。有效运行身份为 M0 94338、M0 评分 94339、SFT 94340、M1 94341、M1 评分 94342、比较 94343；实时状态见[项目状态](../status.md)。
+Job 94304 的旧 holdout 绑定版本、Job 94320/94328 未通过 preflight 的 SFT 和 Job 94305 不完整 M0 均保留在 history，不进入正式结果。有效运行身份为 M0 94338、M0 评分 94339、SFT 94340、M1 94341、M1 评分 94342、比较 94343；项目终态见[项目状态](../status.md)。
 
 ## 可用于论文的方法学表述草案
 

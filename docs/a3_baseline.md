@@ -1,5 +1,7 @@
 # A3.0 冻结基线协议
 
+> 文档定位：A3.0 已完成；本文记录冻结基线，最终模型结论见 [最终实验报告](delivery/final_report.md)。
+
 状态：已完成（A3.0 executable pilot）
 
 版本：`a3-baseline-v1`

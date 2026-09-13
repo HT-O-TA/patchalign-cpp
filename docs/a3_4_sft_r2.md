@@ -1,6 +1,6 @@
 # A3.4：SFT-R2 安全修正轮次
 
-阶段状态：固定 500 条、新 124 条确认集和 Defects4C 176 条外部成对评测均已完成。内部与外部门禁通过，确认集门禁失败，因此 readiness 为 `a4_ready=false`；A4 正式晋级被阻断，仅按 ADR-0006 以负责人授权 exploratory 模式续行。实时作业见[项目状态](status.md)。
+阶段状态：固定 500 条、新 124 条确认集和 Defects4C 176 条外部成对评测均已完成。内部与外部门禁通过，确认集门禁失败，因此当时 readiness 为 `a4_ready=false`；A4 随后按 ADR-0006 以负责人授权 exploratory 模式续行，并最终由 ADR-0031 恢复简历交付版 DPO。项目终态见[项目状态](status.md)。
 
 ## 目标
 

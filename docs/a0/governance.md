@@ -102,4 +102,4 @@ known limitations
 
 ## 9. 本轮交付状态
 
-依据 [ADR-0009](../decisions/0009-close-after-sft-and-exploratory-a4.md)，本轮在 SFT 与 exploratory A4 收尾。M1-R2 的[模型卡](../delivery/model_card_m1_r2.md)和[交付清单](../delivery/README.md)已建立，但逐来源许可、敏感信息和漏洞披露审计尚未关闭，因此 adapter、派生偏好数据和完整预测只作内部研究交付，不构成公开发布批准。
+ADR-0009 曾决定在 SFT 与 exploratory A4 收尾，后续 [ADR-0031](../decisions/0031-resume-delivery-scope.md) 将范围调整为简历交付版，并已完成 A5 DPO 与 A8 冻结交付。M1-R2 的[模型卡](../delivery/model_card_m1_r2.md)和[交付清单](../delivery/README.md)已建立，但逐来源许可、敏感信息和漏洞披露审计尚未关闭，因此 adapter、派生偏好数据和完整预测只作内部研究交付，不构成公开发布批准。

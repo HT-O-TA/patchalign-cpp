@@ -1,6 +1,6 @@
 # ADR-0030：结束来源搜索并冻结 family-disjoint 分层 Data-v2 路线
 
-- 状态：Accepted under delegated project-owner authority
+- 状态：Superseded as current delivery plan by ADR-0031（停止来源搜索的决定保留）
 - 日期：2026-09-08
 
 ## 背景

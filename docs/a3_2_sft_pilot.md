@@ -1,5 +1,7 @@
 # A3.2 LoRA/QLoRA SFT 小规模训练 Pilot
 
+> 文档定位：A3.2 已完成；BF16 与 NF4 均为 1/70 Pass，最终按预注册的显存平局规则选择 NF4 QLoRA。该结论不表示 NF4 质量优于 BF16。
+
 状态：已完成（2026-09-03）
 
 协议：`a3-sft-pilot-v1`

@@ -1,6 +1,6 @@
 # ADR-0009：以 SFT 与探索性研究作为本轮交付终点
 
-状态：Accepted by project owner
+状态：Superseded for current scope by ADR-0031（历史阶段决策仍有效）
 日期：2026-09-06
 
 ## 背景

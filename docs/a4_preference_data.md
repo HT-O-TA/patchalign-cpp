@@ -1,6 +1,6 @@
 # A4 可执行偏好数据与保守配对协议
 
-本文记录负责人授权的 exploratory A4 输入、协议和解释边界，不维护实时 Job 状态；当前进度见 [`status.md`](status.md)。该授权不等同于 A3.4 promotion success。
+本文记录负责人授权的 exploratory A4 输入、协议和解释边界。A4 已完成，后续偏好数据审计与 DPO 结果见 [实验与运行证据](evidence/README.md)；该授权不等同于 A3.4 promotion success。
 
 ## 目标与边界
 

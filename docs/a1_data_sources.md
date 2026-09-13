@@ -1,5 +1,7 @@
 # A1 数据 Pilot：边界与来源登记
 
+> 文档定位：A1 已完成；本文保留冻结的数据来源、筛选和隔离证据。项目终态见 [最终冻结状态](status.md)。
+
 ## A1-0 冻结边界
 
 本阶段只验证数据生产链，不进行正式训练。目标规模为 `300 train + 50 validation`，第一版只纳入 C++，function/file-window 目标比例为 85%/15%。外部测试数据、合成 fixture 和 hidden test 内容不得进入 pilot 训练或验证数据。

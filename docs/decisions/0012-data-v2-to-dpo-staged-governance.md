@@ -1,6 +1,6 @@
 # ADR-0012：Data-v2 到正式 DPO 的分阶段治理与停止门
 
-- 状态：Accepted by project owner through explicit delegated decision authority
+- 状态：Superseded as current completion plan by ADR-0031（治理结论保留）
 - 日期：2026-09-07
 
 ## 背景

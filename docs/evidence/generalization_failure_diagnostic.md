@@ -2,7 +2,7 @@
 
 > 状态：已完成；证据日期：2026-09-06；正式作业：`96197`；运行提交：`6f1b453`。
 >
-> 本诊断是收尾后的只读证据分析，不改变 A3.4 readiness、`a4_ready=false`、A4 exploratory 身份或 A5/DPO 延后决定。它只消费冻结 manifest、prompt、预测和评分，不重新生成、不训练，也不把 confirmation/external 答案回流训练。
+> 历史边界：本诊断形成时，A5/DPO 仍按 ADR-0009 延后；后续 ADR-0031 已恢复并完成简历交付版 DPO。本文只消费冻结 manifest、prompt、预测和评分，不重新生成、不训练，也不把 confirmation/external 答案回流训练；其中 A3.4 readiness 与 `a4_ready=false` 仍是不可改写的历史事实，项目终态见 [项目状态](../status.md)。
 
 ## 1. 证据身份与方法
 
