@@ -2,7 +2,7 @@
 
 PatchAlign-Cpp 是一个面向 C/C++ 程序修复的模型微调与真实执行评测项目。项目以 Qwen2.5-Coder-7B 为基座，完成了数据治理、LoRA/QLoRA SFT、执行沙箱、偏好数据构造、DPO 训练、消融实验和冻结交付。
 
-> 当前状态：实验与交付已冻结。默认交付模型为 **M1-R2（NF4 QLoRA SFT）**；DPO-beta0.3 作为研究模型保留，不替代默认模型。
+> 当前状态：实验版本已冻结。默认模型为 **M1-R2（NF4 QLoRA SFT）**；DPO-beta0.3 作为研究模型保留，不替代默认模型。
 
 ## 项目目标
 
@@ -56,14 +56,13 @@ python -m patchalign.cli prompt --help
 python -m patchalign.cli evaluate --help
 ```
 
-模型权重与大规模数据不提交到 Git；集群路径、环境和完整复现步骤见复现文档。
+模型权重与大规模数据不包含在仓库中；运行环境、数据准备及完整复现步骤见[复现说明](docs/delivery/reproduction.md)。
 
 ## 公开文档
 
 - [最终实验报告](docs/delivery/final_report.md)
 - [系统架构](docs/delivery/architecture.md)
 - [复现说明](docs/delivery/reproduction.md)
-- [项目讲解与面试提纲](docs/delivery/interview_brief.md)
 - [M1-R2 模型卡](docs/delivery/model_card_m1_r2.md)
 - [DPO-beta0.3 模型卡](docs/delivery/model_card_dpo_beta03.md)
 - [任务与评分协议](docs/a0/core_protocol.md)
@@ -82,3 +81,4 @@ python -m patchalign.cli evaluate --help
 ## License
 
 代码采用 [Apache License 2.0](LICENSE)。上游数据和模型分别遵循其原始许可证与使用条款。
+
